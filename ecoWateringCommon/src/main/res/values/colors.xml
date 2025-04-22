@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="classic_hint">#6E6E6E</color>
+
+    <!-- COLOR FROM DEVICE -->
+    <color name="ew_primary_color_98_from_device">#EEFCFF</color>
+    <color name="ew_primary_color_50_from_device">#31818F</color>
+
+    <!-- COLOR FROM HUB -->
+    <color name="ew_primary_color_98_from_hub">#FBF8FF</color>
+    <color name="ew_primary_color_50_from_hub">#4F69F4</color>
+
+    <!-- SECONDARY -->
+    <color name="ew_secondary_color">#EA6E4D</color>
+    <color name="ew_secondary_color_20">#611300</color>
+    <color name="ew_secondary_color_30">#842409</color>
+    <color name="ew_secondary_color_80">#FFB4A1</color>
+    <color name="ew_secondary_color_90">#FFDBD1</color>
+
+    <!-- BLACK - WHITE -->
+    <color name="black_white_0">#000000</color>
+    <color name="black_white_10">#1A1C1C</color>
+    <color name="black_white_15">#242626</color>
+    <color name="black_white_20">#2F3131</color>
+    <color name="black_white_30">#454747</color>
+    <color name="black_white_40">#5D5F5F</color>
+    <color name="black_white_50">#767777</color>
+    <color name="black_white_60">#909191</color>
+    <color name="black_white_70">#AAABAB</color>
+    <color name="black_white_80">#C6C6C7</color>
+    <color name="black_white_85">#D4D4D4</color>
+    <color name="black_white_90">#E2E2E2</color>
+    <color name="black_white_98">#F9F9F9</color>
+    <color name="black_white_100">#FFFFFF</color>
+</resources>

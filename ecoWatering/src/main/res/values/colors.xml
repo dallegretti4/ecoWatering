@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="ewd_primary_color">#076875</color>
+    <color name="ewd_primary_color_10">#001F24</color>
+    <color name="ewd_primary_color_20">#00363E</color>
+    <color name="ewd_primary_color_30">#004E59</color>
+    <color name="ewd_primary_color_40">#076875</color>
+    <color name="ewd_primary_color_50">#31818F</color>
+    <color name="ewd_primary_color_60">#4F9BA9</color>
+    <color name="ewd_primary_color_70">#6BB6C5</color>
+    <color name="ewd_primary_color_80">#87D2E1</color>
+    <color name="ewd_primary_color_90">#A3EEFD</color>
+    <color name="ewd_primary_color_98">#EEFCFF</color>
+</resources>
