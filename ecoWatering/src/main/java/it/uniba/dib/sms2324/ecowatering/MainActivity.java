@@ -11,22 +11,30 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
+import it.uniba.dib.sms2324.ecowatering.connection.ConnectToEWHubActivity;
+import it.uniba.dib.sms2324.ecowatering.entry.MainFragment;
+import it.uniba.dib.sms2324.ecowatering.entry.UserProfileFragment;
+import it.uniba.dib.sms2324.ecowatering.setup.StartFirstFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
-import it.uniba.dib.sms2324.ecowateringcommon.EcoWateringDevice;
-import it.uniba.dib.sms2324.ecowateringcommon.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
 
 public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
         MainFragment.OnMainFragmentActionCallback,
         UserProfileFragment.OnUserProfileActionCallback {
-    protected static EcoWateringDevice thisEcoWateringDevice;
-    private static FragmentManager fragmentManager;
+    public static EcoWateringDevice thisEcoWateringDevice;
+    private FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Common.lockLayout(this);
+        fragmentManager = getSupportFragmentManager();
+        // LOADING FRAGMENT
+        changeFragment(new LoadingFragment(), false);
     }
 
     @Override
@@ -37,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements
             showInternetFaultDialog();
         }
         else {
-            fragmentManager = getSupportFragmentManager();
             Fragment tmpFragment = fragmentManager.findFragmentById(R.id.mainFrameLayout);
             // CONFIGURATION CHANGE FROM MainFragment CASE
             if(tmpFragment instanceof MainFragment) {
@@ -46,13 +53,13 @@ public class MainActivity extends AppCompatActivity implements
             else {
                 EcoWateringDevice.exists(Common.getThisDeviceID(this), (existsResponse) -> {
                     // NOT FIRST START CASE
-                    if(existsResponse.equals(Common.HTTP_RESPONSE_EXISTS_TRUE)) {
+                    if(existsResponse.equals(HttpHelper.HTTP_RESPONSE_EXISTS_TRUE)) {
                         EcoWateringDevice.getEcoWateringDeviceJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
                             if(jsonResponse != null) {
                                 thisEcoWateringDevice = new EcoWateringDevice(jsonResponse);
                                 // NEVER CONNECTED TO A ECO WATERING HUB CASE
                                 if(thisEcoWateringDevice.getEcoWateringHubList() == null || thisEcoWateringDevice.getEcoWateringHubList().isEmpty()) {
-                                    ConnectToEWHubActivity.isFirstActivity = true;
+                                    ConnectToEWHubActivity.setIsFirstActivity(true);
                                     startActivity(new Intent(this, ConnectToEWHubActivity.class));
                                     finish();
                                 }
@@ -88,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements
             finish();
         }
         else {
-            EcoWateringDevice.addNewEcoWateringDevice(Common.getThisDeviceID(this), deviceName, () -> {
+            EcoWateringDevice.addNewEcoWateringDevice(this, deviceName, () -> {
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
             });

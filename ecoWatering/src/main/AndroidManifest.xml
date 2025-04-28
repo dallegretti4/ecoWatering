@@ -37,9 +37,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ConnectToEWHubActivity" android:exported="false"/>
+        <activity android:name=".connection.ConnectToEWHubActivity" android:exported="false"/>
 
-        <activity android:name=".ManageEWHubActivity" android:exported="false"/>
+        <activity android:name=".control.ManageEWHubActivity" android:exported="false"/>
     </application>
 
 </manifest>

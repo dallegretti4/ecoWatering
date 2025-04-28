@@ -41,11 +41,11 @@
         </activity>
 
         <activity
-            android:name=".ManageRemoteEWDevicesConnectedActivity"
+            android:name=".ui.connection.ManageRemoteEWDevicesConnectedActivity"
             android:exported="false"/>
 
         <activity
-            android:name=".ManualEcoWateringConfigurationActivity"
+            android:name=".ui.configuration.EcoWateringConfigurationActivity"
             android:exported="false"/>
 
         <service

@@ -14,7 +14,7 @@
     <string name="first_start_title_text_view">Choose your device name</string>
     <string name="insert_device_name_hint">Insert your device name</string>
     <string name="name_label">Name</string>
-    <string name="remote_device_added_success_message">Now you can manage your ecoWatering system.</string>
+    <string name="remote_device_added_success_message">Now you can manage your ecoWatering Hub.</string>
     <string name="remote_device_added_success_title">Device authorized</string>
     <string name="remote_device_already_added_message">Try with another ecoWatering Hub, or continue to manage that.</string>
     <string name="remote_device_already_added_title">This device is already connected with this ecoWatering Hub</string>

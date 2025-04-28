@@ -22,28 +22,39 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
-import it.uniba.dib.sms2324.ecowateringcommon.EcoWateringHub;
-import it.uniba.dib.sms2324.ecowateringcommon.HttpHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.IrrigationSystem;
-import it.uniba.dib.sms2324.ecowateringcommon.LoadingFragment;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.AmbientTemperatureSensorRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.LightSensorRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.RelativeHumiditySensorRunnable;
+import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.models.IrrigationSystem;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.AmbientTemperatureSensorRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.LightSensorRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.RelativeHumiditySensorRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.service.PersistentService;
+import it.uniba.dib.sms2324.ecowateringhub.ui.entry.AutomaticControlFragment;
+import it.uniba.dib.sms2324.ecowateringhub.ui.connection.ManageRemoteEWDevicesConnectedActivity;
+import it.uniba.dib.sms2324.ecowateringhub.ui.connection.connected.ManageRemoteEWDevicesConnectedFragment;
+import it.uniba.dib.sms2324.ecowateringhub.ui.entry.ManualControlFragment;
+import it.uniba.dib.sms2324.ecowateringhub.ui.configuration.EcoWateringConfigurationActivity;
+import it.uniba.dib.sms2324.ecowateringhub.ui.profile.UserProfileFragment;
+import it.uniba.dib.sms2324.ecowateringhub.ui.setup.StartFirstFragment;
+import it.uniba.dib.sms2324.ecowateringhub.ui.setup.StartSecondFragment;
 
 public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
         StartSecondFragment.OnSecondStartFinishCallback,
         ManualControlFragment.OnUserActionCallback,
         ManageRemoteEWDevicesConnectedFragment.OnRemoteDeviceActionSelectedCallback {
+    private static final String FIRST_START_FILENAME_FLAG = "isFirstStartCheck";
+    private static final String FIRST_START_KEY_FLAG = "IS_FIRST_START";
+    private static final String FIRST_START_VALUE_FLAG = "true";
+    private static final String FIRST_START_KEY_NOT_FOUND_FLAG = "keyNotFound";
+    private static final int ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_ADDED = 1026;
+    private static final int FORCE_SENSORS_INTERVAL_DURATION = 500; // millis
     public static boolean isSimulation = true;
     public static EcoWateringHub thisEcoWateringHub;
-    private static FragmentManager fragmentManager;
+    private FragmentManager fragmentManager;
     private static String tempHubName;
     private static Address tempAddress;
-    protected interface OnSensorsUpdatedForcedCallback {
-        void onFinish();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements
                 if(existsResponse.equals(EcoWateringHub.HUB_EXISTS_RESPONSE)) {
                     EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), ((jsonObjResponse) -> {
                         thisEcoWateringHub = new EcoWateringHub(jsonObjResponse);
-                        Log.i(Common.THIS_LOG, "forceSensorsUpdate from MainActivity");
                         forceSensorsUpdate(this, () -> {
                             if(thisEcoWateringHub.getEcoWateringHubConfiguration().isAutomated()) {
                                 changeFragment(new AutomaticControlFragment(), false);
@@ -107,13 +117,8 @@ public class MainActivity extends AppCompatActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == Common.GPS_ENABLE_REQUEST) {
-            if(resultCode == RESULT_OK) {
-                StartFirstFragment.onGpsEnabledCallback.onGpsEnabled(Common.GPS_ENABLED_RESULT);
-            }
-            else {
-                startActivity(new Intent(this, MainActivity.class));
-                finish();
-            }
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
         }
     }
 
@@ -127,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSecondStartFinish(@NonNull IrrigationSystem irrigationSystem) {
         EcoWateringHub.addNewEcoWateringHub(
-                Common.getThisDeviceID(this),
+                this,
                 tempHubName,
                 tempAddress,
                 irrigationSystem,
@@ -143,9 +148,10 @@ public class MainActivity extends AppCompatActivity implements
         if(cardActivityClass == ManageRemoteEWDevicesConnectedActivity.class) {
             startActivity(new Intent(this, ManageRemoteEWDevicesConnectedActivity.class));
         }
-        else if(cardActivityClass.equals(ManualEcoWateringConfigurationActivity.class)) {
-            startActivity(new Intent(this, ManualEcoWateringConfigurationActivity.class));
+        else if(cardActivityClass.equals(EcoWateringConfigurationActivity.class)) {
+            startActivity(new Intent(this, EcoWateringConfigurationActivity.class));
         }
+        finish();
     }
 
     @Override
@@ -175,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements
             fragmentManager.popBackStack();
             changeFragment(new ManageRemoteEWDevicesConnectedFragment(), true);
         }
-        else if(action == Common.ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_ADDED){
+        else if(action == ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_ADDED){
             changeFragment(new ManageRemoteEWDevicesConnectedFragment(), false);
         }
     }
@@ -194,21 +200,21 @@ public class MainActivity extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    protected static void forceSensorsUpdate(@NonNull Context context, OnSensorsUpdatedForcedCallback callback) {
+    public static void forceSensorsUpdate(@NonNull Context context, Common.OnMethodFinishCallback callback) {
         Thread ambientTemperatureSensorForcedThread = new Thread(), lightSensorForcedThread = new Thread(), relativeHumiditySensorForcedThread = new Thread();
         if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
                 (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
-            ambientTemperatureSensorForcedThread = new Thread(new AmbientTemperatureSensorRunnable(context, MainActivity.thisEcoWateringHub, 400));
+            ambientTemperatureSensorForcedThread = new Thread(new AmbientTemperatureSensorRunnable(context, MainActivity.thisEcoWateringHub, FORCE_SENSORS_INTERVAL_DURATION));
             ambientTemperatureSensorForcedThread.start();
         }
         if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor() != null) &&
                 (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
-            lightSensorForcedThread = new Thread(new LightSensorRunnable(context, MainActivity.thisEcoWateringHub, 400));
+            lightSensorForcedThread = new Thread(new LightSensorRunnable(context, MainActivity.thisEcoWateringHub, FORCE_SENSORS_INTERVAL_DURATION));
             lightSensorForcedThread.start();
         }
         if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
                 (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
-            relativeHumiditySensorForcedThread = new Thread(new RelativeHumiditySensorRunnable(context, MainActivity.thisEcoWateringHub, 400));
+            relativeHumiditySensorForcedThread = new Thread(new RelativeHumiditySensorRunnable(context, MainActivity.thisEcoWateringHub, FORCE_SENSORS_INTERVAL_DURATION));
             relativeHumiditySensorForcedThread.start();
         }
         while(ambientTemperatureSensorForcedThread.isAlive() || lightSensorForcedThread.isAlive() || relativeHumiditySensorForcedThread.isAlive()) {
@@ -223,17 +229,17 @@ public class MainActivity extends AppCompatActivity implements
         }
         EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(context), (jsonResponse) -> {
             thisEcoWateringHub = new EcoWateringHub(jsonResponse);
-            callback.onFinish();
+            callback.canContinue();
         });
     }
 
-    protected static boolean isPersistentServiceRunning(@NonNull Activity activity) {
+    public static boolean isPersistentServiceRunning(@NonNull Activity activity) {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, Context.MODE_PRIVATE);
         Log.i(Common.THIS_LOG, sharedPreferences.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE));
         return sharedPreferences.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE).equals(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE);
     }
 
-    protected static void startPersistentServiceWork(@NonNull Activity activity, @NonNull Context context) {
+    public static void startPersistentServiceWork(@NonNull Activity activity, @NonNull Context context) {
         if(!MainActivity.isPersistentServiceRunning(activity)) {
             Log.i(Common.THIS_LOG, "PersistentService is running");
             // SENSOR WEATHER SERVICES
@@ -251,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    protected static void setServiceStateInSharedPreferences(@NonNull Activity activity, String value) {
+    public static void setServiceStateInSharedPreferences(@NonNull Activity activity, String value) {
         SharedPreferences prefs = activity.getApplicationContext().getSharedPreferences(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, value);
@@ -270,8 +276,8 @@ public class MainActivity extends AppCompatActivity implements
 
         // CHECK IF IS FIRST START
         boolean firstStartDialogFlag = false;
-        SharedPreferences sharedPreferences = getSharedPreferences(Common.FIRST_START_FILENAME_FLAG, Context.MODE_PRIVATE);
-        if(sharedPreferences.getString(Common.FIRST_START_KEY_FLAG, Common.FIRST_START_KEY_NOT_FOUND_FLAG).equals(Common.FIRST_START_KEY_NOT_FOUND_FLAG)) {
+        SharedPreferences sharedPreferences = getSharedPreferences(FIRST_START_FILENAME_FLAG, Context.MODE_PRIVATE);
+        if(sharedPreferences.getString(FIRST_START_KEY_FLAG, FIRST_START_KEY_NOT_FOUND_FLAG).equals(FIRST_START_KEY_NOT_FOUND_FLAG)) {
             firstStartDialogFlag = true;
         }
 
@@ -282,12 +288,13 @@ public class MainActivity extends AppCompatActivity implements
                     .setPositiveButton(
                             getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.setting_button),
                             (dialogInterface, i) -> Common.openAppDetailsSetting(this)
-                    );
+                    )
+                    .setCancelable(false);
         }
         // APP CAN REQUEST PERMISSION CASE
         else {
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(Common.FIRST_START_KEY_FLAG, Common.FIRST_START_VALUE_FLAG);
+            editor.putString(FIRST_START_KEY_FLAG, FIRST_START_VALUE_FLAG);
             editor.apply();
             dialog.setMessage(getString(R.string.why_grant_location_permission_dialog_message))
                     .setPositiveButton(

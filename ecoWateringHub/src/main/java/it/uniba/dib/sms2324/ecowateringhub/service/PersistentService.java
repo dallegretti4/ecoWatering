@@ -18,24 +18,27 @@ import java.util.Date;
 import java.util.Locale;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
-import it.uniba.dib.sms2324.ecowateringcommon.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringhub.R;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.AmbientTemperatureSensorRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.LightSensorEventRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.LightSensorRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.RefreshHubRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.RelativeHumiditySensorRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.runnable.WeatherInfoRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.AmbientTemperatureSensorRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.LightSensorEventRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.LightSensorRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.hub.RefreshHubRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.RelativeHumiditySensorRunnable;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.weather.WeatherInfoRunnable;
 
 public class PersistentService extends Service {
     public static final String PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE = "PERSISTENT_SERVICE_IS_RUNNING";
     public static final String PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE = "PERSISTENT_SERVICE_IS_NOT_RUNNING";
+    public static final String WAKE_LOCK_TAG = "ecoWateringHub:wakeLockPersistentService";
+    private static final String CHANNEL_ID = "PersistentServiceChannel";
+    private static final String NOTIFICATION_CHANNEL_NAME = "Sensor & Weather Service";
+    private static final String SIMPLE_DATE_FORMAT = "HH:mm";
     private static final long SENSORS_WEATHER_POST_DELAY = 15 * 1000;
     private static final long DIFFERENCE_DELAY = 45 * 1000;
     private static final int NOTIFICATION_ID = 3;
     private static boolean isRunning;
     private EcoWateringHub hub;
-    private static final String CHANNEL_ID = "PersistentServiceChannel";
     private PowerManager.WakeLock wakeLock;
 
     public PersistentService() {}
@@ -52,8 +55,6 @@ public class PersistentService extends Service {
    public int onStartCommand(Intent intent, int flags, int startId) {
        this.hub = intent.getParcelableExtra(Common.MANAGE_EWH_INTENT_OBJ);
         if(this.hub != null) {
-            Log.i(Common.THIS_LOG, "hub != null");
-            Log.i(Common.THIS_LOG, "persistent service sp write");
             isRunning = true;
             startPersistentService(this.hub);
         }
@@ -79,7 +80,7 @@ public class PersistentService extends Service {
 
    private void acquireWakeLock() {
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        this.wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ecoWateringHub:wakeLockPersistentService");
+        this.wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);
         wakeLock.acquire();
    }
 
@@ -108,7 +109,7 @@ public class PersistentService extends Service {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
-                    "Sensor & Weather Service",
+                    NOTIFICATION_CHANNEL_NAME,
                     NotificationManager.IMPORTANCE_LOW
             );
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -121,13 +122,13 @@ public class PersistentService extends Service {
     private Notification getNotification() {
         String text;
         if(this.hub != null) {
-            text = getString(R.string.sensors_notification_text) + new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()) + "\n" +
+            text = getString(R.string.sensors_notification_text) + new SimpleDateFormat(SIMPLE_DATE_FORMAT, Locale.getDefault()).format(new Date()) + "\n" +
                     getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.ambient_temperature_label) + ": " + this.hub.getAmbientTemperature() + "\n" +
                     getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.relative_humidity_label) + ": " + this.hub.getRelativeHumidity() + "%\n" +
                     getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.light_uv_index_label) + ": " + this.hub.getIndexUV();
         }
         else {
-            text = getString(R.string.sensors_notification_text) + new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+            text = getString(R.string.sensors_notification_text) + new SimpleDateFormat(SIMPLE_DATE_FORMAT, Locale.getDefault()).format(new Date());
         }
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
