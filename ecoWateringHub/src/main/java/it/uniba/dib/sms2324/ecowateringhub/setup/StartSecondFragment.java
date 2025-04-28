@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.setup;
+package it.uniba.dib.sms2324.ecowateringhub.setup;
 
 import android.content.Context;
 import android.os.Bundle;

@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.entry;
+package it.uniba.dib.sms2324.ecowateringhub.entry;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -33,8 +33,8 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.service.PersistentService;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.ManageRemoteEWDevicesConnectedActivity;
-import it.uniba.dib.sms2324.ecowateringhub.ui.configuration.EcoWateringConfigurationActivity;
+import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedActivity;
+import it.uniba.dib.sms2324.ecowateringhub.configuration.EcoWateringConfigurationActivity;
 
 public class ManualControlFragment extends Fragment {
     private static final int REFRESH_FRAGMENT_FROM_HUB_INTERVAL = 5 * 1000;
@@ -44,7 +44,7 @@ public class ManualControlFragment extends Fragment {
         @Override
         public void run() {
             EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> {
-                MainActivity.thisEcoWateringHub = new EcoWateringHub(jsonResponse);
+                MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
                 MainActivity.forceSensorsUpdate(requireContext(), () -> {
                     isRefreshFragment = true;
                     Log.i(Common.THIS_LOG, "ManualControlFragment -> refreshRunnable");
@@ -115,7 +115,7 @@ public class ManualControlFragment extends Fragment {
 
         // FORCE SENSOR - VIEWs SETUP
         EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> {
-            MainActivity.thisEcoWateringHub = new EcoWateringHub(jsonResponse);
+            MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
             MainActivity.forceSensorsUpdate(requireContext(), () -> {
                 requireActivity().runOnUiThread(() -> weatherCardSetup(view));
                 requireActivity().runOnUiThread(() -> relativeHumidityLightCardSetup(view));
@@ -151,28 +151,28 @@ public class ManualControlFragment extends Fragment {
 
     private void weatherCardSetup(@NonNull View view) {
         ImageView weatherImageView = view.findViewById(R.id.weatherIconImageView);
-        weatherImageView.setImageResource(MainActivity.thisEcoWateringHub.getWeatherInfo().getWeatherImageResourceId());
+        weatherImageView.setImageResource(MainActivity.getThisEcoWateringHub().getWeatherInfo().getWeatherImageResourceId());
         TextView degreesTextView = view.findViewById(R.id.weatherStateFirstDegreesTextView);
-        degreesTextView.setText(String.valueOf(((int) MainActivity.thisEcoWateringHub.getAmbientTemperature())));
+        degreesTextView.setText(String.valueOf(((int) MainActivity.getThisEcoWateringHub().getAmbientTemperature())));
         TextView addressTextView = view.findViewById(R.id.weatherStateAddressTextView);
-        addressTextView.setText(MainActivity.thisEcoWateringHub.getPosition());
+        addressTextView.setText(MainActivity.getThisEcoWateringHub().getPosition());
     }
 
     private void relativeHumidityLightCardSetup(@NonNull View view) {
         TextView relativeHumidityPercentTextView = view.findViewById(R.id.relativeHumidityPercentTextView);
-        relativeHumidityPercentTextView.setText(String.valueOf((int)(MainActivity.thisEcoWateringHub.getRelativeHumidity())));
+        relativeHumidityPercentTextView.setText(String.valueOf((int)(MainActivity.getThisEcoWateringHub().getRelativeHumidity())));
         TextView lightIndexTextView = view.findViewById(R.id.lightIndexTextView);
-        lightIndexTextView.setText(String.valueOf((int)(MainActivity.thisEcoWateringHub.getIndexUV())));
+        lightIndexTextView.setText(String.valueOf((int)(MainActivity.getThisEcoWateringHub().getIndexUV())));
     }
 
     private void remoteDevicesConnectedCardSetup(@NonNull View view) {
         TextView remoteDeviceConnectedNumberTextView = view.findViewById(R.id.remoteDeviceConnectedNumberTextView);
-        remoteDeviceConnectedNumberTextView.setText(String.valueOf(MainActivity.thisEcoWateringHub.getRemoteDeviceList().size()));
+        remoteDeviceConnectedNumberTextView.setText(String.valueOf(MainActivity.getThisEcoWateringHub().getRemoteDeviceList().size()));
         TextView remoteDeviceConnectedTextView = view.findViewById(R.id.remoteDeviceConnectedTextView);
         remoteDeviceConnectedTextView.setText(getResources().getQuantityString(
                 it.uniba.dib.sms2324.ecowateringcommon.R.plurals.remote_devices_connected_plurals,
-                MainActivity.thisEcoWateringHub.getRemoteDeviceList().size(),
-                MainActivity.thisEcoWateringHub.getRemoteDeviceList().size()));
+                MainActivity.getThisEcoWateringHub().getRemoteDeviceList().size(),
+                MainActivity.getThisEcoWateringHub().getRemoteDeviceList().size()));
         ConstraintLayout remoteDevicesConnectedCard = view.findViewById(R.id.remoteDevicesConnectedCard);
         remoteDevicesConnectedCard.setOnClickListener((v) -> onUserActionCallback.onCardSelected(ManageRemoteEWDevicesConnectedActivity.class));
     }
@@ -180,7 +180,7 @@ public class ManualControlFragment extends Fragment {
     private void irrigationSystemCardSetup(@NonNull View view) {
         irrigationSystemValueStateTextView = view.findViewById(R.id.irrigationSystemValueStateTextView);
         SwitchCompat irrigationSystemStateSwitchCompat = view.findViewById(R.id.irrigationSystemStateSwitchCompat);
-        if(MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getIrrigationSystem().getState()) {
+        if(MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getIrrigationSystem().getState()) {
             irrigationSystemValueStateTextView.setText(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.on_value));
             irrigationSystemStateSwitchCompat.setChecked(true);
         }
@@ -191,7 +191,7 @@ public class ManualControlFragment extends Fragment {
         if(!isRefreshFragment) {
             irrigationSystemStateSwitchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if(isChecked) {
-                    MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(
+                    MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getIrrigationSystem().setState(
                             Common.getThisDeviceID(requireContext()),
                             Common.getThisDeviceID(requireContext()),
                             true,
@@ -208,7 +208,7 @@ public class ManualControlFragment extends Fragment {
                             });
                 }
                 else {
-                    MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(
+                    MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getIrrigationSystem().setState(
                             Common.getThisDeviceID(requireContext()),
                             Common.getThisDeviceID(requireContext()),
                             false,
@@ -247,24 +247,23 @@ public class ManualControlFragment extends Fragment {
 
         // SENSORS AND WEATHER REALTIME REFRESH SETUP
         SwitchCompat realTimeSensorsWeatherRefreshSwitch = view.findViewById(R.id.realTimeSensorsWeatherRefreshSwitch);
-        realTimeSensorsWeatherRefreshSwitch.setChecked(MainActivity.isPersistentServiceRunning(requireActivity()));
+        realTimeSensorsWeatherRefreshSwitch.setChecked(PersistentService.isPersistentServiceRunning(requireActivity()));
         realTimeSensorsWeatherRefreshSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(isChecked && !MainActivity.isPersistentServiceRunning(requireActivity())) {
-                MainActivity.startPersistentServiceWork(requireActivity(), requireContext());
+            if(isChecked && !PersistentService.isPersistentServiceRunning(requireActivity())) {
+                PersistentService.startPersistentService(requireActivity(), requireContext());
             }
-            else if (!isChecked && MainActivity.isPersistentServiceRunning(requireActivity())) {
-                requireActivity().stopService(new Intent(requireContext(), PersistentService.class));
-                MainActivity.setServiceStateInSharedPreferences(requireActivity(), PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE);
+            else if (!isChecked && PersistentService.isPersistentServiceRunning(requireActivity())) {
+                PersistentService.stopPersistentService(requireActivity(), requireContext());
             }
         });
 
         // SENSORS CONFIGURATION STATE SETUP
-        if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
+        if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
 
             TextView sensorsConfigurationStateTextView = view.findViewById(R.id.sensorsConfigurationStateTextView);
             sensorsConfigurationStateTextView.setText(getString(R.string.sensors_configuration_complete));

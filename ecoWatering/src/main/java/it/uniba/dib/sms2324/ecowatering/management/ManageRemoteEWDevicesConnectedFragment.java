@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.control;
+package it.uniba.dib.sms2324.ecowatering.management;
 
 import android.content.Context;
 import android.content.Intent;
@@ -45,8 +45,8 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
                 onRemoteDeviceConnectedActionCallback.onRemoteDeviceConnectedAction(Common.ACTION_BACK_PRESSED);
             }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
-                EcoWateringHub.getEcoWateringHubJsonString(ManageEWHubActivity.selectedEWHub.getDeviceID(), (jsonResponse) -> {
-                    ManageEWHubActivity.selectedEWHub = new EcoWateringHub(jsonResponse);
+                EcoWateringHub.getEcoWateringHubJsonString(ManageEWHubActivity.getSelectedEWHub().getDeviceID(), (jsonResponse) -> {
+                    ManageEWHubActivity.setSelectedEWHub(new EcoWateringHub(jsonResponse));
                     onRemoteDeviceConnectedActionCallback.onRemoteDeviceConnectedAction(Common.ACTION_REMOTE_DEVICES_CONNECTED_RESTART_FRAGMENT);
                 });
             }
@@ -54,7 +54,7 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
         }
     };
     private OnRemoteDeviceConnectedActionCallback onRemoteDeviceConnectedActionCallback;
-    protected interface OnRemoteDeviceConnectedActionCallback {
+    public interface OnRemoteDeviceConnectedActionCallback {
         void onRemoteDeviceConnectedAction(int result);
     }
 
@@ -78,8 +78,8 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
         TextView remoteDevicesConnectedTextView = view.findViewById(R.id.remoteDevicesConnectedTextView);
         remoteDevicesConnectedTextView.setText(getResources().getQuantityString(
                 it.uniba.dib.sms2324.ecowateringcommon.R.plurals.remote_devices_connected_plurals,
-                ManageEWHubActivity.selectedEWHub.getRemoteDeviceList().size(),
-                ManageEWHubActivity.selectedEWHub.getRemoteDeviceList().size()
+                ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList().size(),
+                ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList().size()
         ));
         // LIST & ADAPTER SETUP
         ecoWateringDeviceList = new ArrayList<>();
@@ -87,7 +87,7 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
         // LIST VIEW (PORTRAIT CONFIGURATION) SETUP / GRID VIEW (LANDSCAPE) SETUP
         listGridViewSetup(view);
         // FILL REMOTE DEVICE CONNECTED LIST
-        for(String deviceID : ManageEWHubActivity.selectedEWHub.getRemoteDeviceList()) {
+        for(String deviceID : ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList()) {
             EcoWateringDevice.getEcoWateringDeviceJsonString(deviceID, (jsonResponse) -> {
                 ecoWateringDeviceList.add(new EcoWateringDevice(jsonResponse));
                 requireActivity().runOnUiThread(ecoWateringDeviceAdapter::notifyDataSetChanged);
@@ -151,7 +151,7 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
                         (dialogInterface, i) -> EcoWateringHub.removeRemoteDevice(
-                                ManageEWHubActivity.selectedEWHub.getDeviceID(),
+                                ManageEWHubActivity.getSelectedEWHub().getDeviceID(),
                                 device,
                                 (response) -> {
                                     if(response.equals(Common.REMOVE_REMOTE_DEVICE_RESPONSE)) {
@@ -176,7 +176,7 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
                         ((dialogInterface, i) -> EcoWateringHub.removeRemoteDevice(
-                                ManageEWHubActivity.selectedEWHub.getDeviceID(),
+                                ManageEWHubActivity.getSelectedEWHub().getDeviceID(),
                                 device,
                                 (response) -> {
                                     if(response.equals(Common.REMOVE_REMOTE_DEVICE_RESPONSE)) {
@@ -199,8 +199,8 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) ->
-                                EcoWateringHub.getEcoWateringHubJsonString(ManageEWHubActivity.selectedEWHub.getDeviceID(), (jsonResponse) -> {
-                                    ManageEWHubActivity.selectedEWHub = new EcoWateringHub(jsonResponse);
+                                EcoWateringHub.getEcoWateringHubJsonString(ManageEWHubActivity.getSelectedEWHub().getDeviceID(), (jsonResponse) -> {
+                                    ManageEWHubActivity.setSelectedEWHub(new EcoWateringHub(jsonResponse));
                                     if(remoteDeviceRemoveItSelf) {
                                         onRemoteDeviceConnectedActionCallback.onRemoteDeviceConnectedAction(ManageEWHubActivity.ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_IT_SELF_REMOVED);
                                     }

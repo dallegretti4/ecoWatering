@@ -28,7 +28,7 @@ import java.util.Objects;
 import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
 import it.uniba.dib.sms2324.ecowatering.connection.ConnectToEWHubActivity;
-import it.uniba.dib.sms2324.ecowatering.control.ManageEWHubActivity;
+import it.uniba.dib.sms2324.ecowatering.management.ManageEWHubActivity;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
@@ -162,18 +162,18 @@ public class MainFragment extends Fragment {
     private void uploadEcoWateringHubList(@NonNull View view) {
         ArrayList<EcoWateringHub> hubListHelper = new ArrayList<>(); // AUXILIARY ARRAY LIST
         EcoWateringDevice.getEcoWateringDeviceJsonString(Common.getThisDeviceID(requireContext()), (jsonDeviceResponse) -> {
-            MainActivity.thisEcoWateringDevice = new EcoWateringDevice(jsonDeviceResponse);
+            MainActivity.setThisEcoWateringDevice(new EcoWateringDevice(jsonDeviceResponse));
             // NO HUB CONNECTED CASE
-            if(MainActivity.thisEcoWateringDevice.getEcoWateringHubList().isEmpty() || (MainActivity.thisEcoWateringDevice.getEcoWateringHubList() == null)) {
+            if(MainActivity.getThisEcoWateringDevice().getEcoWateringHubList().isEmpty() || (MainActivity.getThisEcoWateringDevice().getEcoWateringHubList() == null)) {
                 startActivity(new Intent(requireContext(), MainActivity.class));
                 requireActivity().finish();
             }
             else {
-                for(String hubID : MainActivity.thisEcoWateringDevice.getEcoWateringHubList()) {
+                for(String hubID : MainActivity.getThisEcoWateringDevice().getEcoWateringHubList()) {
                     EcoWateringHub.getEcoWateringHubJsonString(hubID, (jsonHubResponse) -> {
                         hubListHelper.add(new EcoWateringHub(jsonHubResponse));
                         // LAST HUB CASE
-                        if(hubListHelper.size() == MainActivity.thisEcoWateringDevice.getEcoWateringHubList().size()) {
+                        if(hubListHelper.size() == MainActivity.getThisEcoWateringDevice().getEcoWateringHubList().size()) {
                             hubListHelper.sort(new EcoWateringHubComparator());
                             ecoWateringHubList.clear();
                             requireActivity().runOnUiThread(ecoWateringHubAdapter::notifyDataSetChanged);
@@ -217,7 +217,7 @@ public class MainFragment extends Fragment {
                 .setMessage(getString(R.string.disconnect_from_ewh_confirm_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        (dialogInterface, i) -> MainActivity.thisEcoWateringDevice.disconnectFromEWHub(requireContext(), hubID, (response) -> {
+                        (dialogInterface, i) -> MainActivity.getThisEcoWateringDevice().disconnectFromEWHub(requireContext(), hubID, (response) -> {
                             if(response != null && response.equals(Common.REMOVE_REMOTE_DEVICE_RESPONSE)) {
                                 requireActivity().runOnUiThread(this::showDeviceDisconnectedDialog);
                             }

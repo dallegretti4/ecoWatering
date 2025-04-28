@@ -13,4 +13,5 @@ public interface OnConnectionFinishCallback {
     int CONNECTION_ERROR_RESULT = 1010;
     void onConnectionFinish(int resultCode);
     void restartFragment(String connectionMode);
+    void closeConnection();
 }

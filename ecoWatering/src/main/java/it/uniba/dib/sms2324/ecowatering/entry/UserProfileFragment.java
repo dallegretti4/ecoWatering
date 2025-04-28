@@ -103,8 +103,8 @@ public class UserProfileFragment extends Fragment {
 
         // LOGIC
         EcoWateringDevice.getEcoWateringDeviceJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> {
-            MainActivity.thisEcoWateringDevice = new EcoWateringDevice(jsonResponse);
-            currentUserName = MainActivity.thisEcoWateringDevice.getName();
+            MainActivity.setThisEcoWateringDevice(new EcoWateringDevice(jsonResponse));
+            currentUserName = MainActivity.getThisEcoWateringDevice().getName();
             requireActivity().runOnUiThread(() -> {
                 this.userNameEditText.setText(currentUserName);
                 lockUserNameEdit();

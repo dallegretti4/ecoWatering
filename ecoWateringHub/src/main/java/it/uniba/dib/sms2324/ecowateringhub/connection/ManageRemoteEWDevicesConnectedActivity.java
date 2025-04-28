@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.connection;
+package it.uniba.dib.sms2324.ecowateringhub.connection;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -20,26 +20,24 @@ import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringhub.R;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.connect.ConnectionChooserFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.connect.BtConnectionFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.connect.WiFiConnectionFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.connected.ManageRemoteEWDevicesConnectedFragment;
+import it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth.BtConnectionFragment;
+import it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi.WiFiConnectionFragment;
 
 public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity implements
         ManageRemoteEWDevicesConnectedFragment.OnRemoteDeviceActionSelectedCallback,
         ConnectionChooserFragment.OnConnectionModeSelectedCallback,
         OnConnectionFinishCallback {
-    public static final int ACTION_ADD_REMOTE_DEVICE = 1027;
-    public static final int BT_PERMISSION_REQUEST = 2001;
+    protected static final int ACTION_ADD_REMOTE_DEVICE = 1027;
+    protected static final int BT_PERMISSION_REQUEST = 2001;
     private static FragmentManager fragmentManager;
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_remote_ew_devices_connected);
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         Common.lockLayout(this);
         // NO INTERNET CONNECTION CASE
@@ -71,19 +69,27 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
             }
         }
         else if(action == Common.ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_REMOVED) {
-            popBackStackFragment();
+            fragmentManager.popBackStack();
             changeFragment(new ManageRemoteEWDevicesConnectedFragment(), true);
         }
     }
 
     @Override
-    public void onModeSelected(@NonNull Fragment fragment) {
-        changeFragment(fragment, true);
+    public void onModeSelected(Fragment fragment) {
+        if(fragment == null) {
+            fragmentManager.popBackStack();
+        }
+        else {
+            changeFragment(fragment, true);
+        }
     }
 
     @Override
     public void onConnectionFinish(int resultCode) {
         switch (resultCode) {
+            case Common.ACTION_BACK_PRESSED:
+                fragmentManager.popBackStack();
+                break;
             case OnConnectionFinishCallback.CONNECTION_ERROR_RESULT:
                 runOnUiThread(this::showErrorDialog);
                 break;
@@ -100,7 +106,7 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
 
     @Override
     public void restartFragment(String connectionMode) {
-        popBackStackFragment();
+        fragmentManager.popBackStack();
         if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH)) {
             changeFragment(new BtConnectionFragment(), true);
         }
@@ -110,6 +116,11 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
         else {
             runOnUiThread(this::showErrorDialog);
         }
+    }
+
+    @Override
+    public void closeConnection() {
+        fragmentManager.popBackStack();
     }
 
     @Override
@@ -140,27 +151,17 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == Common.GPS_WIFI_ENABLE_REQUEST) {
+            fragmentManager.popBackStack();
             if(resultCode == RESULT_OK) {
-                popBackStackFragment();
                 changeFragment(new WiFiConnectionFragment(), true);
-            }
-            else {
-                popBackStackFragment();
             }
         }
         else if(requestCode == Common.GPS_BT_ENABLE_REQUEST) {
-            if(resultCode != RESULT_OK) {
-                popBackStackFragment();
-            }
-            else {
-                popBackStackFragment();
+            fragmentManager.popBackStack();
+            if(resultCode == RESULT_OK) {
                 changeFragment(new BtConnectionFragment(), true);
             }
         }
-    }
-
-    public static void popBackStackFragment() {
-        fragmentManager.popBackStack();
     }
 
     private void changeFragment(Fragment fragment, boolean addToBackStackFlag) {
@@ -214,8 +215,8 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
-                            popBackStackFragment();
-                            popBackStackFragment();
+                            fragmentManager.popBackStack();
+                            fragmentManager.popBackStack();
                         })
                 )
                 .setCancelable(false)
@@ -249,7 +250,7 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
      * Notify the user there isn't internet connection.
      * Positive button restarts the app.
      */
-    protected void showInternetFaultDialog() {
+    private void showInternetFaultDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_msg))

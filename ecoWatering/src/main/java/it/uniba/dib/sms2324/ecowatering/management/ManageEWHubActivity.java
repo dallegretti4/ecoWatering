@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.control;
+package it.uniba.dib.sms2324.ecowatering.management;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -25,7 +25,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
         ManageEWHubManualControlFragment.OnUserActionCallback,
         ManageRemoteEWDevicesConnectedFragment.OnRemoteDeviceConnectedActionCallback {
     protected static final int ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_IT_SELF_REMOVED = 1031;
-    protected static EcoWateringHub selectedEWHub;
+    private static EcoWateringHub selectedEWHub;
     private FragmentManager fragmentManager;
 
     @Override
@@ -39,7 +39,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         if(selectedEWHub != null) {
             // NO INTERNET CONNECTION CASE
@@ -89,20 +89,16 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     @Override
     public void onRemoteDeviceConnectedAction(int result) {
         if((result == Common.ACTION_REMOTE_DEVICES_CONNECTED_RESTART_FRAGMENT) || (result == Common.ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_REMOVED)) {
-            popBackStackFragment();
+            fragmentManager.popBackStack();
             changeFragment(new ManageRemoteEWDevicesConnectedFragment(), true);
         }
         else if(result == Common.ACTION_BACK_PRESSED) {
-            popBackStackFragment();
+            fragmentManager.popBackStack();
         }
         else if(result == ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_IT_SELF_REMOVED) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
         }
-    }
-
-    private void popBackStackFragment() {
-        fragmentManager.popBackStack();
     }
 
     private void changeFragment(Fragment fragment, boolean addToBackStack) {
@@ -112,6 +108,14 @@ public class ManageEWHubActivity extends AppCompatActivity implements
             fragmentTransaction.addToBackStack(null);
         }
         fragmentTransaction.commit();
+    }
+
+    protected static EcoWateringHub getSelectedEWHub() {
+        return selectedEWHub;
+    }
+
+    protected static void setSelectedEWHub(@NonNull EcoWateringHub ecoWateringHub) {
+        selectedEWHub = ecoWateringHub;
     }
 
     /**
@@ -149,7 +153,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
      * Notify the user there isn't internet connection.
      * Positive button restarts the app.
      */
-    protected void showInternetFaultDialog(@NonNull Context context) {
+    private void showInternetFaultDialog(@NonNull Context context) {
         new AlertDialog.Builder(context)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_msg))

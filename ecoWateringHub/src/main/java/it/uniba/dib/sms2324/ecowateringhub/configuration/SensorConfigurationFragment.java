@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.configuration;
+package it.uniba.dib.sms2324.ecowateringhub.configuration;
 
 import android.content.Context;
 import android.content.Intent;
@@ -48,7 +48,7 @@ public class SensorConfigurationFragment extends Fragment {
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
             if(itemID == android.R.id.home) {
-                EcoWateringConfigurationActivity.popBackStackFragment();
+                onSensorConfiguredCallback.onSensorConfigured(Common.ACTION_BACK_PRESSED);
             }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 onSensorConfiguredCallback.onSensorConfigured(Common.REFRESH_FRAGMENT);
@@ -111,9 +111,9 @@ public class SensorConfigurationFragment extends Fragment {
         Button selectedSensorDetachButton = view.findViewById(R.id.selectedSensorDetachButton);
         if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE)) {
             configSensor = new AmbientTemperatureSensor(requireContext());
-            if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
-                    (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
-                ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID());
+            if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
+                    (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
+                ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID());
                 ((View) view.findViewById(R.id.selectedSensorCardDivisor)).setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
@@ -121,9 +121,9 @@ public class SensorConfigurationFragment extends Fragment {
         }
         else if(EcoWateringConfigurationActivity.getConfigureSensorType().equals(EcoWateringSensor.CONFIGURE_SENSOR_TYPE_LIGHT)) {
             configSensor = new LightSensor(requireContext());
-            if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor() != null) &&
-                    (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
-                ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor().getSensorID());
+            if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
+                    (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
+                ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID());
                 ((View) view.findViewById(R.id.selectedSensorCardDivisor)).setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
@@ -131,9 +131,9 @@ public class SensorConfigurationFragment extends Fragment {
         }
         else if(EcoWateringConfigurationActivity.getConfigureSensorType().equals(EcoWateringSensor.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY)) {
             configSensor = new RelativeHumiditySensor(requireContext());
-            if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
-                    (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
-                ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID());
+            if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
+                    (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
+                ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID());
                 ((View) view.findViewById(R.id.selectedSensorCardDivisor)).setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
@@ -183,18 +183,18 @@ public class SensorConfigurationFragment extends Fragment {
 
     private void setSensorOnEWHub(Sensor chosenSensor) {
         if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
             requireActivity().runOnUiThread(this::showSensorAlreadyConfiguredDialog);
         }
         else if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_LIGHT) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
             requireActivity().runOnUiThread(this::showSensorAlreadyConfiguredDialog);
         }
         else if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
             requireActivity().runOnUiThread(this::showSensorAlreadyConfiguredDialog);
         }
         else {
@@ -270,7 +270,7 @@ public class SensorConfigurationFragment extends Fragment {
      * Notify the user something went wrong with the database server.
      * Positive button restarts the app.
      */
-    protected void showHttpErrorFaultDialog() {
+    private void showHttpErrorFaultDialog() {
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setPositiveButton(

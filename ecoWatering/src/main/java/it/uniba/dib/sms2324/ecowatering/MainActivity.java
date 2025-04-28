@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
         MainFragment.OnMainFragmentActionCallback,
         UserProfileFragment.OnUserProfileActionCallback {
-    public static EcoWateringDevice thisEcoWateringDevice;
+    private static EcoWateringDevice thisEcoWateringDevice;
     private FragmentManager fragmentManager;
 
     @Override
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         // NO INTERNET CONNECTION CASE
         if(!HttpHelper.isDeviceConnectedToInternet(this)) {
@@ -112,12 +112,12 @@ public class MainActivity extends AppCompatActivity implements
     // FROM UserProfileFragment
     @Override
     public void onUserProfileGoBack() {
-        popToBackStackFragment();
+        fragmentManager.popBackStack();
     }
 
     @Override
     public void onUserProfileRefresh() {
-        popToBackStackFragment();
+        fragmentManager.popBackStack();
         changeFragment(new UserProfileFragment(), true);
     }
 
@@ -142,8 +142,12 @@ public class MainActivity extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    private void popToBackStackFragment() {
-        fragmentManager.popBackStack();
+    public static EcoWateringDevice getThisEcoWateringDevice() {
+        return thisEcoWateringDevice;
+    }
+
+    public static void setThisEcoWateringDevice(@NonNull EcoWateringDevice ecoWateringDevice) {
+        thisEcoWateringDevice = ecoWateringDevice;
     }
 
     /**
@@ -152,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements
      * Notify the user there isn't internet connection.
      * Positive button restarts the app.
      */
-    protected void showInternetFaultDialog() {
+    private void showInternetFaultDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_msg))
@@ -175,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements
      * Notify the user something went wrong with the database server.
      * Positive button restarts the app.
      */
-    protected void showHttpErrorFaultDialog() {
+    private void showHttpErrorFaultDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_message))

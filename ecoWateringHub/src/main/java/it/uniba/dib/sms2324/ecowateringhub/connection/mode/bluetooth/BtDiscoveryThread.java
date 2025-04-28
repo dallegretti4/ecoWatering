@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.threads.bluetooth;
+package it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -12,7 +12,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.connect.BtConnectionFragment;
 
 public class BtDiscoveryThread extends Thread {
     private final Context context;
@@ -37,7 +36,7 @@ public class BtDiscoveryThread extends Thread {
         }
     };
 
-    public BtDiscoveryThread(@NonNull Context context, @NonNull BluetoothAdapter bluetoothAdapter) {
+    protected BtDiscoveryThread(@NonNull Context context, @NonNull BluetoothAdapter bluetoothAdapter) {
         this.context = context;
         this.bluetoothAdapter = bluetoothAdapter;
     }

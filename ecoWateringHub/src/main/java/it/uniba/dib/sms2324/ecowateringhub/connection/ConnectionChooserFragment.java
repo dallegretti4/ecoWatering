@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.connection.connect;
+package it.uniba.dib.sms2324.ecowateringhub.connection;
 
 import android.Manifest;
 import android.content.Context;
@@ -26,7 +26,9 @@ import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringhub.R;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.ManageRemoteEWDevicesConnectedActivity;
+import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedActivity;
+import it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth.BtConnectionFragment;
+import it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi.WiFiConnectionFragment;
 
 public class ConnectionChooserFragment extends Fragment {
     private final MenuProvider menuProvider = new MenuProvider() {
@@ -38,15 +40,15 @@ public class ConnectionChooserFragment extends Fragment {
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
             if(itemID == android.R.id.home) {
-                ManageRemoteEWDevicesConnectedActivity.popBackStackFragment();
+                onConnectionModeSelectedCallback.onModeSelected(null);
             }
             return false;
         }
     };
 
     private OnConnectionModeSelectedCallback onConnectionModeSelectedCallback;
-    public interface OnConnectionModeSelectedCallback {
-        void onModeSelected(@NonNull Fragment fragment);
+    protected interface OnConnectionModeSelectedCallback {
+        void onModeSelected(Fragment fragment);
     }
 
     public ConnectionChooserFragment() {

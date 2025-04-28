@@ -25,7 +25,6 @@ import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
-import it.uniba.dib.sms2324.ecowatering.connection.ConnectToEWHubActivity;
 import it.uniba.dib.sms2324.ecowatering.connection.threads.BtAcceptingRequestThread;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
@@ -43,7 +42,7 @@ public class BtConnectionFragment extends Fragment {
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
             if(itemID == android.R.id.home) {
-                ConnectToEWHubActivity.popBackStatFragment();
+                onConnectionFinishCallback.closeConnection();
             }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
@@ -55,7 +54,7 @@ public class BtConnectionFragment extends Fragment {
             new ActivityResultContracts.StartActivityForResult(),
             ((result) -> {
                 if(result.getResultCode() != Activity.RESULT_OK) {
-                    ConnectToEWHubActivity.popBackStatFragment();
+                    onConnectionFinishCallback.closeConnection();
                 }
                 else {
                     onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
@@ -66,7 +65,7 @@ public class BtConnectionFragment extends Fragment {
             new ActivityResultContracts.StartActivityForResult(),
             ((result) -> {
                 if(result.getResultCode() == Activity.RESULT_CANCELED) {
-                    ConnectToEWHubActivity.popBackStatFragment();
+                    onConnectionFinishCallback.closeConnection();
                 }
                 else {
                     startAcceptingBtRequest();
@@ -125,7 +124,7 @@ public class BtConnectionFragment extends Fragment {
        }
    }
 
-   protected void enableBluetooth(Common.OnMethodFinishCallback callback) {
+   private void enableBluetooth(Common.OnMethodFinishCallback callback) {
        if(!bluetoothAdapter.isEnabled()) {
            enableBtLauncher.launch(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
        }
@@ -155,7 +154,7 @@ public class BtConnectionFragment extends Fragment {
                .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.bt_not_supported_dialog_message))
                .setPositiveButton(
                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                       ((dialogInterface, i) -> ConnectToEWHubActivity.popBackStatFragment()))
+                       ((dialogInterface, i) -> onConnectionFinishCallback.closeConnection()))
                .setCancelable(false);
        dialog.show();
    }

@@ -13,7 +13,7 @@ public class RefreshHubRunnable implements Runnable {
     public void run() {
         EcoWateringHub.getEcoWateringHubJsonString(this.hubID, (jsonResponse) -> {
             if((jsonResponse != null) && (jsonResponse.equals("null"))) {
-                MainActivity.thisEcoWateringHub = new EcoWateringHub(jsonResponse);
+                MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
             }
         });
     }

@@ -39,7 +39,7 @@
 
         <activity android:name=".connection.ConnectToEWHubActivity" android:exported="false"/>
 
-        <activity android:name=".control.ManageEWHubActivity" android:exported="false"/>
+        <activity android:name=".management.ManageEWHubActivity" android:exported="false"/>
     </application>
 
 </manifest>

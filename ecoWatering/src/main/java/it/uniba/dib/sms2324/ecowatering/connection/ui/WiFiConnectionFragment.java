@@ -33,7 +33,6 @@ import com.google.android.gms.location.SettingsClient;
 import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowatering.R;
-import it.uniba.dib.sms2324.ecowatering.connection.ConnectToEWHubActivity;
 import it.uniba.dib.sms2324.ecowatering.connection.threads.WiFiConnectionRequestThread;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
@@ -53,7 +52,7 @@ public class WiFiConnectionFragment extends Fragment {
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemId = menuItem.getItemId();
             if(itemId == android.R.id.home) {
-                ConnectToEWHubActivity.popBackStatFragment();
+                onConnectionFinishCallback.closeConnection();
             }
             else if(itemId == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_WIFI);
@@ -221,7 +220,7 @@ public class WiFiConnectionFragment extends Fragment {
                         }))
                 .setNegativeButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> ConnectToEWHubActivity.popBackStatFragment()))
+                        ((dialogInterface, i) -> onConnectionFinishCallback.closeConnection()))
                 .setCancelable(false)
                 .show();
     }

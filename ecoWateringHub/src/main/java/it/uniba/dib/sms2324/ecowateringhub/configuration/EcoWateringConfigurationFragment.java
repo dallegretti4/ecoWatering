@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.configuration;
+package it.uniba.dib.sms2324.ecowateringhub.configuration;
 
 import android.content.Context;
 import android.content.Intent;
@@ -46,7 +46,7 @@ public class EcoWateringConfigurationFragment extends Fragment {
             else if(itemId == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 requireActivity().runOnUiThread(() -> Common.showLoadingFragment(requireView(), R.id.manualEWConfigurationFragmentContainer, R.id.includeLoadingFragment));
                 EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> {
-                    MainActivity.thisEcoWateringHub = new EcoWateringHub(jsonResponse);
+                    MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
                     MainActivity.forceSensorsUpdate(
                             requireContext(),
                             () -> requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(requireView(), R.id.manualEWConfigurationFragmentContainer, R.id.includeLoadingFragment)));
@@ -126,21 +126,20 @@ public class EcoWateringConfigurationFragment extends Fragment {
 
     private void sensorsAndWeatherRealTimeRefreshSetup(@NonNull View view) {
         SwitchCompat realTimeSensorsWeatherRefreshSwitch = view.findViewById(R.id.realTimeSensorsWeatherRefreshSwitch);
-        realTimeSensorsWeatherRefreshSwitch.setChecked(MainActivity.isPersistentServiceRunning(requireActivity()));
+        realTimeSensorsWeatherRefreshSwitch.setChecked(PersistentService.isPersistentServiceRunning(requireActivity()));
         realTimeSensorsWeatherRefreshSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(isChecked && !MainActivity.isPersistentServiceRunning(requireActivity())) {
-                MainActivity.startPersistentServiceWork(requireActivity(), requireContext());
+            if(isChecked && !PersistentService.isPersistentServiceRunning(requireActivity())) {
+                PersistentService.startPersistentService(requireActivity(), requireContext());
             }
-            else if(!isChecked && MainActivity.isPersistentServiceRunning(requireActivity())) {
-                requireActivity().stopService(new Intent(requireContext(), PersistentService.class));
-                MainActivity.setServiceStateInSharedPreferences(requireActivity(), PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE);
+            else if(!isChecked && PersistentService.isPersistentServiceRunning(requireActivity())) {
+                PersistentService.stopPersistentService(requireActivity(), requireContext());
             }
         });
     }
 
     private void ambientTemperatureSensorSetup(@NonNull View view) {
-        if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
+        if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
             ImageView ambientTemperatureSensorImageView = view.findViewById(R.id.ambientTemperatureSensorStateImageView);
             ambientTemperatureSensorImageView.setBackground(ResourcesCompat.getDrawable(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.drawable.check_circle_icon, requireContext().getTheme()));
             ambientTemperatureSensorImageView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ew_primary_color, requireActivity().getTheme())));
@@ -150,8 +149,8 @@ public class EcoWateringConfigurationFragment extends Fragment {
     }
 
     private void lightSensorSetup(@NonNull View view) {
-        if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
+        if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
             ImageView lightSensorImageView = view.findViewById(R.id.lightSensorStateImageView);
             lightSensorImageView.setBackground(ResourcesCompat.getDrawable(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.drawable.check_circle_icon, requireContext().getTheme()));
             lightSensorImageView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ew_primary_color, requireActivity().getTheme())));
@@ -161,8 +160,8 @@ public class EcoWateringConfigurationFragment extends Fragment {
     }
 
     private void relativeHumiditySensorSetup(@NonNull View view) {
-        if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
-                (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
+        if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
+                (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
             ImageView relativeHumiditySensorImageView = view.findViewById(R.id.relativeHumiditySensorStateImageView);
             relativeHumiditySensorImageView.setBackground(ResourcesCompat.getDrawable(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.drawable.check_circle_icon, requireContext().getTheme()));
             relativeHumiditySensorImageView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ew_primary_color, requireActivity().getTheme())));

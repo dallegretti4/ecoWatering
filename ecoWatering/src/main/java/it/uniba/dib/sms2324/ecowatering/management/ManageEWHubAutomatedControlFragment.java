@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.control;
+package it.uniba.dib.sms2324.ecowatering.management;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

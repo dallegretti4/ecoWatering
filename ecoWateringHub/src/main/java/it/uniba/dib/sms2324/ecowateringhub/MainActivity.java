@@ -9,14 +9,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -29,15 +27,14 @@ import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.AmbientTemperatureSensorRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.LightSensorRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.RelativeHumiditySensorRunnable;
-import it.uniba.dib.sms2324.ecowateringhub.service.PersistentService;
-import it.uniba.dib.sms2324.ecowateringhub.ui.entry.AutomaticControlFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.ManageRemoteEWDevicesConnectedActivity;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.connected.ManageRemoteEWDevicesConnectedFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.entry.ManualControlFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.configuration.EcoWateringConfigurationActivity;
-import it.uniba.dib.sms2324.ecowateringhub.ui.profile.UserProfileFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.setup.StartFirstFragment;
-import it.uniba.dib.sms2324.ecowateringhub.ui.setup.StartSecondFragment;
+import it.uniba.dib.sms2324.ecowateringhub.entry.AutomaticControlFragment;
+import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedActivity;
+import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedFragment;
+import it.uniba.dib.sms2324.ecowateringhub.entry.ManualControlFragment;
+import it.uniba.dib.sms2324.ecowateringhub.configuration.EcoWateringConfigurationActivity;
+import it.uniba.dib.sms2324.ecowateringhub.entry.UserProfileFragment;
+import it.uniba.dib.sms2324.ecowateringhub.setup.StartFirstFragment;
+import it.uniba.dib.sms2324.ecowateringhub.setup.StartSecondFragment;
 
 public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
@@ -51,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_ADDED = 1026;
     private static final int FORCE_SENSORS_INTERVAL_DURATION = 500; // millis
     public static boolean isSimulation = true;
-    public static EcoWateringHub thisEcoWateringHub;
+    private static EcoWateringHub thisEcoWateringHub;
     private FragmentManager fragmentManager;
     private static String tempHubName;
     private static Address tempAddress;
@@ -233,36 +230,12 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
-    public static boolean isPersistentServiceRunning(@NonNull Activity activity) {
-        SharedPreferences sharedPreferences = activity.getSharedPreferences(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, Context.MODE_PRIVATE);
-        Log.i(Common.THIS_LOG, sharedPreferences.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE));
-        return sharedPreferences.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE).equals(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE);
+    public static EcoWateringHub getThisEcoWateringHub() {
+        return thisEcoWateringHub;
     }
 
-    public static void startPersistentServiceWork(@NonNull Activity activity, @NonNull Context context) {
-        if(!MainActivity.isPersistentServiceRunning(activity)) {
-            Log.i(Common.THIS_LOG, "PersistentService is running");
-            // SENSOR WEATHER SERVICES
-            Intent persistentServiceIntent = new Intent(context, PersistentService.class);
-            persistentServiceIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, MainActivity.thisEcoWateringHub);
-            setServiceStateInSharedPreferences(activity, PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ContextCompat.startForegroundService(context, persistentServiceIntent);
-            } else {
-                activity.startService(persistentServiceIntent);
-            }
-        }
-        else {
-            Log.i(Common.THIS_LOG, "PersistentService not running");
-        }
-    }
-
-    public static void setServiceStateInSharedPreferences(@NonNull Activity activity, String value) {
-        SharedPreferences prefs = activity.getApplicationContext().getSharedPreferences(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, value);
-        editor.apply();
-        Log.i(Common.THIS_LOG, "post writing: " + prefs.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, "ghghj"));
+    public static void setThisEcoWateringHub(@NonNull EcoWateringHub ecoWateringHub) {
+        thisEcoWateringHub = ecoWateringHub;
     }
 
     /**
@@ -310,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements
      * Notify the user there isn't internet connection.
      * Positive button restarts the app.
      */
-    protected void showInternetFaultDialog() {
+    private void showInternetFaultDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_msg))

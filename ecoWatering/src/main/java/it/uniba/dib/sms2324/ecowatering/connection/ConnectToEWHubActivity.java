@@ -82,13 +82,18 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void restartFragment(String connectionMode) {
-        popBackStatFragment();
+        fragmentManager.popBackStack();
         if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH)) {
             changeFragment(new BtConnectionFragment(), true);
         }
         else if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_WIFI)) {
             changeFragment(new WiFiConnectionFragment(), true);
         }
+    }
+
+    @Override
+    public void closeConnection() {
+        fragmentManager.popBackStack();
     }
 
     @Override
@@ -121,18 +126,11 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == Common.GPS_ENABLE_REQUEST) {
+            fragmentManager.popBackStack();
             if(resultCode == Activity.RESULT_OK) {
-                popBackStatFragment();
                 changeFragment(new WiFiConnectionFragment(), true);
             }
-            else {
-                popBackStatFragment();
-            }
         }
-    }
-
-    public static void popBackStatFragment() {
-        fragmentManager.popBackStack();
     }
 
     /**
@@ -246,7 +244,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
      * Notify the user there isn't internet connection.
      * Positive button restarts the app.
      */
-    protected void showInternetFaultDialog(@NonNull Context context) {
+    private void showInternetFaultDialog(@NonNull Context context) {
         new AlertDialog.Builder(context)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_msg))

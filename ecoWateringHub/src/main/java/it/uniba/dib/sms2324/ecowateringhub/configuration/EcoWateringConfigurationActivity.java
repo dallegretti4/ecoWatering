@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.configuration;
+package it.uniba.dib.sms2324.ecowateringhub.configuration;
 
 import android.os.Bundle;
 
@@ -16,22 +16,20 @@ public class EcoWateringConfigurationActivity extends AppCompatActivity implemen
     private static FragmentManager fragmentManager;
     private static String configureSensorType;
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ew_configuration);
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         fragmentManager = getSupportFragmentManager();
         changeFragment(new EcoWateringConfigurationFragment(), false);
     }
 
     @Override
-    public void onAutomateIrrigationSystem() {
-
-    }
+    public void onAutomateIrrigationSystem() {}
 
     @Override
     public void configureSensor(String chosenConfigureSensorType) {
@@ -41,8 +39,11 @@ public class EcoWateringConfigurationActivity extends AppCompatActivity implemen
 
     @Override
     public void onSensorConfigured(int sensorResult) {
-        if(sensorResult == Common.REFRESH_FRAGMENT) {
-            popBackStackFragment();
+        if(sensorResult == Common.ACTION_BACK_PRESSED) {
+            fragmentManager.popBackStack();
+        }
+        else if(sensorResult == Common.REFRESH_FRAGMENT) {
+            fragmentManager.popBackStack();
             changeFragment(new SensorConfigurationFragment(), true);
         }
     }
@@ -54,10 +55,6 @@ public class EcoWateringConfigurationActivity extends AppCompatActivity implemen
             fragmentTransaction.addToBackStack(null);
         }
         fragmentTransaction.commit();
-    }
-
-    protected static void popBackStackFragment() {
-        fragmentManager.popBackStack();
     }
 
     protected static String getConfigureSensorType() {

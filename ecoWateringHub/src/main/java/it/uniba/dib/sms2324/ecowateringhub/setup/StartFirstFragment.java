@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.setup;
+package it.uniba.dib.sms2324.ecowateringhub.setup;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -157,7 +157,7 @@ public class StartFirstFragment extends Fragment {
      *  OnLocationFoundCallback callback -> to manage the location found
      * To find location of user.
      */
-    protected void startFindLocation(OnLocationFoundCallback callback) {
+    private void startFindLocation(OnLocationFoundCallback callback) {
         // CHECK PERMISSION
         if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(requireActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, Common.LOCATION_PERMISSION_REQUEST);

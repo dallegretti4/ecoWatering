@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.control;
+package it.uniba.dib.sms2324.ecowatering.management;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -41,8 +41,8 @@ public class ManageEWHubManualControlFragment extends Fragment {
     private final Runnable refreshManualControlFragmentRunnable = new Runnable() {
         @Override
         public void run() {
-            EcoWateringHub.getEcoWateringHubJsonString(ManageEWHubActivity.selectedEWHub.getDeviceID(), (jsonResponse) -> {
-                ManageEWHubActivity.selectedEWHub = new EcoWateringHub(jsonResponse);
+            EcoWateringHub.getEcoWateringHubJsonString(ManageEWHubActivity.getSelectedEWHub().getDeviceID(), (jsonResponse) -> {
+                ManageEWHubActivity.setSelectedEWHub(new EcoWateringHub(jsonResponse));
                 Log.i(Common.THIS_LOG, "manageEWHubManualControlFragment -> refreshRunnable");
                 requireActivity().runOnUiThread(() -> {
                     Common.showLoadingFragment(requireView(), R.id.mainFrameLayout, R.id.includeLoadingFragment);
@@ -86,7 +86,7 @@ public class ManageEWHubManualControlFragment extends Fragment {
         }
     };
     private OnUserActionCallback onManualActionCallback;
-    protected interface OnUserActionCallback {
+    public interface OnUserActionCallback {
         void onAutomateIrrigationSystem();
         void onRemoteEWDevicesConnectedCardListener();
         void onRefreshMenuItem();
@@ -140,7 +140,7 @@ public class ManageEWHubManualControlFragment extends Fragment {
         Toolbar toolbar = view.findViewById(R.id.toolBar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if(toolbar != null) {
-            ((TextView) view.findViewById(R.id.hubNameTextView)).setText(ManageEWHubActivity.selectedEWHub.getName());
+            ((TextView) view.findViewById(R.id.hubNameTextView)).setText(ManageEWHubActivity.getSelectedEWHub().getName());
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayShowTitleEnabled(false);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setHomeAsUpIndicator(it.uniba.dib.sms2324.ecowateringcommon.R.drawable.back_icon);
@@ -150,33 +150,33 @@ public class ManageEWHubManualControlFragment extends Fragment {
 
     private void weatherCardSetup(@NonNull View view) {
         TextView addressTextView = view.findViewById(R.id.weatherStateAddressTextView);
-        addressTextView.setText(ManageEWHubActivity.selectedEWHub.getPosition());
+        addressTextView.setText(ManageEWHubActivity.getSelectedEWHub().getPosition());
         TextView weatherStateFirstDegreesTextView = view.findViewById(R.id.weatherStateFirstDegreesTextView);
 
-        weatherStateFirstDegreesTextView.setText(String.valueOf(((int) ManageEWHubActivity.selectedEWHub.getAmbientTemperature())));
+        weatherStateFirstDegreesTextView.setText(String.valueOf(((int) ManageEWHubActivity.getSelectedEWHub().getAmbientTemperature())));
         ImageView weatherIconImageView = view.findViewById(R.id.weatherIconImageView);
-        weatherIconImageView.setImageResource(ManageEWHubActivity.selectedEWHub.getWeatherInfo().getWeatherImageResourceId());
+        weatherIconImageView.setImageResource(ManageEWHubActivity.getSelectedEWHub().getWeatherInfo().getWeatherImageResourceId());
 
         // RELATIVE HUMIDITY - LIGHT CARD SETUP
         TextView relativeHumidityPercentTextView = view.findViewById(R.id.relativeHumidityPercentTextView);
-        relativeHumidityPercentTextView.setText(String.valueOf((int)(ManageEWHubActivity.selectedEWHub.getRelativeHumidity())));
+        relativeHumidityPercentTextView.setText(String.valueOf((int)(ManageEWHubActivity.getSelectedEWHub().getRelativeHumidity())));
         TextView lightIndexTextView = view.findViewById(R.id.lightIndexTextView);
-        lightIndexTextView.setText(String.valueOf((int)(ManageEWHubActivity.selectedEWHub.getIndexUV())));
+        lightIndexTextView.setText(String.valueOf((int)(ManageEWHubActivity.getSelectedEWHub().getIndexUV())));
     }
 
     private void remoteDevicesConnectedCardSetup(@NonNull View view) {
         TextView remoteDeviceConnectedNumberTextView = view.findViewById(R.id.remoteDeviceConnectedNumberTextView);
         TextView remoteDeviceConnectedTextView = view.findViewById(R.id.remoteDeviceConnectedTextView);
-        if((ManageEWHubActivity.selectedEWHub.getRemoteDeviceList() != null) && (!ManageEWHubActivity.selectedEWHub.getRemoteDeviceList().isEmpty())) {
-            remoteDeviceConnectedNumberTextView.setText(String.valueOf(ManageEWHubActivity.selectedEWHub.getRemoteDeviceList().size()));
+        if((ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList() != null) && (!ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList().isEmpty())) {
+            remoteDeviceConnectedNumberTextView.setText(String.valueOf(ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList().size()));
         }
         else {
             remoteDeviceConnectedNumberTextView.setText("0");
         }
         remoteDeviceConnectedTextView.setText(getResources().getQuantityString(
                 it.uniba.dib.sms2324.ecowateringcommon.R.plurals.remote_devices_connected_plurals,
-                ManageEWHubActivity.selectedEWHub.getRemoteDeviceList().size(),
-                ManageEWHubActivity.selectedEWHub.getRemoteDeviceList().size()));
+                ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList().size(),
+                ManageEWHubActivity.getSelectedEWHub().getRemoteDeviceList().size()));
         ConstraintLayout remoteDevicesConnectedCard = view.findViewById(R.id.remoteDevicesConnectedCard);
         remoteDevicesConnectedCard.setOnClickListener((v) -> onManualActionCallback.onRemoteEWDevicesConnectedCardListener());
     }
@@ -184,7 +184,7 @@ public class ManageEWHubManualControlFragment extends Fragment {
     private void irrigationSystemCardSetup(@NonNull View view) {
         irrigationSystemValueStateTextView = view.findViewById(R.id.irrigationSystemValueStateTextView);
         SwitchCompat irrigationSystemStateSwitchCompat = view.findViewById(R.id.irrigationSystemStateSwitchCompat);
-        if(ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getIrrigationSystem().getState()) {
+        if(ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getIrrigationSystem().getState()) {
             irrigationSystemValueStateTextView.setText(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.on_value));
             irrigationSystemStateSwitchCompat.setChecked(true);
         }
@@ -198,9 +198,9 @@ public class ManageEWHubManualControlFragment extends Fragment {
         else {
             irrigationSystemStateSwitchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if(isChecked && !isRefreshFragment) {
-                    ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(
+                    ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getIrrigationSystem().setState(
                             Common.getThisDeviceID(requireContext()),
-                            ManageEWHubActivity.selectedEWHub.getDeviceID(),
+                            ManageEWHubActivity.getSelectedEWHub().getDeviceID(),
                             true,
                             (requestedState, outcome) -> {
                                 if(outcome && requestedState) {
@@ -215,9 +215,9 @@ public class ManageEWHubManualControlFragment extends Fragment {
                             });
                 }
                 else if(!isChecked && !isRefreshFragment) {
-                    ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(
+                    ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getIrrigationSystem().setState(
                             Common.getThisDeviceID(requireContext()),
-                            ManageEWHubActivity.selectedEWHub.getDeviceID(),
+                            ManageEWHubActivity.getSelectedEWHub().getDeviceID(),
                             false,
                             (requestedState, outcome) -> {
                                 if(outcome && !requestedState) {
@@ -249,22 +249,22 @@ public class ManageEWHubManualControlFragment extends Fragment {
     private void sensorsCardSetup(@NonNull View view) {
         ImageView stateImageView;
         // AMBIENT TEMPERATURE SENSOR
-        if((ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
-                (ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
+        if((ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
+                (ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
             stateImageView = view.findViewById(R.id.ambientTemperatureSensorStateImageView);
             stateImageView.setBackground(ResourcesCompat.getDrawable(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.drawable.check_circle_icon, requireContext().getTheme()));
             stateImageView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ewd_primary_color, requireActivity().getTheme())));
         }
         // LIGHT SENSOR
-        if((ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getLightSensor() != null) &&
-                (ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
+        if((ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
+                (ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
             stateImageView = view.findViewById(R.id.lightSensorStateImageView);
             stateImageView.setBackground(ResourcesCompat.getDrawable(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.drawable.check_circle_icon, requireContext().getTheme()));
             stateImageView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ewd_primary_color, requireActivity().getTheme())));
         }
         // RELATIVE HUMIDITY SENSOR
-        if((ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
-                (ManageEWHubActivity.selectedEWHub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
+        if((ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
+                (ManageEWHubActivity.getSelectedEWHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
             stateImageView = view.findViewById(R.id.relativeHumiditySensorStateImageView);
             stateImageView.setBackground(ResourcesCompat.getDrawable(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.drawable.check_circle_icon, requireContext().getTheme()));
             stateImageView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.ewd_primary_color, requireActivity().getTheme())));

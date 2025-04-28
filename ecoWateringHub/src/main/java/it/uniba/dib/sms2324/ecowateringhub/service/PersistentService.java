@@ -1,17 +1,21 @@
 package it.uniba.dib.sms2324.ecowateringhub.service;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,6 +23,7 @@ import java.util.Locale;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.AmbientTemperatureSensorRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.LightSensorEventRunnable;
@@ -28,9 +33,9 @@ import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.RelativeHumiditySens
 import it.uniba.dib.sms2324.ecowateringhub.runnable.weather.WeatherInfoRunnable;
 
 public class PersistentService extends Service {
-    public static final String PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE = "PERSISTENT_SERVICE_IS_RUNNING";
-    public static final String PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE = "PERSISTENT_SERVICE_IS_NOT_RUNNING";
-    public static final String WAKE_LOCK_TAG = "ecoWateringHub:wakeLockPersistentService";
+    private static final String PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE = "PERSISTENT_SERVICE_IS_RUNNING";
+    private static final String PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE = "PERSISTENT_SERVICE_IS_NOT_RUNNING";
+    private static final String WAKE_LOCK_TAG = "ecoWateringHub:wakeLockPersistentService";
     private static final String CHANNEL_ID = "PersistentServiceChannel";
     private static final String NOTIFICATION_CHANNEL_NAME = "Sensor & Weather Service";
     private static final String SIMPLE_DATE_FORMAT = "HH:mm";
@@ -141,5 +146,42 @@ public class PersistentService extends Service {
     private void updateNotification() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, getNotification());
+    }
+
+    public static boolean isPersistentServiceRunning(@NonNull Activity activity) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+        Log.i(Common.THIS_LOG, sharedPreferences.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE));
+        return sharedPreferences.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE).equals(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE);
+    }
+
+    public static void startPersistentService(@NonNull Activity activity, @NonNull Context context) {
+        if(!isPersistentServiceRunning(activity)) {
+            Log.i(Common.THIS_LOG, "PersistentService is running");
+            // SENSOR WEATHER SERVICES
+            Intent persistentServiceIntent = new Intent(context, PersistentService.class);
+            persistentServiceIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, MainActivity.getThisEcoWateringHub());
+            setServiceStateInSharedPreferences(activity, PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(context, persistentServiceIntent);
+            } else {
+                activity.startService(persistentServiceIntent);
+            }
+        }
+        else {
+            Log.i(Common.THIS_LOG, "PersistentService not running");
+        }
+    }
+
+    public static void stopPersistentService(@NonNull Activity activity, @NonNull Context context) {
+        activity.stopService(new Intent(context, PersistentService.class));
+        setServiceStateInSharedPreferences(activity, PersistentService.PERSISTENT_SERVICE_IS_NOT_RUNNING_FROM_SHARED_PREFERENCE);
+    }
+
+    private static void setServiceStateInSharedPreferences(@NonNull Activity activity, String value) {
+        SharedPreferences prefs = activity.getApplicationContext().getSharedPreferences(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, value);
+        editor.apply();
+        Log.i(Common.THIS_LOG, "post writing: " + prefs.getString(PersistentService.PERSISTENT_SERVICE_IS_RUNNING_FROM_SHARED_PREFERENCE, Common.NULL_STRING_VALUE));
     }
 }

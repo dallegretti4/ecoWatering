@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.connection.connected;
+package it.uniba.dib.sms2324.ecowateringhub.connection;
 
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +31,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDeviceAda
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.ManageRemoteEWDevicesConnectedActivity;
 
 public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
     private ArrayList<String> remoteDeviceList;
@@ -98,9 +97,9 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
         Common.showLoadingFragment(view, R.id.manageRemoteEWDevicesConnectedFragmentContainer, R.id.includeLoadingFragment);
 
         // REFRESH THIS_ECO_WATERING_HUB
-        EcoWateringHub.getEcoWateringHubJsonString(MainActivity.thisEcoWateringHub.getDeviceID(), (jsonResponse) -> {
-            MainActivity.thisEcoWateringHub = new EcoWateringHub(jsonResponse);
-            this.remoteDeviceList = (ArrayList<String>) MainActivity.thisEcoWateringHub.getRemoteDeviceList();
+        EcoWateringHub.getEcoWateringHubJsonString(MainActivity.getThisEcoWateringHub().getDeviceID(), (jsonResponse) -> {
+            MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
+            this.remoteDeviceList = (ArrayList<String>) MainActivity.getThisEcoWateringHub().getRemoteDeviceList();
             requireActivity().runOnUiThread(() -> {
                 // NO REMOTE DEVICES CONNECTED CASE
                 if(this.remoteDeviceList == null || this.remoteDeviceList.isEmpty()) {
@@ -162,7 +161,7 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
         }
 
         // FILL REMOTE DEVICE LIST
-        for(String deviceID : MainActivity.thisEcoWateringHub.getRemoteDeviceList()) {
+        for(String deviceID : MainActivity.getThisEcoWateringHub().getRemoteDeviceList()) {
             EcoWateringDevice.getEcoWateringDeviceJsonString(deviceID, (jsonResponse1) -> {
                 this.remoteDevicesConnectedList.add(new EcoWateringDevice(jsonResponse1));
                 requireActivity().runOnUiThread(() -> this.ecoWateringDeviceAdapter.notifyDataSetChanged());
@@ -172,7 +171,7 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
 
     private void disconnectDeviceFromHub(EcoWateringDevice device) {
         EcoWateringHub.removeRemoteDevice(
-                MainActivity.thisEcoWateringHub.getDeviceID(),
+                MainActivity.getThisEcoWateringHub().getDeviceID(),
                 device,
                 (response) -> {
                     if(response.equals(Common.REMOVE_REMOTE_DEVICE_RESPONSE)) {
@@ -229,7 +228,7 @@ public class ManageRemoteEWDevicesConnectedFragment extends Fragment {
      * Notify the user something went wrong with the database server.
      * Positive button restarts the app.
      */
-    protected void showHttpErrorFaultDialog() {
+    private void showHttpErrorFaultDialog() {
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setPositiveButton(

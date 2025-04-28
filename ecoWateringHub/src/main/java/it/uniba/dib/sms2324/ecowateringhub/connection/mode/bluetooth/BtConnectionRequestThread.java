@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.threads.bluetooth;
+package it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
@@ -38,7 +38,7 @@ public class BtConnectionRequestThread extends Thread {
             int byteRead = inputStream.read(buffer);
             String remoteDeviceID = new String(buffer, 0, byteRead);
             // SEND HTTP REQUEST TO UPDATE DATABASE SERVER
-            String response = MainActivity.thisEcoWateringHub.addNewRemoteDevice(this.context, remoteDeviceID);
+            String response = MainActivity.getThisEcoWateringHub().addNewRemoteDevice(this.context, remoteDeviceID);
             // RESPONSE SENDING
             try {
                 OutputStream outputStream = this.bluetoothSocket.getOutputStream();

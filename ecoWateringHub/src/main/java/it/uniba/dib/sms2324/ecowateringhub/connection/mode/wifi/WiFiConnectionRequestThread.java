@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.threads.wifi;
+package it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi;
 
 import android.content.Context;
 import android.util.Log;
@@ -19,7 +19,7 @@ public class WiFiConnectionRequestThread extends Thread {
     private final String peerAddress;
     private final Common.OnStringResponseGivenCallback callback;
 
-    public WiFiConnectionRequestThread(@NonNull Context context, @NonNull String peerAddress, Common.OnStringResponseGivenCallback callback) {
+    protected WiFiConnectionRequestThread(@NonNull Context context, @NonNull String peerAddress, Common.OnStringResponseGivenCallback callback) {
         this.context = context;
         this.peerAddress = peerAddress;
         this.callback = callback;
@@ -36,7 +36,7 @@ public class WiFiConnectionRequestThread extends Thread {
             String remoteDeviceID = reader.readLine();
             Log.i(Common.THIS_LOG, "remote device id: " + remoteDeviceID);
             // SEND HTTP REQUEST TO UPDATE DATABASE SERVER
-            String response = MainActivity.thisEcoWateringHub.addNewRemoteDevice(this.context, remoteDeviceID);
+            String response = MainActivity.getThisEcoWateringHub().addNewRemoteDevice(this.context, remoteDeviceID);
             Log.i(Common.THIS_LOG, "remote device response: " + response);
             writer.println(response);
             callback.getResponse(response);

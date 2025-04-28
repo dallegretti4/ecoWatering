@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.connection.connect;
+package it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -45,9 +45,6 @@ import java.util.Objects;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringhub.R;
-import it.uniba.dib.sms2324.ecowateringhub.threads.bluetooth.BtConnectionRequestThread;
-import it.uniba.dib.sms2324.ecowateringhub.threads.bluetooth.BtDiscoveryThread;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.ManageRemoteEWDevicesConnectedActivity;
 
 public class BtConnectionFragment extends Fragment {
     private static final String BT_CONNECTED_RESPONSE = "remoteDeviceAdded";
@@ -70,7 +67,7 @@ public class BtConnectionFragment extends Fragment {
                     onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
                 }
                 else {
-                    ManageRemoteEWDevicesConnectedActivity.popBackStackFragment();
+                    onConnectionFinishCallback.closeConnection();
                 }
             }));
 
@@ -83,7 +80,7 @@ public class BtConnectionFragment extends Fragment {
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
             if(itemID == android.R.id.home) {
-                ManageRemoteEWDevicesConnectedActivity.popBackStackFragment();
+                onConnectionFinishCallback.closeConnection();
             }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
@@ -216,7 +213,7 @@ public class BtConnectionFragment extends Fragment {
             }
             // BLUETOOTH ENABLING REQUEST REJECTED CASE
             else {
-                ManageRemoteEWDevicesConnectedActivity.popBackStackFragment();
+                onConnectionFinishCallback.closeConnection();
             }
         });
     }
@@ -264,7 +261,7 @@ public class BtConnectionFragment extends Fragment {
         requireActivity().runOnUiThread(connectPopUpMenu::show);
     }
 
-    protected void sendBtConnectionRequest(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
+    private void sendBtConnectionRequest(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
         titleTextView.setVisibility(View.GONE);
         deviceListView.setVisibility(View.GONE);
         titleConnectingTextView.setVisibility(View.VISIBLE);
@@ -280,7 +277,7 @@ public class BtConnectionFragment extends Fragment {
         }, MAX_TIME_CONNECTION);
     }
 
-    protected void manageResponse(String response) {
+    private void manageResponse(String response) {
         switch (response) {
             case OnConnectionFinishCallback.BT_ERROR_RESPONSE:
                 onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT);
@@ -296,15 +293,15 @@ public class BtConnectionFragment extends Fragment {
         }
     }
 
-    public static List<BluetoothDevice> getBtDeviceList() {
+    protected static List<BluetoothDevice> getBtDeviceList() {
         return btDeviceList;
     }
 
-    public static void addToBtDeviceList(@NonNull BluetoothDevice device) {
+    protected static void addToBtDeviceList(@NonNull BluetoothDevice device) {
         btDeviceList.add(device);
     }
 
-    public static void addToDeviceListAdapter(String deviceName) {
+    protected static void addToDeviceListAdapter(String deviceName) {
         deviceListAdapter.add(deviceName);
         deviceListAdapter.notifyDataSetChanged();
     }
@@ -319,7 +316,7 @@ public class BtConnectionFragment extends Fragment {
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.bt_not_supported_dialog_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> ManageRemoteEWDevicesConnectedActivity.popBackStackFragment())
+                        ((dialogInterface, i) -> onConnectionFinishCallback.closeConnection())
                 )
                 .setCancelable(false);
         dialog.show();

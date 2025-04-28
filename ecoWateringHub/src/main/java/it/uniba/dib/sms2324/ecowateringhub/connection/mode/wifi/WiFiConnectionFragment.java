@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.ui.connection.connect;
+package it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -50,9 +50,8 @@ import java.util.stream.Collectors;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringhub.R;
-import it.uniba.dib.sms2324.ecowateringhub.threads.wifi.WiFiConnectionRequestThread;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
-import it.uniba.dib.sms2324.ecowateringhub.ui.connection.ManageRemoteEWDevicesConnectedActivity;
+import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedActivity;
 
 public class WiFiConnectionFragment extends Fragment {
     private ConstraintLayout constraintLayout;
@@ -74,7 +73,7 @@ public class WiFiConnectionFragment extends Fragment {
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
             if(itemID == android.R.id.home) {
-                ManageRemoteEWDevicesConnectedActivity.popBackStackFragment();
+                onConnectionFinishCallback.closeConnection();
             }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_WIFI);
@@ -329,7 +328,7 @@ public class WiFiConnectionFragment extends Fragment {
                         }))
                 .setNegativeButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> ManageRemoteEWDevicesConnectedActivity.popBackStackFragment()))
+                        ((dialogInterface, i) -> onConnectionFinishCallback.closeConnection()))
 
                 .setCancelable(false)
                 .show();
@@ -345,7 +344,7 @@ public class WiFiConnectionFragment extends Fragment {
                 .setMessage(getString(R.string.why_use_location_dialog_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> ManageRemoteEWDevicesConnectedActivity.popBackStackFragment())
+                        ((dialogInterface, i) -> onConnectionFinishCallback.closeConnection())
                 )
                 .setCancelable(false)
                 .show();
