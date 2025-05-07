@@ -45,14 +45,16 @@ public class ManageEWHubManualControlFragment extends Fragment {
                 ManageEWHubActivity.setSelectedEWHub(new EcoWateringHub(jsonResponse));
                 Log.i(Common.THIS_LOG, "manageEWHubManualControlFragment -> refreshRunnable");
                 requireActivity().runOnUiThread(() -> {
-                    Common.showLoadingFragment(requireView(), R.id.mainFrameLayout, R.id.includeLoadingFragment);
-                    weatherCardSetup(requireView());
-                    remoteDevicesConnectedCardSetup(requireView());
-                    isRefreshFragment = true;
-                    irrigationSystemCardSetup(requireView());
-                    automateSystemCardSetup(requireView());
-                    sensorsCardSetup(requireView());
-                    Common.hideLoadingFragment(requireView(), R.id.mainFrameLayout, R.id.includeLoadingFragment);
+                    if(getView() != null) {
+                        Common.showLoadingFragment(requireView(), R.id.mainFrameLayout, R.id.includeLoadingFragment);
+                        weatherCardSetup(requireView());
+                        remoteDevicesConnectedCardSetup(requireView());
+                        isRefreshFragment = true;
+                        irrigationSystemCardSetup(requireView());
+                        automateSystemCardSetup(requireView());
+                        sensorsCardSetup(requireView());
+                        Common.hideLoadingFragment(requireView(), R.id.mainFrameLayout, R.id.includeLoadingFragment);
+                    }
                 });
             });
             // REPEAT RUNNABLE

@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.connection.threads;
+package it.uniba.dib.sms2324.ecowatering.connection.mode.bluetooth;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -21,7 +21,7 @@ public class BtAcceptingRequestThread extends Thread {
     private final BluetoothAdapter bluetoothAdapter;
     private final Common.OnStringResponseGivenCallback callback;
 
-    public BtAcceptingRequestThread(
+    protected BtAcceptingRequestThread(
             @NonNull Context context,
             @NonNull BluetoothAdapter bluetoothAdapter,
             @NonNull Common.OnStringResponseGivenCallback callback) {

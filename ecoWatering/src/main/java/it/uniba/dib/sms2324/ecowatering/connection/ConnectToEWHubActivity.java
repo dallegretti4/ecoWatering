@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.KeyEvent;
@@ -22,31 +23,29 @@ import androidx.fragment.app.FragmentTransaction;
 
 import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
-import it.uniba.dib.sms2324.ecowatering.connection.ui.BtConnectionFragment;
-import it.uniba.dib.sms2324.ecowatering.connection.ui.ConnectionChooserFragment;
-import it.uniba.dib.sms2324.ecowatering.connection.ui.WiFiConnectionFragment;
+import it.uniba.dib.sms2324.ecowatering.connection.mode.bluetooth.BtConnectionFragment;
+import it.uniba.dib.sms2324.ecowatering.connection.mode.wifi.WiFiConnectionFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 
 public class ConnectToEWHubActivity extends AppCompatActivity implements
-        ConnectionChooserFragment.OnConnectionModeSelectedCallback,
+        it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
         OnConnectionFinishCallback {
-    public static final int FIRST_BT_CONNECT_PERMISSION_REQUEST = 1016;
+    protected static final int FIRST_BT_CONNECT_PERMISSION_REQUEST = 1016;
     private static final int FIRST_LOCATION_PERMISSION_REQUEST = 1015;
-    public static final int FIRST_WIFI_PERMISSION_REQUEST = 1017;
+    protected static final int FIRST_WIFI_PERMISSION_REQUEST = 1017;
     private static FragmentManager fragmentManager;
     private static boolean isFirstActivity = false;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Common.unlockLayout(this);
         setContentView(R.layout.activity_connect_to_eco_watering_hub);
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         // NO INTERNET CONNECTION CASE
         if(!HttpHelper.isDeviceConnectedToInternet(this)) {
@@ -59,15 +58,44 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
                 showWhyUseLocationPermissionDialog();
             }
             else {
-                changeFragment(new ConnectionChooserFragment(), false);
-                Common.lockLayout(this);
+                changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
             }
         }
     }
 
     @Override
-    public void onModeSelected(Fragment fragment) {
-        changeFragment(fragment, true);
+    public void onModeSelected(String mode) {
+        // BLUETOOTH MODE CASE
+        if(mode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH)) {
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.BLUETOOTH_CONNECT}, FIRST_BT_CONNECT_PERMISSION_REQUEST);
+            }
+            else {
+                changeFragment(new BtConnectionFragment(), true);
+            }
+        }
+        // WIFI MODE CASE
+        else if(mode.equals(OnConnectionFinishCallback.CONNECTION_MODE_WIFI)) {
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.NEARBY_WIFI_DEVICES}, FIRST_WIFI_PERMISSION_REQUEST);
+            }
+            else {
+                changeFragment(new WiFiConnectionFragment(), true);
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionChooserBackPressed() {
+        if(isFirstActivity) {
+            finish();
+        }
+        else {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
     }
 
     @Override
@@ -93,7 +121,8 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void closeConnection() {
-        fragmentManager.popBackStack();
+        startActivity(new Intent(this, ConnectToEWHubActivity.class));
+        finish();
     }
 
     @Override
@@ -102,22 +131,22 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         // CALLED IN ConnectToEWHubActivity IN onStart()
         if(requestCode == FIRST_LOCATION_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                changeFragment(new ConnectionChooserFragment(), false);
+                changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
             }
             else {
                 showWhyUseLocationDialog();
             }
         }
-        // CALLED IN ConnectionChooserFragment
+        // CALLED IN onModeSelected()
         else if(requestCode == FIRST_BT_CONNECT_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                onModeSelected(new BtConnectionFragment());
+                changeFragment(new BtConnectionFragment(), true);
             }
         }
-        // CALLED IN ConnectionChooserFragment
+        // CALLED IN onModeSelected()
         else if (requestCode == FIRST_WIFI_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                onModeSelected(new WiFiConnectionFragment());
+                changeFragment(new WiFiConnectionFragment(), true);
             }
         }
     }
@@ -146,10 +175,6 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
             fragmentTransaction.addToBackStack(null);
         }
         fragmentTransaction.commit();
-    }
-
-    public static boolean isFirstActivity() {
-        return isFirstActivity;
     }
 
     public static void setIsFirstActivity(boolean value) {
@@ -204,7 +229,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
      * Positive button to callback with result.
      */
     private void showDeviceAlreadyConnectedDialog() {
-        android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(this)
+        new android.app.AlertDialog.Builder(this)
                 .setTitle(getString(R.string.remote_device_already_added_title))
                 .setMessage(getString(R.string.remote_device_already_added_message))
                 .setPositiveButton(
@@ -213,8 +238,8 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
                             startActivity(new Intent(this, ConnectToEWHubActivity.class));
                             finish();
                         }))
-                .setCancelable(false);
-        dialog.show();
+                .setCancelable(false)
+                .show();
     }
 
     /**

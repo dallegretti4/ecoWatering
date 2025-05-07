@@ -2,18 +2,14 @@
     <string name="app_name">ecoWatering</string>
 
     <string name="add_remote_device_menu_button">Add new ecoWatering Hub</string>
-    <string name="are_you_sure_label">Are you sure?</string>
     <string name="bt_connection_title_textview">Waiting ecoWatering Hub request…</string>
     <string name="change_irrigation_system_button">Change irrigation system</string>
-    <string name="connection_chooser_fragment_title">To connect to your ecoWatering system, you need to receive the request from your EcoWateringHub.\n\nChoose the way you like to receive the request.</string>
-    <string name="delete_account_button">Delete account</string>
     <string name="disconnect_from_ewh_confirm_message">You won\'t be able to manage this ecoWatering Hub.</string>
     <string name="disconnect_from_ewh_confirm_title">Are you sure?</string>
     <string name="disconnected_from_ewh_success_title">You are successfully disconnected from this ecoWatering Hub.</string>
     <string name="first_start_message_text_view">The name you choose will be used to recognize your device.</string>
     <string name="first_start_title_text_view">Choose your device name</string>
     <string name="insert_device_name_hint">Insert your device name</string>
-    <string name="name_label">Name</string>
     <string name="remote_device_added_success_message">Now you can manage your ecoWatering Hub.</string>
     <string name="remote_device_added_success_title">Device authorized</string>
     <string name="remote_device_already_added_message">Try with another ecoWatering Hub, or continue to manage that.</string>

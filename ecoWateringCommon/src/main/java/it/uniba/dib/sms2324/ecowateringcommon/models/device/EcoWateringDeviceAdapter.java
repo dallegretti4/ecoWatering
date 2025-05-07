@@ -12,11 +12,10 @@ import androidx.core.content.res.ResourcesCompat;
 
 import java.util.List;
 
+import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 
 public class EcoWateringDeviceAdapter extends ArrayAdapter<EcoWateringDevice> {
-    public static final String CALLED_FROM_HUB = "CALLED_FROM_HUB";
-    public static final String CALLED_FROM_DEVICE = "CALLED_FROM_DEVICE";
     private final Context context;
     private final List<EcoWateringDevice> ecoWateringDeviceList;
     private final String calledFrom;
@@ -39,7 +38,7 @@ public class EcoWateringDeviceAdapter extends ArrayAdapter<EcoWateringDevice> {
         deviceNameTextView.setText(device.getName());
         TextView deviceIDTextView = convertView.findViewById(R.id.ecoWateringDeviceID);
         deviceIDTextView.setText(device.getDeviceID());
-        if(this.calledFrom.equals(CALLED_FROM_HUB)) {
+        if(this.calledFrom.equals(Common.CALLED_FROM_HUB)) {
             convertView.findViewById(R.id.ecoWateringDeviceNameContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(this.context.getResources(), R.color.ew_primary_color_50_from_hub, this.context.getTheme()));
         }
         else {

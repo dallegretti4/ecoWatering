@@ -24,15 +24,15 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.AmbientTemperatureSensorRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.LightSensorRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.runnable.sensors.RelativeHumiditySensorRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.entry.AutomaticControlFragment;
-import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedActivity;
-import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedFragment;
+import it.uniba.dib.sms2324.ecowateringhub.connection.ManageConnectedRemoteEWDevicesActivity;
 import it.uniba.dib.sms2324.ecowateringhub.entry.ManualControlFragment;
 import it.uniba.dib.sms2324.ecowateringhub.configuration.EcoWateringConfigurationActivity;
-import it.uniba.dib.sms2324.ecowateringhub.entry.UserProfileFragment;
+import it.uniba.dib.sms2324.ecowateringhub.runnable.weather.WeatherInfoRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.setup.StartFirstFragment;
 import it.uniba.dib.sms2324.ecowateringhub.setup.StartSecondFragment;
 
@@ -40,12 +40,11 @@ public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
         StartSecondFragment.OnSecondStartFinishCallback,
         ManualControlFragment.OnUserActionCallback,
-        ManageRemoteEWDevicesConnectedFragment.OnRemoteDeviceActionSelectedCallback {
+        it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment.OnUserProfileActionCallback {
     private static final String FIRST_START_FILENAME_FLAG = "isFirstStartCheck";
     private static final String FIRST_START_KEY_FLAG = "IS_FIRST_START";
     private static final String FIRST_START_VALUE_FLAG = "true";
     private static final String FIRST_START_KEY_NOT_FOUND_FLAG = "keyNotFound";
-    private static final int ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_ADDED = 1026;
     private static final int FORCE_SENSORS_INTERVAL_DURATION = 500; // millis
     public static boolean isSimulation = true;
     private static EcoWateringHub thisEcoWateringHub;
@@ -57,37 +56,29 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Common.lockLayout(this);
         fragmentManager = getSupportFragmentManager();
-        // LOADING FRAGMENT
-        changeFragment(new LoadingFragment(), false);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // CHECK INTERNET CONNECTION
-        if(HttpHelper.isDeviceConnectedToInternet(this)) {
-            EcoWateringHub.exists(Common.getThisDeviceID(this), ((existsResponse) -> {
-                // NOT FIRST START CASE
-                if(existsResponse.equals(EcoWateringHub.HUB_EXISTS_RESPONSE)) {
-                    EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), ((jsonObjResponse) -> {
-                        thisEcoWateringHub = new EcoWateringHub(jsonObjResponse);
+        if(HttpHelper.isDeviceConnectedToInternet(this)) {    // CHECK INTERNET CONNECTION
+            if(savedInstanceState == null) {    // CHECK IS NOT CONFIGURATION CHANGED
+                changeFragment(new LoadingFragment(), false);    // SHOW LOADING FRAGMENT
+                EcoWateringHub.exists(Common.getThisDeviceID(this), ((existsResponse) -> {  // CHECK DEVICE IS REGISTERED
+                    // NOT FIRST START CASE
+                    if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
+                        thisEcoWateringHub = new EcoWateringHub(existsResponse);
                         forceSensorsUpdate(this, () -> {
                             if(thisEcoWateringHub.getEcoWateringHubConfiguration().isAutomated()) {
-                                changeFragment(new AutomaticControlFragment(), false);
+                                changeFragment(new AutomaticControlFragment(), true);
                             }
                             else {
-                                changeFragment(new ManualControlFragment(), false);
+                                changeFragment(new ManualControlFragment(), true);
                             }
                         });
-                    }));
-                }
-                // FIRST START CASE
-                else {
-                    runOnUiThread(this::showWhyGrantLocationPermissionDialog);
-                }
-            }));
+                    }
+                    // FIRST START CASE
+                    else {
+                        runOnUiThread(this::showWhyGrantLocationPermissionDialog);
+                    }
+                }));
+            }
         }
         else {
             showInternetFaultDialog();
@@ -142,8 +133,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onCardSelected(Class<?> cardActivityClass) {
-        if(cardActivityClass == ManageRemoteEWDevicesConnectedActivity.class) {
-            startActivity(new Intent(this, ManageRemoteEWDevicesConnectedActivity.class));
+        if(cardActivityClass == ManageConnectedRemoteEWDevicesActivity.class) {
+            startActivity(new Intent(this, ManageConnectedRemoteEWDevicesActivity.class));
         }
         else if(cardActivityClass.equals(EcoWateringConfigurationActivity.class)) {
             startActivity(new Intent(this, EcoWateringConfigurationActivity.class));
@@ -157,30 +148,31 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void refreshManualControlFragment() {
-        changeFragment(new ManualControlFragment(), false);
+        fragmentManager.popBackStack();
+        changeFragment(new ManualControlFragment(), true);
     }
 
     @Override
     public void onUserProfileSelected() {
-        changeFragment(new UserProfileFragment(), true);
+        changeFragment(new UserProfileFragment(Common.CALLED_FROM_HUB), true);
+    }
+
+    // FROM UserProfileFragment
+    @Override
+    public void onUserProfileGoBack() {
+        fragmentManager.popBackStack();
     }
 
     @Override
-    public void onRemoteDeviceActionSelected(int action) {
-        if(action == Common.ACTION_BACK_PRESSED) {
-            fragmentManager.popBackStack();
-        }
-        else if(action == Common.ACTION_REMOTE_DEVICES_CONNECTED_RESTART_FRAGMENT) {
-            fragmentManager.popBackStack();
-            changeFragment(new ManageRemoteEWDevicesConnectedFragment(), false);
-        }
-        else if (action == Common.ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_REMOVED) {
-            fragmentManager.popBackStack();
-            changeFragment(new ManageRemoteEWDevicesConnectedFragment(), true);
-        }
-        else if(action == ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_ADDED){
-            changeFragment(new ManageRemoteEWDevicesConnectedFragment(), false);
-        }
+    public void onUserProfileRefresh() {
+        fragmentManager.popBackStack();
+        changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment(Common.CALLED_FROM_HUB), true);
+    }
+
+    @Override
+    public void restartApp() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     /**
@@ -199,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public static void forceSensorsUpdate(@NonNull Context context, Common.OnMethodFinishCallback callback) {
         Thread ambientTemperatureSensorForcedThread = new Thread(), lightSensorForcedThread = new Thread(), relativeHumiditySensorForcedThread = new Thread();
+        new Thread(new WeatherInfoRunnable(context)).start();
         if((MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
                 (MainActivity.thisEcoWateringHub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
             ambientTemperatureSensorForcedThread = new Thread(new AmbientTemperatureSensorRunnable(context, MainActivity.thisEcoWateringHub, FORCE_SENSORS_INTERVAL_DURATION));

@@ -68,9 +68,9 @@ public class StartFirstFragment extends Fragment {
     }
 
     private void showDeviceNameConfirmDialog() {
-        String message = getString(R.string.name_label) + ": " + deviceNameEditText.getText().toString();
+        String message = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.name_label) + ": " + deviceNameEditText.getText().toString();
         AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext())
-                .setTitle(getString(R.string.are_you_sure_label))
+                .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.are_you_sure_label))
                 .setMessage(message)
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),

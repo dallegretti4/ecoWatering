@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="add_remote_device_button">Add remote device</string>
     <string name="agree">Agree</string>
+    <string name="are_you_sure_label">Are you sure?</string>
     <string name="ambient_temperature_label">Ambient temperature</string>
     <string name="bluetooth_button">Bluetooth</string>
     <string name="bt_connection_toolbar_title">Bluetooth connection</string>
@@ -16,12 +18,16 @@
     <string name="configure_label">Configure</string>
     <string name="confirm_button">Confirm</string>
     <string name="connect_to_hub_toolbar_title">Connect to ecoWatering Hub</string>
+    <string name="connection_chooser_fragment_title_device">To connect to your ecoWatering system, you need to receive the request from your EcoWateringHub.\n\nChoose the way you like to receive the request.</string>
+    <string name="connection_chooser_fragment_title_hub">Choose the way you like to authorize a remote ecoWatering Device.</string>
+    <string name="delete_account_button">Delete account</string>
     <string name="delete_account_message">Your data would be destroyed forever.</string>
     <string name="delete_account_title">Do you really want to delete your account?</string>
     <string name="detach_button">Detach</string>
     <string name="device_account_successful_deleted_title">Account deleted</string>
     <string name="device_id_label">DeviceID:</string>
     <string name="disconnect">Disconnect</string>
+    <string name="edit_user_name_content_description">Press to edit your username</string>
     <string name="go_to_settings_button">Go to Settings</string>
     <string name="http_error_dialog_message">Retry later.</string>
     <string name="http_error_dialog_title">Sorry, something went wrong</string>
@@ -34,6 +40,7 @@
     <string name="location_label_textview">Position:</string>
     <string name="manage_remote_device_toolbar_title">Connected Devices</string>
     <string name="manual_ew_configuration_toolbar_title">ecoWatering Configuration</string>
+    <string name="name_label">Name</string>
     <string name="next_button">Next</string>
     <string name="new_name_label">New name</string>
     <string name="off_value">Off</string>
@@ -49,6 +56,7 @@
     <string name="remove_remote_device_confirm_title">Do you want to remove this device?</string>
     <string name="remove_remote_device_confirm_message">After, you cannot manage the ecoWatering system from this device</string>
     <string name="remove_remote_device_successfully_title">Device removed successfully!</string>
+    <string name="remove_remote_device_title_empty_case">No remote device connected</string>
     <string name="retry_button">Retry</string>
     <string name="sensor_added_successfully">Sensor is successfully configured</string>
     <string name="sensor_already_configured">This sensor is already configured.</string>

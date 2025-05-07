@@ -14,8 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import it.uniba.dib.sms2324.ecowateringcommon.Common;
-
 public class HttpHelper {
     public static final String HTTP_RESPONSE_ERROR = "error";
     public static final String HTTP_RESPONSE_EXISTS_TRUE = "0";
@@ -46,6 +44,8 @@ public class HttpHelper {
     public static final String MODE_UPDATE_RELATIVE_HUMIDITY_SENSOR = "UPDATE_RELATIVE_HUMIDITY_SENSOR";
     public static final String MODE_SET_IRRIGATION_SYSTEM_STATE = "SET_IRRIGATION_SYSTEM_STATE";
     public static final String MODE_UPDATE_WEATHER_INFO = "UPDATE_WEATHER_INFO";
+    public static final String MODE_SET_HUB_NAME = "SET_HUB_NAME";
+    public static final String MODE_DELETE_HUB_ACCOUNT = "DELETE_HUB_ACCOUNT";
     public static final String TIME_PARAMETER = "TIME";
     public static final String SENSOR_TYPE_PARAMETER = "SENSOR_TYPE";
     public static final String SENSOR_ID_PARAMETER = "SENSOR_ID";

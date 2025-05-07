@@ -109,6 +109,7 @@ public class BtConnectionFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        Common.lockLayout(requireActivity());
         // TOOLBAR SETUP
         toolbarSetup(view);
         // FRAGMENT LAYOUT SETUP

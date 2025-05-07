@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -33,36 +34,19 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.service.PersistentService;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
-import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedActivity;
+import it.uniba.dib.sms2324.ecowateringhub.connection.ManageConnectedRemoteEWDevicesActivity;
 import it.uniba.dib.sms2324.ecowateringhub.configuration.EcoWateringConfigurationActivity;
 
 public class ManualControlFragment extends Fragment {
     private static final int REFRESH_FRAGMENT_FROM_HUB_INTERVAL = 5 * 1000;
     private static boolean isRefreshFragment = false;
-    private final Handler refreshManualControlFragmentHandler = new Handler(Looper.getMainLooper());
-    private final Runnable refreshManualControlFragmentRunnable = new Runnable() {
+    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
         @Override
-        public void run() {
-            EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> {
-                MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
-                MainActivity.forceSensorsUpdate(requireContext(), () -> {
-                    isRefreshFragment = true;
-                    Log.i(Common.THIS_LOG, "ManualControlFragment -> refreshRunnable");
-                    requireActivity().runOnUiThread(() -> {
-                        Common.showLoadingFragment(requireView(), R.id.manualControlFragmentContainer, R.id.includeLoadingFragment);
-                        weatherCardSetup(requireView());
-                        relativeHumidityLightCardSetup(requireView());
-                        remoteDevicesConnectedCardSetup(requireView());
-                        irrigationSystemCardSetup(requireView());
-                        configurationCardSetup(requireView());
-                        Common.hideLoadingFragment(requireView(), R.id.manualControlFragmentContainer, R.id.includeLoadingFragment);
-                    });
-                });
-            });
-            // REPEAT RUNNABLE
-            refreshManualControlFragmentHandler.postDelayed(this, REFRESH_FRAGMENT_FROM_HUB_INTERVAL);
+        public void handleOnBackPressed() {
+            requireActivity().finish();
         }
     };
+    private final Handler refreshManualControlFragmentHandler = new Handler(Looper.getMainLooper());
     private final MenuProvider menuProvider = new MenuProvider() {
         @Override
         public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
@@ -88,6 +72,29 @@ public class ManualControlFragment extends Fragment {
         void refreshManualControlFragment();
         void onUserProfileSelected();
     }
+    private final Runnable refreshManualControlFragmentRunnable = new Runnable() {
+        @Override
+        public void run() {
+            EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> {
+                MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
+                MainActivity.forceSensorsUpdate(requireContext(), () -> {
+                    isRefreshFragment = true;
+                    if(getView() != null) {
+                        Log.i(Common.THIS_LOG, "ManualControlFragment -> refreshRunnable");
+                        requireActivity().runOnUiThread(() -> {
+                            weatherCardSetup(requireView());
+                            relativeHumidityLightCardSetup(requireView());
+                            remoteDevicesConnectedCardSetup(requireView());
+                            irrigationSystemCardSetup(requireView());
+                            configurationCardSetup(requireView());
+                        });
+                    }
+                });
+            });
+            // REPEAT RUNNABLE
+            refreshManualControlFragmentHandler.postDelayed(this, REFRESH_FRAGMENT_FROM_HUB_INTERVAL);
+        }
+    };
 
     public ManualControlFragment() {
         super(R.layout.fragment_manual_control);
@@ -109,7 +116,9 @@ public class ManualControlFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        requireActivity().runOnUiThread(() -> Common.showLoadingFragment(view, R.id.manualControlFragmentContainer, R.id.includeLoadingFragment));
+        Common.showLoadingFragment(view, R.id.manualControlFragmentContainer , R.id.includeLoadingFragment);
+        // ON BACK PRESSED CALLBACK SETUP
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);
         // TOOLBAR SETUP
         toolbarSetup(view);
 
@@ -122,21 +131,16 @@ public class ManualControlFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> remoteDevicesConnectedCardSetup(view));
                 requireActivity().runOnUiThread(() -> irrigationSystemCardSetup(view));
                 requireActivity().runOnUiThread(() -> configurationCardSetup(view));
-                requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.manualControlFragmentContainer, R.id.includeLoadingFragment));
+                requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.manualControlFragmentContainer , R.id.includeLoadingFragment));
+                // AUTO REFRESH FRAGMENT
+                refreshManualControlFragmentHandler.post(refreshManualControlFragmentRunnable);
             });
         });
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        refreshManualControlFragmentHandler.post(refreshManualControlFragmentRunnable);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
-        Common.showLoadingFragment(requireView(), R.id.manualControlFragmentContainer, R.id.includeLoadingFragment);
         refreshManualControlFragmentHandler.removeCallbacks(refreshManualControlFragmentRunnable);
     }
 
@@ -174,7 +178,7 @@ public class ManualControlFragment extends Fragment {
                 MainActivity.getThisEcoWateringHub().getRemoteDeviceList().size(),
                 MainActivity.getThisEcoWateringHub().getRemoteDeviceList().size()));
         ConstraintLayout remoteDevicesConnectedCard = view.findViewById(R.id.remoteDevicesConnectedCard);
-        remoteDevicesConnectedCard.setOnClickListener((v) -> onUserActionCallback.onCardSelected(ManageRemoteEWDevicesConnectedActivity.class));
+        remoteDevicesConnectedCard.setOnClickListener((v) -> onUserActionCallback.onCardSelected(ManageConnectedRemoteEWDevicesActivity.class));
     }
 
     private void irrigationSystemCardSetup(@NonNull View view) {

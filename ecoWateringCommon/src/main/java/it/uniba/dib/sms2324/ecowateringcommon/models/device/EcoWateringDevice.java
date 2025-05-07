@@ -1,6 +1,8 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models.device;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 
-public class EcoWateringDevice {
+public class EcoWateringDevice implements Parcelable {
     private static final String BO_DEVICE_HUB_LIST_COLUMN_NAME = "ecoWateringHubList";
     public static final String TABLE_DEVICE_DEVICE_ID_COLUMN_NAME = "deviceID";
     private static final String TABLE_DEVICE_NAME_COLUMN_NAME = "name";
@@ -161,5 +163,38 @@ public class EcoWateringDevice {
     @Override
     public String toString() {
         return this.name + " - " + this.deviceID;
+    }
+
+
+    // PARCELABLE IMPLEMENTATION
+
+    protected EcoWateringDevice(Parcel in) {
+        deviceID = in.readString();
+        name = in.readString();
+        ecoWateringHubList = in.createStringArrayList();
+    }
+
+    public static final Creator<EcoWateringDevice> CREATOR = new Creator<EcoWateringDevice>() {
+        @Override
+        public EcoWateringDevice createFromParcel(Parcel in) {
+            return new EcoWateringDevice(in);
+        }
+
+        @Override
+        public EcoWateringDevice[] newArray(int size) {
+            return new EcoWateringDevice[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(deviceID);
+        dest.writeString(name);
+        dest.writeStringList(ecoWateringHubList);
     }
 }

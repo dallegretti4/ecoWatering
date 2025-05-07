@@ -1,13 +1,11 @@
 <resources>
     <string name="app_name">ecoWateringHub</string>
     <string name="add_new_remote_device">Add remote device</string>
-    <string name="add_remote_device_button">Add remote device</string>
     <string name="address_not_found">Address not found\nIf you have already given location permission and set them on "always", try to restart the device.</string>
     <string name="authorized_devices_textview">Authorized devices</string>
     <string name="bt_connection_title">Select your ecoWatering Device</string>
     <string name="connect">Connect</string>
     <string name="connecting">Connecting…</string>
-    <string name="connection_chooser_fragment_title">Choose the way you like to authorize a remote ecoWatering Device.</string>
     <string name="delete_account_button">Delete account</string>
     <string name="detach_sensor_dialog_title">Are you sure to detach this sensor?</string>
     <string name="discovery_remote_device_title">Choose your remote device</string>
@@ -30,7 +28,6 @@
     <string name="remote_device_not_available_title">Sorry, this device is not available</string>
     <string name="remove_remote_device_button">Remove remote device</string>
     <string name="remove_remote_device_title">Select the ecoWatering Device that you want to remove</string>
-    <string name="remove_remote_device_title_empty_case">No remote device connected</string>
     <string name="restart_discovery_button">Restart discovery</string>
     <string name="selected_sensor_label">Selected sensor: </string>
     <string name="sensor_detached_title">Sensor successfully detached</string>

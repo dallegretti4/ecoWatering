@@ -37,8 +37,13 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHubComparato
 
 public class MainFragment extends Fragment {
     private static final String BUNDLE_EWH_LIST_KEY = "EWH_LIST";
+    private static final String TO_DISCONNECT_HUB_ID_OUT_STATE = "TO_DISCONNECT_HUB_ID_OUT_STATE";
     private List<EcoWateringHub> ecoWateringHubList;
     private ArrayAdapter<EcoWateringHub> ecoWateringHubAdapter;
+    private OnMainFragmentActionCallback onMainFragmentActionCallback;
+    public interface OnMainFragmentActionCallback {
+        void onMainFragmentUserProfileChosen();
+    }
     private final MenuProvider menuProvider = new MenuProvider() {
         @Override
         public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
@@ -61,10 +66,8 @@ public class MainFragment extends Fragment {
             return false;
         }
     };
-    private OnMainFragmentActionCallback onMainFragmentActionCallback;
-    public interface OnMainFragmentActionCallback {
-        void onMainFragmentUserProfileChosen();
-    }
+    private static String toDisconnectHubID = Common.NULL_STRING_VALUE;
+    private static boolean isDisconnectedHubDialogVisible = false;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -90,26 +93,35 @@ public class MainFragment extends Fragment {
         // TOOLBAR SETUP
         toolbarSetup(view);
         // LIST & ADAPTER SETUP
-        ecoWateringHubList = new ArrayList<>();
-        ecoWateringHubAdapter = new EcoWateringHubAdapter(requireContext(), ecoWateringHubList);
-        requireActivity().runOnUiThread(() -> ecoWateringHubAdapter.notifyDataSetChanged());
+        this.ecoWateringHubList = new ArrayList<>();
+        this.ecoWateringHubAdapter = new EcoWateringHubAdapter(requireContext(), this.ecoWateringHubList);
         // LIST VIEW (PORTRAIT CONFIGURATION)/ GRID VIEW (LANDSCAPE CONFIGURATION) SETUP
         listGridViewSetup(view);
 
         // REFILL EWH LIST FROM CONFIGURATION CHANGE CASE
-        if(savedInstanceState != null && savedInstanceState.getParcelableArrayList(BUNDLE_EWH_LIST_KEY) != null) {
-            refillEcoWateringHubList(view, savedInstanceState);
+        if((savedInstanceState != null) && (savedInstanceState.getParcelableArrayList(BUNDLE_EWH_LIST_KEY) != null)) {
+            refillEcoWateringHubList(Objects.requireNonNull(savedInstanceState.getParcelableArrayList(BUNDLE_EWH_LIST_KEY)));
+            Common.hideLoadingFragment(view, R.id.mainFrameLayout, R.id.includeLoadingFragment);
+            if(savedInstanceState.getString(TO_DISCONNECT_HUB_ID_OUT_STATE) != null) {
+                showDisconnectFromEWHubDialog(Objects.requireNonNull(savedInstanceState.getString(TO_DISCONNECT_HUB_ID_OUT_STATE)));
+            }
+            else if (isDisconnectedHubDialogVisible) {
+                showDeviceDisconnectedDialog();
+            }
         }
         // FILL EWH LIST FROM DATABASE SERVER CASE
         else {
-            uploadEcoWateringHubList(view);
+            uploadEcoWateringHubList(() -> requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.mainFrameLayout, R.id.includeLoadingFragment)));
         }
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(BUNDLE_EWH_LIST_KEY, new ArrayList<>(ecoWateringHubList));
+        outState.putParcelableArrayList(BUNDLE_EWH_LIST_KEY, new ArrayList<>(this.ecoWateringHubList));
+        if(!toDisconnectHubID.equals(Common.NULL_STRING_VALUE)) {
+            outState.putString(TO_DISCONNECT_HUB_ID_OUT_STATE, toDisconnectHubID);
+        }
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -125,7 +137,7 @@ public class MainFragment extends Fragment {
         // SET ADAPTER PORTRAIT LAYOUT CASE
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             ListView ecoWateringHubListView = view.findViewById(R.id.hubListListView);
-            ecoWateringHubListView.setAdapter(ecoWateringHubAdapter);
+            ecoWateringHubListView.setAdapter(this.ecoWateringHubAdapter);
             ecoWateringHubListView.setOnItemClickListener((adapterView, v, position, l) -> manageEWHub(position));
             ecoWateringHubListView.setOnItemLongClickListener(
                     (adapterView, v, position, l) -> {
@@ -136,7 +148,7 @@ public class MainFragment extends Fragment {
         // SET ADAPTER LANDSCAPE LAYOUT CASE
         else if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             GridView ecoWateringHubGridView = view.findViewById(R.id.hubListGridView);
-            ecoWateringHubGridView.setAdapter(ecoWateringHubAdapter);
+            ecoWateringHubGridView.setAdapter(this.ecoWateringHubAdapter);
             ecoWateringHubGridView.setOnItemClickListener((adapterView, v, position, l) -> manageEWHub(position));
             ecoWateringHubGridView.setOnItemLongClickListener(
                     (adapterView, v, position, l) -> {
@@ -146,20 +158,14 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void refillEcoWateringHubList(@NonNull View view, Bundle savedInstanceState) {
-        ArrayList<EcoWateringHub> helpEcoWateringHubList = savedInstanceState.getParcelableArrayList(BUNDLE_EWH_LIST_KEY);
-        if(helpEcoWateringHubList != null) {
-            ecoWateringHubList.clear();
-            requireActivity().runOnUiThread(ecoWateringHubAdapter::notifyDataSetChanged);
-            for(EcoWateringHub hub : helpEcoWateringHubList) {
-                ecoWateringHubList.add(hub);
-                requireActivity().runOnUiThread(() -> ecoWateringHubAdapter.notifyDataSetChanged());
-            }
-            Common.hideLoadingFragment(view, R.id.mainFrameLayout, R.id.includeLoadingFragment);
+    private void refillEcoWateringHubList(ArrayList<EcoWateringHub> helpEcoWateringHubList) {
+        for(EcoWateringHub hub : helpEcoWateringHubList) {
+            this.ecoWateringHubList.add(hub);
+            requireActivity().runOnUiThread(() -> this.ecoWateringHubAdapter.notifyDataSetChanged());
         }
     }
 
-    private void uploadEcoWateringHubList(@NonNull View view) {
+    private void uploadEcoWateringHubList(Common.OnMethodFinishCallback callback) {
         ArrayList<EcoWateringHub> hubListHelper = new ArrayList<>(); // AUXILIARY ARRAY LIST
         EcoWateringDevice.getEcoWateringDeviceJsonString(Common.getThisDeviceID(requireContext()), (jsonDeviceResponse) -> {
             MainActivity.setThisEcoWateringDevice(new EcoWateringDevice(jsonDeviceResponse));
@@ -175,13 +181,12 @@ public class MainFragment extends Fragment {
                         // LAST HUB CASE
                         if(hubListHelper.size() == MainActivity.getThisEcoWateringDevice().getEcoWateringHubList().size()) {
                             hubListHelper.sort(new EcoWateringHubComparator());
-                            ecoWateringHubList.clear();
-                            requireActivity().runOnUiThread(ecoWateringHubAdapter::notifyDataSetChanged);
+                            // LIST FILLING
                             for(int i=0; i<hubListHelper.size(); i++) {
-                                ecoWateringHubList.add(hubListHelper.get(i));
-                                requireActivity().runOnUiThread(ecoWateringHubAdapter::notifyDataSetChanged);
+                                this.ecoWateringHubList.add(hubListHelper.get(i));
+                                requireActivity().runOnUiThread(this.ecoWateringHubAdapter::notifyDataSetChanged);
                             }
-                            requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.mainFrameLayout, R.id.includeLoadingFragment));
+                            callback.canContinue();
                         }
                     });
                 }
@@ -191,7 +196,7 @@ public class MainFragment extends Fragment {
 
     private void manageEWHub(int position) {
         Bundle b = new Bundle();
-        b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, ecoWateringHubList.get(position));
+        b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, this.ecoWateringHubList.get(position));
         Intent manageEWHIntent = new Intent(requireContext(), ManageEWHubActivity.class);
         manageEWHIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
         startActivity(manageEWHIntent);
@@ -199,7 +204,7 @@ public class MainFragment extends Fragment {
     }
 
     private void showDisconnectPopUpMenu(@NonNull View view, int position) {
-        String hubID = ecoWateringHubList.get(position).getDeviceID();
+        String hubID = this.ecoWateringHubList.get(position).getDeviceID();
         PopupMenu disconnectMenu = new PopupMenu(requireContext(), view);
         disconnectMenu.getMenu().add(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.disconnect));
         disconnectMenu.setOnMenuItemClickListener((menuItem) -> {
@@ -212,31 +217,41 @@ public class MainFragment extends Fragment {
     }
 
     private void showDisconnectFromEWHubDialog(@NonNull String hubID) {
+        toDisconnectHubID = hubID;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.disconnect_from_ewh_confirm_title))
                 .setMessage(getString(R.string.disconnect_from_ewh_confirm_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        (dialogInterface, i) -> MainActivity.getThisEcoWateringDevice().disconnectFromEWHub(requireContext(), hubID, (response) -> {
-                            if(response != null && response.equals(Common.REMOVE_REMOTE_DEVICE_RESPONSE)) {
-                                requireActivity().runOnUiThread(this::showDeviceDisconnectedDialog);
-                            }
-                            else {
-                                requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
-                            }
-                        }))
+                        (dialogInterface, i) -> {
+                            toDisconnectHubID = Common.NULL_STRING_VALUE;
+                            MainActivity.getThisEcoWateringDevice().disconnectFromEWHub(requireContext(), hubID, (response) -> {
+                                if(response != null && response.equals(Common.REMOVE_REMOTE_DEVICE_RESPONSE)) {
+                                    requireActivity().runOnUiThread(this::showDeviceDisconnectedDialog);
+                                }
+                                else {
+                                    requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
+                                }
+                            });
+                        })
                 .setNegativeButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> dialogInterface.dismiss())
+                        (dialogInterface, i) -> {
+                            toDisconnectHubID = Common.NULL_STRING_VALUE;
+                            dialogInterface.dismiss();
+                        })
+                .setOnDismissListener((dialog) -> toDisconnectHubID = Common.NULL_STRING_VALUE)
                 .show();
     }
 
     private void showDeviceDisconnectedDialog() {
+        isDisconnectedHubDialogVisible = true;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.disconnected_from_ewh_success_title))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
+                            isDisconnectedHubDialogVisible = false;
                             startActivity(new Intent(requireContext(), MainActivity.class));
                             requireActivity().finish();
                         }))

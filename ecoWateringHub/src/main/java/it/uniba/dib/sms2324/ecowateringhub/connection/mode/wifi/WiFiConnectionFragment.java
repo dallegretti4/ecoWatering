@@ -51,7 +51,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
-import it.uniba.dib.sms2324.ecowateringhub.connection.ManageRemoteEWDevicesConnectedActivity;
 
 public class WiFiConnectionFragment extends Fragment {
     private ConstraintLayout constraintLayout;
@@ -157,6 +156,7 @@ public class WiFiConnectionFragment extends Fragment {
     @SuppressLint("MissingPermission")
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        Common.lockLayout(requireActivity());
         // TOOLBAR SETUP
         toolbarSetup(view);
         // FRAGMENT LAYOUT SETUP

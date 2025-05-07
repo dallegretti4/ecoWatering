@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 
 public class WiFiConnectionRequestThread extends Thread {
@@ -31,7 +32,7 @@ public class WiFiConnectionRequestThread extends Thread {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // SEND REQUEST NAME
-            writer.println(Common.WIFI_SOCKET_REQUEST_NAME);
+            writer.println(OnConnectionFinishCallback.WIFI_SOCKET_REQUEST_NAME);
             // READ REMOTE DEVICE ID
             String remoteDeviceID = reader.readLine();
             Log.i(Common.THIS_LOG, "remote device id: " + remoteDeviceID);

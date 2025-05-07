@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 
@@ -19,69 +20,91 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment;
+import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth.BtConnectionFragment;
 import it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi.WiFiConnectionFragment;
 
-public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity implements
-        ManageRemoteEWDevicesConnectedFragment.OnRemoteDeviceActionSelectedCallback,
-        ConnectionChooserFragment.OnConnectionModeSelectedCallback,
+public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity implements
+        it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback,
+        it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
         OnConnectionFinishCallback {
-    protected static final int ACTION_ADD_REMOTE_DEVICE = 1027;
     protected static final int BT_PERMISSION_REQUEST = 2001;
     private static FragmentManager fragmentManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manage_remote_ew_devices_connected);
+        setContentView(R.layout.activity_manage_connected_remote_ew_devices);
+        fragmentManager = getSupportFragmentManager();
+
+        if(savedInstanceState == null) {    // NOT CONFIGURATION CHANGED CASE
+            changeFragment(new ManageConnectedRemoteEWDevicesFragment(Common.getThisDeviceID(this), Common.CALLED_FROM_HUB), false);
+        }
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
-        Common.lockLayout(this);
-        // NO INTERNET CONNECTION CASE
-        if(!HttpHelper.isDeviceConnectedToInternet(this)) {
+        if(!HttpHelper.isDeviceConnectedToInternet(this)) { // CHECK INTERNET CONNECTION
             showInternetFaultDialog();
         }
-        else {
-            fragmentManager = getSupportFragmentManager();
-            changeFragment(new ManageRemoteEWDevicesConnectedFragment(), false);
-        }
     }
 
     @Override
-    public void onRemoteDeviceActionSelected(int action) {
-        if(action == Common.REFRESH_FRAGMENT) {
-            changeFragment(new ManageRemoteEWDevicesConnectedFragment(), false);
-        }
-        else if(action == ACTION_ADD_REMOTE_DEVICE) {
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, Common.LOCATION_PERMISSION_REQUEST);
-                }
-                else {
-                    showUserMustGrantLocationPermissionManuallyDialog();
-                }
+    public void onManageConnectedDevicesGoBack() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
+
+    @Override
+    public void onManageConnectedDevicesRefresh() {
+        startActivity(new Intent(this, ManageConnectedRemoteEWDevicesActivity.class));
+        finish();
+    }
+
+    @Override
+    public void addNewRemoteDevice() {
+        changeFragment(new ConnectionChooserFragment(Common.CALLED_FROM_HUB, false), true);
+    }
+
+    @Override
+    public void onModeSelected(String mode) {
+        // BLUETOOTH MODE CASE
+        if(mode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH)) {
+            if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) &&
+                    ((ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) ||
+                            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED)){
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[] {
+                                Manifest.permission.BLUETOOTH_CONNECT,
+                                Manifest.permission.BLUETOOTH_SCAN
+                        },
+                        BT_PERMISSION_REQUEST
+                );
             }
             else {
-                changeFragment(new ConnectionChooserFragment(), true);
+                changeFragment(new BtConnectionFragment(), true);
             }
         }
-        else if(action == Common.ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_REMOVED) {
-            fragmentManager.popBackStack();
-            changeFragment(new ManageRemoteEWDevicesConnectedFragment(), true);
+        // WIFI MODE CASE
+        else if(mode.equals(OnConnectionFinishCallback.CONNECTION_MODE_WIFI)) {
+            if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) &&
+                    (ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED)) {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.NEARBY_WIFI_DEVICES}, Common.WIFI_PERMISSION_REQUEST);
+            }
+            else {
+                changeFragment(new WiFiConnectionFragment(), true);
+            }
         }
     }
 
     @Override
-    public void onModeSelected(Fragment fragment) {
-        if(fragment == null) {
-            fragmentManager.popBackStack();
-        }
-        else {
-            changeFragment(fragment, true);
-        }
+    public void onConnectionChooserBackPressed() {
+        startActivity(new Intent(this, ManageConnectedRemoteEWDevicesActivity.class));
+        finish();
     }
 
     @Override
@@ -129,16 +152,16 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
         // CALLED IN ManageRemoteEWDevicesConnectedActivity IN onRemoteDeviceActionSelected()
         if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                changeFragment(new ConnectionChooserFragment(), false);
+                changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_HUB, false), false);
             }
         }
-        // REQUESTED IN ConnectionChooserFragment IN onViewCreated()
+        // REQUESTED IN ManageRemoteEWDevicesConnectedActivity IN onModeSelected()
         else if(requestCode == BT_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 changeFragment(new BtConnectionFragment(), false);
             }
         }
-        // REQUESTED IN ConnectionChooserFragment IN onViewCreated()
+        // REQUESTED IN ManageRemoteEWDevicesConnectedActivity IN onModeSelected()
         else if(requestCode == Common.WIFI_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 changeFragment(new WiFiConnectionFragment(), false);
@@ -171,20 +194,6 @@ public class ManageRemoteEWDevicesConnectedActivity extends AppCompatActivity im
             fragmentTransaction.addToBackStack(null);
         }
         fragmentTransaction.commit();
-    }
-
-    private void showUserMustGrantLocationPermissionManuallyDialog() {
-        String message = getString(R.string.why_use_location_dialog_message) + ".\n\n" + getString(R.string.user_must_enable_location_permission_message);
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.user_must_enable_location_permission_title))
-                .setMessage(message)
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.go_to_settings_button),
-                        (dialogInterface, i) -> Common.openAppDetailsSetting(this))
-                .setNegativeButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> dialogInterface.dismiss())
-                .show();
     }
 
     /**

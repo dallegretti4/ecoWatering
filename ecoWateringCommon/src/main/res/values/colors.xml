@@ -4,12 +4,18 @@
     <color name="classic_hint">#6E6E6E</color>
 
     <!-- COLOR FROM DEVICE -->
+    <color name="ew_primary_color_from_device">#076875</color>
     <color name="ew_primary_color_98_from_device">#EEFCFF</color>
+    <color name="ew_primary_color_70_from_device">#6BB6C5</color>
     <color name="ew_primary_color_50_from_device">#31818F</color>
+    <color name="ew_primary_color_30_from_device">#004E59</color>
 
     <!-- COLOR FROM HUB -->
+    <color name="ew_primary_color_from_hub">#1F3ECC</color>
     <color name="ew_primary_color_98_from_hub">#FBF8FF</color>
+    <color name="ew_primary_color_70_from_hub">#96A5FF</color>
     <color name="ew_primary_color_50_from_hub">#4F69F4</color>
+    <color name="ew_primary_color_30_from_hub">#0B32C3</color>
 
     <!-- SECONDARY -->
     <color name="ew_secondary_color">#EA6E4D</color>

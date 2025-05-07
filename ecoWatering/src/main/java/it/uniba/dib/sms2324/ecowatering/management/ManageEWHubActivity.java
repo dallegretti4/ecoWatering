@@ -20,46 +20,39 @@ import it.uniba.dib.sms2324.ecowatering.R;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment;
 
 public class ManageEWHubActivity extends AppCompatActivity implements
         ManageEWHubManualControlFragment.OnUserActionCallback,
-        ManageRemoteEWDevicesConnectedFragment.OnRemoteDeviceConnectedActionCallback {
-    protected static final int ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_IT_SELF_REMOVED = 1031;
+        ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback {
     private static EcoWateringHub selectedEWHub;
     private FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Common.unlockLayout(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_eco_watering_hub);
         Bundle b = getIntent().getBundleExtra(Common.MANAGE_EWH_INTENT_OBJ);
         selectedEWHub = Objects.requireNonNull(b).getParcelable(Common.MANAGE_EWH_INTENT_OBJ);
-        Log.i(Common.THIS_LOG, "selectedHub: " + selectedEWHub);
+        fragmentManager = getSupportFragmentManager();
+        if(savedInstanceState == null) {
+            if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
+                changeFragment(new ManageEWHubAutomatedControlFragment(), false);
+            }
+            else {
+                changeFragment(new ManageEWHubManualControlFragment(), false);
+            }
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if(selectedEWHub != null) {
-            // NO INTERNET CONNECTION CASE
-            if(!HttpHelper.isDeviceConnectedToInternet(this)) {
-                showInternetFaultDialog(this);
-            }
-            else {
-                fragmentManager = getSupportFragmentManager();
-                Common.lockLayout(this);
-                if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
-                    changeFragment(new ManageEWHubAutomatedControlFragment(), false);
-                }
-                else {
-                    changeFragment(new ManageEWHubManualControlFragment(), false);
-                }
-            }
-        }
-        // ERROR CASE
-        else {
+        if(selectedEWHub == null) { // ERROR CASE
             showHttpErrorFaultDialog(this);
+        }
+        if(!HttpHelper.isDeviceConnectedToInternet(this)) { // NO INTERNET CONNECTION CASE
+            showInternetFaultDialog(this);
         }
     }
 
@@ -70,7 +63,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void onRemoteEWDevicesConnectedCardListener() {
-        changeFragment(new ManageRemoteEWDevicesConnectedFragment(), true);
+        changeFragment(new ManageConnectedRemoteEWDevicesFragment(selectedEWHub.getDeviceID(), Common.CALLED_FROM_DEVICE), true);
     }
 
     @Override
@@ -87,19 +80,23 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onRemoteDeviceConnectedAction(int result) {
-        if((result == Common.ACTION_REMOTE_DEVICES_CONNECTED_RESTART_FRAGMENT) || (result == Common.ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_REMOVED)) {
-            fragmentManager.popBackStack();
-            changeFragment(new ManageRemoteEWDevicesConnectedFragment(), true);
-        }
-        else if(result == Common.ACTION_BACK_PRESSED) {
-            fragmentManager.popBackStack();
-        }
-        else if(result == ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_IT_SELF_REMOVED) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        }
+    public void onManageConnectedDevicesGoBack() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
+        Intent goBackIntent = new Intent(this, ManageEWHubActivity.class);
+        goBackIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, bundle);
+        startActivity(goBackIntent);
+        finish();
     }
+
+    @Override
+    public void onManageConnectedDevicesRefresh() {
+        fragmentManager.popBackStack();
+        changeFragment(new ManageConnectedRemoteEWDevicesFragment(selectedEWHub.getDeviceID(), Common.CALLED_FROM_DEVICE), true);
+    }
+
+    @Override
+    public void addNewRemoteDevice() {} // NOT USED BY ECO WATERING DEVICE
 
     private void changeFragment(Fragment fragment, boolean addToBackStack) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

@@ -14,9 +14,14 @@ import androidx.annotation.NonNull;
 import java.util.UUID;
 
 public class Common {
+
+    // CONSTANTS
+
     public static final int ACTION_BACK_PRESSED = 1023;
     public static final int ACTION_REMOTE_DEVICES_CONNECTED_RESTART_FRAGMENT = 1024;
     public static final int ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_REMOVED = 1025;
+    public static final String CALLED_FROM_HUB = "CALLED_FROM_HUB";
+    public static final String CALLED_FROM_DEVICE = "CALLED_FROM_DEVICE";
     public static final int GPS_WIFI_ENABLE_REQUEST = 2003;
     public static final int GPS_ENABLE_REQUEST = 2004;
     public static final int GPS_BT_ENABLE_REQUEST = 2006;
@@ -33,7 +38,6 @@ public class Common {
     private static final UUID THIS_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public static final String VOID_STRING_VALUE = "";
     public static final int WIFI_PERMISSION_REQUEST = 2005;
-    public static final String WIFI_SOCKET_REQUEST_NAME = "ecoWateringWiFiRequest";
     private static final String URI_SCHEME_PACKAGE = "package";
 
     // INTERFACES
@@ -65,15 +69,6 @@ public class Common {
         return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} Activity activity;
-     * To lock the layout.
-     */
-    public static void lockLayout(@NonNull Activity activity) {
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-    }
-
     public static void openAppDetailsSetting(Context context) {
         Intent openAppSettingIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         Uri uri = Uri.fromParts(URI_SCHEME_PACKAGE, context.getPackageName(), null);
@@ -102,6 +97,15 @@ public class Common {
             context.startActivity(restartIntent);
             Runtime.getRuntime().exit(0);
         }
+    }
+
+    /**
+     * {@code @param:}
+     *  {@code @NonNull} Activity activity;
+     * To lock the layout.
+     */
+    public static void lockLayout(@NonNull Activity activity) {
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
     }
 
     /**

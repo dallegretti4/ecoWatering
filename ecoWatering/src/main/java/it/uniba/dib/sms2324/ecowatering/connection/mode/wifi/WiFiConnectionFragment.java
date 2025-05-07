@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.connection.ui;
+package it.uniba.dib.sms2324.ecowatering.connection.mode.wifi;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -33,7 +33,6 @@ import com.google.android.gms.location.SettingsClient;
 import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowatering.R;
-import it.uniba.dib.sms2324.ecowatering.connection.threads.WiFiConnectionRequestThread;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 
@@ -91,6 +90,7 @@ public class WiFiConnectionFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        Common.lockLayout(requireActivity());
         // TOOLBAR SETUP
         toolbarSetup(view);
         // WIFI P2P MANAGER & CHANNEL SETUP

@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.connection.threads;
+package it.uniba.dib.sms2324.ecowatering.connection.mode.wifi;
 
 import android.content.Context;
 import android.util.Log;
@@ -13,12 +13,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 
 public class WiFiConnectionRequestThread extends Thread {
     private final Context context;
     private final Common.OnStringResponseGivenCallback callback;
 
-    public WiFiConnectionRequestThread(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
+    protected WiFiConnectionRequestThread(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
         this.context = context;
         this.callback = callback;
     }
@@ -30,7 +31,7 @@ public class WiFiConnectionRequestThread extends Thread {
             // READ REQUEST NAME
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String requestName = reader.readLine();
-            if(requestName.equals(Common.WIFI_SOCKET_REQUEST_NAME)) {
+            if(requestName.equals(OnConnectionFinishCallback.WIFI_SOCKET_REQUEST_NAME)) {
                 // SEND THIS DEVICE ID
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
                 writer.println(Common.getThisDeviceID(this.context));

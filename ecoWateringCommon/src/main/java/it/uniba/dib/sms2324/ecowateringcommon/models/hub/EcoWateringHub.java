@@ -26,6 +26,8 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.SensorsInfo;
 public class EcoWateringHub implements Parcelable {
     private static final String BO_HUB_CONFIGURATION_COLUMN_NAME = "ecoWateringHubConfiguration";
     public static final String HUB_EXISTS_RESPONSE = "0";
+    public static final String HUB_NAME_CHANGED_RESPONSE = "hubNameSuccessfulChanged";
+    public static final String DEVICE_HUB_ACCOUNT_RESPONSE = "hubAccountSuccessfulDeleted";
     public static final String TABLE_HUB_DEVICE_ID_COLUMN_NAME = "deviceID";
     private static final String TABLE_HUB_NAME_COLUMN_NAME = "name";
     private static final String TABLE_HUB_ADDRESS_COLUMN_NAME = "address";
@@ -178,6 +180,29 @@ public class EcoWateringHub implements Parcelable {
             callback.getResponse(response);
         });
         removeRemoteDeviceThread.start();
+    }
+
+    public static void setName(@NonNull Context context, String newName, Common.OnStringResponseGivenCallback callback) {
+        String jsonString = "{\"" +
+                TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
+                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_HUB_NAME + "\",\"" +
+                HttpHelper.NEW_NAME_PARAMETER + "\":\"" + newName + "\"}";
+        new Thread(() -> {
+            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+            Log.i(Common.THIS_LOG, "setHubName response: " + response);
+            callback.getResponse(response);
+        }).start();
+    }
+
+    public static void deleteAccount(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
+        String jsonString = "{\"" +
+                TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
+                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_DELETE_HUB_ACCOUNT + "\"}";
+        new Thread(() -> {
+            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+            Log.i(Common.THIS_LOG, "deleteHubAccount response: " + response);
+            callback.getResponse(response);
+        }).start();
     }
 
     /**

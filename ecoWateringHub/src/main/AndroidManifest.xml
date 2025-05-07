@@ -41,7 +41,7 @@
         </activity>
 
         <activity
-            android:name=".connection.ManageRemoteEWDevicesConnectedActivity"
+            android:name=".connection.ManageConnectedRemoteEWDevicesActivity"
             android:exported="false"/>
 
         <activity

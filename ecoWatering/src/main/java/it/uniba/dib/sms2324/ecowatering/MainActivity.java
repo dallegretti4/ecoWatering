@@ -13,7 +13,7 @@ import android.view.KeyEvent;
 
 import it.uniba.dib.sms2324.ecowatering.connection.ConnectToEWHubActivity;
 import it.uniba.dib.sms2324.ecowatering.entry.MainFragment;
-import it.uniba.dib.sms2324.ecowatering.entry.UserProfileFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment;
 import it.uniba.dib.sms2324.ecowatering.setup.StartFirstFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
@@ -31,10 +31,30 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Common.lockLayout(this);
         fragmentManager = getSupportFragmentManager();
-        // LOADING FRAGMENT
-        changeFragment(new LoadingFragment(), false);
+        if(savedInstanceState == null) {
+            changeFragment(new LoadingFragment(), false);   // LOADING FRAGMENT
+            EcoWateringDevice.exists(Common.getThisDeviceID(this), (existsResponse) -> { // CHECK DEVICE IS REGISTERED
+                if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
+                    // DEVICE ALREADY REGISTERED CASE
+                    thisEcoWateringDevice = new EcoWateringDevice(existsResponse);
+                    if(thisEcoWateringDevice.getEcoWateringHubList() == null || thisEcoWateringDevice.getEcoWateringHubList().isEmpty()) {
+                        // NEVER CONNECTED TO A ECO WATERING HUB CASE
+                        ConnectToEWHubActivity.setIsFirstActivity(true);
+                        startActivity(new Intent(this, ConnectToEWHubActivity.class));
+                        finish();
+                    }
+                    else {
+                        // ALREADY CONNECTED TO ONE HUB AT LEAST CASE
+                        changeFragment(new MainFragment(), false);
+                    }
+                }
+                else {
+                    // DEVICE NEED TO BE REGISTERED CASE
+                    changeFragment(new StartFirstFragment(), false);
+                }
+            });
+        }
     }
 
     @Override
@@ -43,42 +63,6 @@ public class MainActivity extends AppCompatActivity implements
         // NO INTERNET CONNECTION CASE
         if(!HttpHelper.isDeviceConnectedToInternet(this)) {
             showInternetFaultDialog();
-        }
-        else {
-            Fragment tmpFragment = fragmentManager.findFragmentById(R.id.mainFrameLayout);
-            // CONFIGURATION CHANGE FROM MainFragment CASE
-            if(tmpFragment instanceof MainFragment) {
-                changeFragment(tmpFragment, false);
-            }
-            else {
-                EcoWateringDevice.exists(Common.getThisDeviceID(this), (existsResponse) -> {
-                    // NOT FIRST START CASE
-                    if(existsResponse.equals(HttpHelper.HTTP_RESPONSE_EXISTS_TRUE)) {
-                        EcoWateringDevice.getEcoWateringDeviceJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
-                            if(jsonResponse != null) {
-                                thisEcoWateringDevice = new EcoWateringDevice(jsonResponse);
-                                // NEVER CONNECTED TO A ECO WATERING HUB CASE
-                                if(thisEcoWateringDevice.getEcoWateringHubList() == null || thisEcoWateringDevice.getEcoWateringHubList().isEmpty()) {
-                                    ConnectToEWHubActivity.setIsFirstActivity(true);
-                                    startActivity(new Intent(this, ConnectToEWHubActivity.class));
-                                    finish();
-                                }
-                                // ALREADY CONNECTED TO ONE HUB AT LEAST CASE
-                                else {
-                                    changeFragment(new MainFragment(), false);
-                                }
-                            }
-                            else {
-                                showHttpErrorFaultDialog();
-                            }
-                        });
-                    }
-                    // FIRST START CASE
-                    else {
-                        changeFragment(new StartFirstFragment(), false);
-                    }
-                });
-            }
         }
     }
 
@@ -106,19 +90,26 @@ public class MainActivity extends AppCompatActivity implements
     // FROM MainFragment
     @Override
     public void onMainFragmentUserProfileChosen() {
-        changeFragment(new UserProfileFragment(), true);
+        changeFragment(new UserProfileFragment(Common.CALLED_FROM_DEVICE), true);
     }
 
     // FROM UserProfileFragment
     @Override
     public void onUserProfileGoBack() {
-        fragmentManager.popBackStack();
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     @Override
     public void onUserProfileRefresh() {
         fragmentManager.popBackStack();
-        changeFragment(new UserProfileFragment(), true);
+        changeFragment(new UserProfileFragment(Common.CALLED_FROM_DEVICE), true);
+    }
+
+    @Override
+    public void restartApp() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     /**
@@ -128,12 +119,6 @@ public class MainActivity extends AppCompatActivity implements
      *  To change the fragment.
      */
     private void changeFragment(@NonNull Fragment fragment, boolean addToBackStackFlag) {
-        if(fragment instanceof MainFragment) {
-            Common.unlockLayout(this);
-        }
-        else {
-            Common.lockLayout(this);
-        }
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
         if(addToBackStackFlag) {
@@ -166,30 +151,6 @@ public class MainActivity extends AppCompatActivity implements
                             startActivity(new Intent(this, MainActivity.class));
                             finish();
                         }))
-                .setOnKeyListener((dialogInterface, keyCode, keyEvent) -> {
-                    if(keyCode == KeyEvent.KEYCODE_BACK) finish();
-                    return false;
-                })
-                .setCancelable(false)
-                .create()
-                .show();
-    }
-
-    /**
-     * Notify the user something went wrong with the database server.
-     * Positive button restarts the app.
-     */
-    private void showHttpErrorFaultDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
-                .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_message))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.retry_button),
-                        ((dialogInterface, i) -> {
-                            startActivity(new Intent(this, MainActivity.class));
-                            finish();
-                        })
-                )
                 .setOnKeyListener((dialogInterface, keyCode, keyEvent) -> {
                     if(keyCode == KeyEvent.KEYCODE_BACK) finish();
                     return false;

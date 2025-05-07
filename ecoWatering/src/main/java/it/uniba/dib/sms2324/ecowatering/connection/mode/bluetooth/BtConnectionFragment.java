@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowatering.connection.ui;
+package it.uniba.dib.sms2324.ecowatering.connection.mode.bluetooth;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,7 +25,6 @@ import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
-import it.uniba.dib.sms2324.ecowatering.connection.threads.BtAcceptingRequestThread;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 
@@ -93,6 +92,7 @@ public class BtConnectionFragment extends Fragment {
 
    @Override
    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+       Common.lockLayout(requireActivity());
         // TOOLBAR SETUP
        toolbarSetup(view);
 
