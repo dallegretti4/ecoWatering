@@ -60,6 +60,13 @@ public class SensorConfigurationFragment extends Fragment {
     protected interface OnSensorConfiguredCallback {
         void onSensorConfigured(int sensorResult);
     }
+    private static Sensor chosenSensor;
+    private static boolean isSensorChosenDialogVisible;
+    private static boolean isSensorAlreadyConfiguredDialogVisible;
+    private static boolean isDetachSensorDialogVisible;
+    private static boolean isSensorDetachedDialogVisible;
+    private static boolean isSensorConfiguredDialogVisible;
+    private static boolean isHttpErrorFaultDialogVisible;
 
     public SensorConfigurationFragment() {
         super(R.layout.fragment_sensor_configuration);
@@ -81,18 +88,23 @@ public class SensorConfigurationFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        // TOOLBAR SETUP
         toolbarSetup(view);
-        // SELECTED SENSOR DETACH BUTTON SETUP
         selectedSensorDetachButtonSetup(view);
-        // TITLE SETUP
-        ((TextView) view.findViewById(R.id.sensorsConfigurationTitleTextView)).setText(
+        ((TextView) view.findViewById(R.id.sensorsConfigurationTitleTextView)).setText( // TITLE SETUP
                 String.format(
                     getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensors_configuration_title),
                     EcoWateringConfigurationActivity.getConfigureSensorType())
         );
-        // SENSOR LIST VIEW SETUP
         sensorListViewSetup(view);
+
+        if(savedInstanceState != null) { // DIALOG RECOVERING FROM CONFIGURATION CHANGED
+            if(isSensorChosenDialogVisible) onSensorChosenDialog(chosenSensor);
+            else if(isSensorAlreadyConfiguredDialogVisible) showSensorAlreadyConfiguredDialog();
+            else if(isDetachSensorDialogVisible) showDetachSensorDialog();
+            else if(isSensorDetachedDialogVisible) showSensorDetachedDialog();
+            else if(isSensorConfiguredDialogVisible) showSensorConfiguredDialog();
+            else if(isHttpErrorFaultDialogVisible) showHttpErrorFaultDialog();
+        }
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -103,7 +115,7 @@ public class SensorConfigurationFragment extends Fragment {
             toolbar.setTitleTextAppearance(requireContext(), it.uniba.dib.sms2324.ecowateringcommon.R.style.toolBarTitleStyle);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setHomeAsUpIndicator(it.uniba.dib.sms2324.ecowateringcommon.R.drawable.back_icon);
-            ((AppCompatActivity) requireActivity()).addMenuProvider(this.menuProvider, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+            requireActivity().addMenuProvider(this.menuProvider, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
         }
     }
 
@@ -114,7 +126,7 @@ public class SensorConfigurationFragment extends Fragment {
             if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
                     (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
                 ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID());
-                ((View) view.findViewById(R.id.selectedSensorCardDivisor)).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.selectedSensorCardDivisor).setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
             }
@@ -124,7 +136,7 @@ public class SensorConfigurationFragment extends Fragment {
             if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
                     (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
                 ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID());
-                ((View) view.findViewById(R.id.selectedSensorCardDivisor)).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.selectedSensorCardDivisor).setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
             }
@@ -134,7 +146,7 @@ public class SensorConfigurationFragment extends Fragment {
             if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
                     (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
                 ((TextView) view.findViewById(R.id.selectedSensorValueTextView)).setText(MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID());
-                ((View) view.findViewById(R.id.selectedSensorCardDivisor)).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.selectedSensorCardDivisor).setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setVisibility(View.VISIBLE);
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
             }
@@ -154,7 +166,7 @@ public class SensorConfigurationFragment extends Fragment {
                 sensorList.add(sensor);
                 requireActivity().runOnUiThread(sensorsListAdapter::notifyDataSetChanged);
             }
-            sensorListView.setOnItemClickListener((adapterView, v, position, l) -> onSensorChosen(position));
+            sensorListView.setOnItemClickListener((adapterView, v, position, l) -> onSensorChosenDialog(sensorList.get(position)));
         }
         // EMPTY CASE
         else {
@@ -164,20 +176,23 @@ public class SensorConfigurationFragment extends Fragment {
         }
     }
 
-    private void onSensorChosen(int position) {
-        Sensor chosenSensor = sensorList.get(position);
+    private void onSensorChosenDialog(@NonNull Sensor sensor) {
+        chosenSensor = sensor;
+        isSensorChosenDialogVisible = true;
         String message = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensor_name_label) + chosenSensor.getName() + "\n" +
                 getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensor_vendor_label) + chosenSensor.getVendor() + "\n" +
                 getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensor_version_label) + chosenSensor.getVersion();
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensor_chosen_title_dialog))
                 .setMessage(message)
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        (dialogInterface, i) -> setSensorOnEWHub(chosenSensor))
-                .setNegativeButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> dialogInterface.dismiss())
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button), (dialogInterface, i) -> {
+                    isSensorChosenDialogVisible = false;
+                    setSensorOnEWHub(chosenSensor);
+                })
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                    isSensorChosenDialogVisible = false;
+                    dialogInterface.dismiss();
+                })
                 .show();
     }
 
@@ -210,54 +225,56 @@ public class SensorConfigurationFragment extends Fragment {
     }
 
     private void showSensorAlreadyConfiguredDialog() {
+        isSensorAlreadyConfiguredDialogVisible = true;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensor_already_configured))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> dialogInterface.dismiss()))
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), ((dialogInterface, i) -> {
+                    isSensorAlreadyConfiguredDialogVisible = false;
+                    dialogInterface.dismiss();
+                }))
                 .show();
     }
 
     private void showDetachSensorDialog() {
+        isDetachSensorDialogVisible = true;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.detach_sensor_dialog_title))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        ((dialogInterface, i) -> configSensor.detachSelectedSensor(
-                                requireContext(),
-                                (response) -> {
-                                    if(response.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
-                                        requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
-                                    }
-                                    else {
-                                        requireActivity().runOnUiThread(this::showSensorDetachedDialog);
-                                    }
-                                })))
-                .setNegativeButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> dialogInterface.dismiss())
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button), ((dialogInterface, i) -> {
+                    isDetachSensorDialogVisible = false;
+                    configSensor.detachSelectedSensor(requireContext(), (response) -> {
+                        if (response.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
+                            requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
+                        } else {
+                            requireActivity().runOnUiThread(this::showSensorDetachedDialog);
+                        }
+                    });
+                }))
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                            isDetachSensorDialogVisible = false;
+                            dialogInterface.dismiss();
+                        })
                 .show();
     }
 
     private void showSensorDetachedDialog() {
+        isSensorDetachedDialogVisible = true;
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.sensor_detached_title))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> {
-                            startActivity(new Intent(requireContext(), MainActivity.class));
-                            requireActivity().finish();
-                        }
-                ).setCancelable(false)
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                        isSensorDetachedDialogVisible = false;
+                        startActivity(new Intent(requireContext(), MainActivity.class));
+                        requireActivity().finish();
+                }).setCancelable(false)
                 .show();
     }
 
     private void showSensorConfiguredDialog() {
+        isSensorConfiguredDialogVisible = true;
+        chosenSensor = null;
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensor_added_successfully))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> {
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), ((dialogInterface, i) -> {
+                            isSensorConfiguredDialogVisible = false;
                             startActivity(new Intent(requireContext(), MainActivity.class));
                             requireActivity().finish();
                         }))
@@ -271,11 +288,14 @@ public class SensorConfigurationFragment extends Fragment {
      * Positive button restarts the app.
      */
     private void showHttpErrorFaultDialog() {
+        isHttpErrorFaultDialogVisible = true;
+        chosenSensor = null;
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
+                            isHttpErrorFaultDialogVisible = false;
                             startActivity(new Intent(requireContext(), MainActivity.class));
                             requireActivity().finish();
                         })

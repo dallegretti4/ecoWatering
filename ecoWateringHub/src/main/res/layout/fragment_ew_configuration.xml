@@ -99,7 +99,7 @@
                     android:id="@+id/realTimeSensorsWeatherRefreshTextView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/sensors_weather_background_refresh"
+                    android:text="@string/background_refresh_label"
                     android:textSize="24sp"
                     android:textAlignment="center"
                     app:layout_constraintWidth_percent="0.7"
@@ -114,7 +114,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintRight_toRightOf="parent">
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/realTimeSensorsWeatherRefreshSwitch"
+                        android:id="@+id/backgroundRefreshSwitch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="15dp"

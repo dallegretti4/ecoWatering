@@ -39,10 +39,12 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 
 public class StartFirstFragment extends Fragment {
+    private static final String CHOSEN_HUB_NAME_OUT_STATE = "CHOSEN_HUB_NAME_OUT_STATE";
     private EditText hubNameEditText;
     private TextView locationFoundTextView;
     private Button nextButton;
     private Address tmpAddress = null;
+    private static boolean isDialogShowed;
     private interface OnLocationFoundCallback {
         void onLocationFound(Address address);
     }
@@ -72,22 +74,35 @@ public class StartFirstFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        // NEXT BUTTON SETUP
+        // SETUP
         nextButtonSetup(view);
-        // HUB NAME CHOSEN EDIT TEXT SETUP
         hubNameEditTextSetup(view);
-        // LOCATION FOUND TEXT VIEW SETUP
         locationFoundTextViewSetup(view);
-        // UPDATE LOCATION BUTTON SETUP
         updateLocationButtonSetup(view);
-        // FORCE TO UPDATE LOCATION
-        startFindLocation((address) -> {
+
+        startFindLocation((address) -> {    // FORCE TO UPDATE LOCATION WHEN FRAGMENT START
             if(address != null) {
                 tmpAddress = address;
                 String stringAddress = address.getThoroughfare() + ", " + address.getLocality() + " - " + address.getCountryName();
                 locationFoundTextView.setText(stringAddress);
             }
         });
+
+        if(savedInstanceState != null) {    // CONFIGURATION CHANGED CASE
+            if(savedInstanceState.getString(CHOSEN_HUB_NAME_OUT_STATE) != null ) {
+                this.hubNameEditText.setText(savedInstanceState.getString(CHOSEN_HUB_NAME_OUT_STATE));
+            }
+            if(isDialogShowed) {
+                showHubNameConfirmDialog();
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if(!this.hubNameEditText.getText().toString().equals(Common.VOID_STRING_VALUE)) {
+            outState.putString(CHOSEN_HUB_NAME_OUT_STATE, this.hubNameEditText.getText().toString());
+        }
     }
 
     private void nextButtonSetup(@NonNull View view) {
@@ -98,8 +113,8 @@ public class StartFirstFragment extends Fragment {
     }
 
     private void hubNameEditTextSetup(@NonNull View view) {
-        hubNameEditText = view.findViewById(R.id.hubNameEditText);
-        hubNameEditText.addTextChangedListener(new TextWatcher() {
+        this.hubNameEditText = view.findViewById(R.id.hubNameEditText);
+        this.hubNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
             @Override
@@ -247,13 +262,21 @@ public class StartFirstFragment extends Fragment {
      * Negative button to close dialog.
      */
     private void showHubNameConfirmDialog() {
+        isDialogShowed = true;
+        String message = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.name_label) + ": " + hubNameEditText.getText().toString();
         AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.hub_name_confirm_dialog_title))
-                .setMessage(getString(R.string.hub_name_confirm_dialog_message))
+                .setMessage(message)
                 .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        ((dialogInterface, i) -> onFirstStartFinishCallback.onFirstStartFinish(hubNameEditText.getText().toString(), tmpAddress)))
+                        ((dialogInterface, i) -> {
+                            isDialogShowed = false;
+                            onFirstStartFinishCallback.onFirstStartFinish(hubNameEditText.getText().toString(), tmpAddress);
+                        }))
                 .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.cancel_button),
-                        ((dialogInterface, i) -> dialogInterface.dismiss()))
+                        ((dialogInterface, i) -> {
+                            isDialogShowed = false;
+                            dialogInterface.dismiss();
+                        }))
                 .setCancelable(false);
         dialog.show();
     }

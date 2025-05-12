@@ -19,13 +19,10 @@ public class EcoWateringConfigurationActivity extends AppCompatActivity implemen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ew_configuration);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         fragmentManager = getSupportFragmentManager();
-        changeFragment(new EcoWateringConfigurationFragment(), false);
+        if(savedInstanceState == null) {
+            changeFragment(new EcoWateringConfigurationFragment(), false);
+        }
     }
 
     @Override

@@ -104,7 +104,6 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
-                                android:text="20"
                                 android:layout_marginEnd="2dp"
                                 android:textSize="40sp"
                                 android:textStyle="bold"/>
@@ -123,7 +122,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
-                        android:text="sdjksa nakla mn knasknck asnkclnaklsnckasn cknsaklnakslnkalsncklnasklncklansnc"
                         app:layout_constraintTop_toBottomOf="@+id/weatherStateTextViewContainer"
                         app:layout_constraintLeft_toRightOf="@+id/weatherIconImageViewContainer"
                         app:layout_constraintRight_toRightOf="parent"/>
@@ -464,8 +462,8 @@
                     android:layout_marginTop="10dp"
                     android:background="@drawable/rounded_square_shape"
                     android:elevation="1dp"
-                    android:scaleX="0.85"
-                    android:scaleY="0.85"
+                    android:scaleX="0.95"
+                    android:scaleY="0.95"
                     app:layout_constraintTop_toBottomOf="@+id/titleConfigurationCards">
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="0dp"
@@ -517,21 +515,21 @@
                             app:layout_constraintRight_toRightOf="parent"/>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
-                <!-- REAL TIME SENSORS WEATHER REFRESH -->
+                <!-- BACKGROUND REFRESH -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/realTimeSensorsWeatherRefreshCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/rounded_square_shape"
-                    android:scaleY="0.85"
-                    android:scaleX="0.85"
+                    android:scaleY="0.95"
+                    android:scaleX="0.95"
                     android:elevation="1dp"
                     app:layout_constraintTop_toBottomOf="@+id/isNotAutomatedContainer">
                     <TextView
                         android:id="@+id/realTimeSensorsWeatherRefreshTextView"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/sensors_weather_background_refresh"
+                        android:text="@string/background_refresh_label"
                         android:textSize="24sp"
                         android:textAlignment="center"
                         app:layout_constraintWidth_percent="0.7"
@@ -547,7 +545,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintRight_toRightOf="parent">
                         <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/realTimeSensorsWeatherRefreshSwitch"
+                            android:id="@+id/backgroundRefreshSwitch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_margin="15dp"
@@ -566,8 +564,8 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/rounded_square_shape"
                     android:backgroundTint="@color/ew_secondary_color_30"
-                    android:scaleX="0.85"
-                    android:scaleY="0.85"
+                    android:scaleX="0.95"
+                    android:scaleY="0.95"
                     android:elevation="1dp"
                     app:layout_constraintTop_toBottomOf="@+id/realTimeSensorsWeatherRefreshCard">
                     <TextView
@@ -606,6 +604,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
                 <!-- INFO NO SENSOR CONFIGURED -->
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/sensorInfoContainer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"

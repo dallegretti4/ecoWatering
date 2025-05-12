@@ -88,31 +88,24 @@
                         android:id="@+id/weatherStateTextViewContainer"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginStart="24dp"
+                        android:layout_gravity="start"
+                        android:orientation="horizontal"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintLeft_toRightOf="@+id/weatherIconImageViewContainer"
                         app:layout_constraintRight_toRightOf="parent">
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/weatherStateFirstDegreesTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="start"
-                            android:orientation="horizontal">
-                            <TextView
-                                android:id="@+id/weatherStateFirstDegreesTextView"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="5dp"
-                                android:text="20"
-                                android:textSize="40sp"
-                                android:textStyle="bold"/>
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/temperature_celsius"
-                                android:textSize="20sp"
-                                android:layout_marginTop="-15dp"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="5dp"
+                            android:textSize="40sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/temperature_celsius"
+                            android:textSize="20sp"
+                            android:layout_marginTop="-15dp"/>
                     </LinearLayout>
                     <!-- ADDRESS OF EWH -->
                     <TextView
@@ -120,7 +113,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
-                        android:text="sdabhasbda asdhvasbvdjhasbdab asbjsbx jbjkasnfjnajknxaknsknldkns"
                         app:layout_constraintTop_toBottomOf="@+id/weatherStateTextViewContainer"
                         app:layout_constraintLeft_toRightOf="@+id/weatherIconImageViewContainer"
                         app:layout_constraintRight_toRightOf="parent"/>
@@ -530,7 +522,7 @@
                                 app:layout_constraintRight_toRightOf="parent"/>
                         </androidx.constraintlayout.widget.ConstraintLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                    <!-- REAL TIME SENSORS WEATHER REFRESH -->
+                    <!-- BACKGROUND REFRESH -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/realTimeSensorsWeatherRefreshCard"
                         android:layout_width="match_parent"
@@ -551,7 +543,7 @@
                                 android:id="@+id/realTimeSensorsWeatherRefreshTextView"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="@string/sensors_weather_background_refresh"
+                                android:text="@string/background_refresh_label"
                                 android:textSize="24sp"
                                 android:textAlignment="center"
                                 android:paddingStart="10dp"
@@ -569,7 +561,7 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintRight_toRightOf="parent">
                             <androidx.appcompat.widget.SwitchCompat
-                                android:id="@+id/realTimeSensorsWeatherRefreshSwitch"
+                                android:id="@+id/backgroundRefreshSwitch"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="15dp"

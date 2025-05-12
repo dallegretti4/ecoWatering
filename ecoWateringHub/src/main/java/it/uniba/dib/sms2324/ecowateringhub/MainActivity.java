@@ -237,39 +237,45 @@ public class MainActivity extends AppCompatActivity implements
      * If app cannot requests permissions directly, Positive Button open the app details setting.
      */
     private void showWhyGrantLocationPermissionDialog() {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.why_grant_location_permission_dialog_title));
-
-        // CHECK IF IS FIRST START
-        boolean firstStartDialogFlag = false;
-        SharedPreferences sharedPreferences = getSharedPreferences(FIRST_START_FILENAME_FLAG, Context.MODE_PRIVATE);
-        if(sharedPreferences.getString(FIRST_START_KEY_FLAG, FIRST_START_KEY_NOT_FOUND_FLAG).equals(FIRST_START_KEY_NOT_FOUND_FLAG)) {
-            firstStartDialogFlag = true;
+        // CALLED AFTER GRANT PERMISSION & RESTART
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            changeFragment(new StartFirstFragment(), false);
         }
-
-        // USER MUST GRANT LOCATION PERMISSION MANUALLY CASE
-        if((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) &&
-                (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) && (!firstStartDialogFlag)) {
-            dialog.setMessage(getString(R.string.why_grant_location_permission_manually_dialog_message))
-                    .setPositiveButton(
-                            getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.setting_button),
-                            (dialogInterface, i) -> Common.openAppDetailsSetting(this)
-                    )
-                    .setCancelable(false);
+        else {  // NORMAL CALL
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle(getString(R.string.why_grant_location_permission_dialog_title));
+            // CHECK IF IS FIRST START
+            boolean firstStartDialogFlag = false;
+            SharedPreferences sharedPreferences = getSharedPreferences(FIRST_START_FILENAME_FLAG, Context.MODE_PRIVATE);
+            if(sharedPreferences.getString(FIRST_START_KEY_FLAG, FIRST_START_KEY_NOT_FOUND_FLAG).equals(FIRST_START_KEY_NOT_FOUND_FLAG)) {
+                firstStartDialogFlag = true;
+            }
+            // USER MUST GRANT LOCATION PERMISSION MANUALLY CASE
+            if((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) &&
+                    (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) && (!firstStartDialogFlag)) {
+                dialog.setMessage(getString(R.string.why_grant_location_permission_manually_dialog_message))
+                        .setPositiveButton(
+                                getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.setting_button),
+                                (dialogInterface, i) -> {
+                                    Common.openAppDetailsSetting(this);
+                                    finish();
+                                }
+                        )
+                        .setCancelable(false);
+            }
+            else {  // APP CAN REQUEST PERMISSION CASE
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(FIRST_START_KEY_FLAG, FIRST_START_VALUE_FLAG);
+                editor.apply();
+                dialog.setMessage(getString(R.string.why_grant_location_permission_dialog_message))
+                        .setPositiveButton(
+                                getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.ok_button),
+                                (dialogInterface, i) -> changeFragment(new StartFirstFragment(), false)
+                        )
+                        .setCancelable(false);
+            }
+            dialog.setCancelable(false);
+            dialog.show();
         }
-        // APP CAN REQUEST PERMISSION CASE
-        else {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(FIRST_START_KEY_FLAG, FIRST_START_VALUE_FLAG);
-            editor.apply();
-            dialog.setMessage(getString(R.string.why_grant_location_permission_dialog_message))
-                    .setPositiveButton(
-                            getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.ok_button),
-                            (dialogInterface, i) -> changeFragment(new StartFirstFragment(), false)
-                    )
-                    .setCancelable(false);
-        }
-        dialog.show();
     }
 
     /**

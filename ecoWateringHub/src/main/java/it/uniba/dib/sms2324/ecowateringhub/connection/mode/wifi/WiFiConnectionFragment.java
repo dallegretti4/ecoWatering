@@ -156,29 +156,20 @@ public class WiFiConnectionFragment extends Fragment {
     @SuppressLint("MissingPermission")
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        // SETUP
         Common.lockLayout(requireActivity());
-        // TOOLBAR SETUP
         toolbarSetup(view);
-        // FRAGMENT LAYOUT SETUP
         fragmentLayoutSetup(view);
-        // WIFI P2P MANAGER & CHANNEL SETUP
         wifiP2pManager = (WifiP2pManager) requireActivity().getSystemService(Context.WIFI_P2P_SERVICE);
         channel = wifiP2pManager.initialize(requireContext(), requireContext().getMainLooper(), null);
-        // PEERS RECEIVER SETUP
         peersReceiverSetup();
-
         WifiManager wifiManager = (WifiManager) requireContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        // WIFI NOT ENABLED CASE
-        if (!wifiManager.isWifiEnabled()) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                wifiManager.setWifiEnabled(true);
-            } else {
-                showEnableWiFiDialog();
-            }
-
+        // LOGIC
+        if (!wifiManager.isWifiEnabled()) { // WIFI NOT ENABLED CASE
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) wifiManager.setWifiEnabled(true);
+            else showEnableWiFiDialog();
         }
-        // WIFI ENABLED CASE
-        else {
+        else {  // WIFI ENABLED CASE
             enableGPS((resultCode) -> {
                 if (resultCode == Common.GPS_ENABLED_RESULT) {
                     wifiP2pManager.discoverPeers(channel, new WifiP2pManager.ActionListener() {

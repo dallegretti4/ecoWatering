@@ -39,6 +39,12 @@ public class UserProfileFragment extends Fragment {
     private EditText userNameEditText;
     private ConstraintLayout enableEditUserNameButton;
     private ConstraintLayout editUserNameButtonsContainer;
+    private OnUserProfileActionCallback onUserProfileActionCallback;
+    public interface OnUserProfileActionCallback {
+        void onUserProfileGoBack();
+        void onUserProfileRefresh();
+        void restartApp();
+    }
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
         @Override
         public void handleOnBackPressed() {
@@ -72,12 +78,11 @@ public class UserProfileFragment extends Fragment {
             return false;
         }
     };
-    private OnUserProfileActionCallback onUserProfileActionCallback;
-    public interface OnUserProfileActionCallback {
-        void onUserProfileGoBack();
-        void onUserProfileRefresh();
-        void restartApp();
-    }
+    private static boolean isChangesWillBeLostDialogVisible;
+    private static boolean isEditUserNameConfirmDialogVisible;
+    private static boolean isDeleteAccountConfirmDialogVisible;
+    private static boolean isDeviceAccountDeletedDialogVisible;
+    private static boolean isErrorDialogVisible;
     public UserProfileFragment() {
         this(calledFrom);
         Log.i(Common.THIS_LOG, "UserProfileFragment no parameter constructor, calledFrom: " + calledFrom);
@@ -112,27 +117,28 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);    // ON BACK PRESSED CALLBACK SETUP
-
         toolbarSetup(view);
         fragmentLayoutSetup(view);
 
         if(savedInstanceState == null) {    // FIRST USER NAME RECOVERING
+            Common.showLoadingFragment(view, R.id.mainFragmentLayout, R.id.includeLoadingFragment);
             getCurrentName((name) -> {
                 currentUserName = name;
                 requireActivity().runOnUiThread(() -> {
                     this.userNameEditText.setText(currentUserName);
                     lockUserNameEdit();
+                    Common.hideLoadingFragment(view, R.id.mainFragmentLayout, R.id.includeLoadingFragment);
                 });
             });
-            Log.i(Common.THIS_LOG, "UserProfileFragment -> onViewCreated() savedInstanceState: null");
         }
-        else {    // EDITED USER NAME RECOVERING FROM CONFIGURATION CHANGES
-            Log.i(Common.THIS_LOG, "UserProfileFragment -> onViewCreated() savedInstanceState: not null");
+        else {
+            // EDITED USER NAME RECOVERING FROM CONFIGURATION CHANGES
             if(savedInstanceState.getString(EDITED_USER_NAME) != null) {
-                Log.i(Common.THIS_LOG, "UserProfileFragment -> onViewCreated() savedInstanceState.getString(EDITED_USER_NAME) not null: " + savedInstanceState.getString(EDITED_USER_NAME));
                 unlockUserNameEdit();
                 this.userNameEditText.setText(savedInstanceState.getString(EDITED_USER_NAME));
             }
+            // DIALOG RECOVERING FROM CONFIGURATION CHANGES
+            dialogRecovering();
         }
     }
 
@@ -209,40 +215,53 @@ public class UserProfileFragment extends Fragment {
     private void lockUserNameEdit() {
         this.enableEditUserNameButton.setEnabled(true);
         this.enableEditUserNameButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.color.ew_secondary_color, requireContext().getTheme()));
+        this.enableEditUserNameButton.setElevation(Common.dpToPx(requireContext(), 8));
         this.editUserNameButtonsContainer.setVisibility(View.GONE);
         this.userNameEditText.setEnabled(false);
-        this.userNameEditText.setTextColor(ResourcesCompat.getColor(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.color.black_white_30, requireActivity().getTheme()));
+        this.userNameEditText.setTextColor(ResourcesCompat.getColor(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.color.black_white_40, requireActivity().getTheme()));
     }
 
     private void unlockUserNameEdit() {
         this.enableEditUserNameButton.setEnabled(false);
         this.enableEditUserNameButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.color.ew_secondary_color_90, requireContext().getTheme()));
+        this.enableEditUserNameButton.setElevation(Common.dpToPx(requireContext(), 1));
         this.editUserNameButtonsContainer.setVisibility(View.VISIBLE);
         this.userNameEditText.setEnabled(true);
         this.userNameEditText.setTextColor(ResourcesCompat.getColor(getResources(), R.color.black_white_0, requireActivity().getTheme()));
     }
 
+    private void dialogRecovering() {
+        if(isChangesWillBeLostDialogVisible) showChangesWillBeLostDialog();
+        else if(isEditUserNameConfirmDialogVisible) showEditUserNameConfirmDialog();
+        else if(isDeleteAccountConfirmDialogVisible) showDeleteAccountConfirmDialog();
+        else if(isDeviceAccountDeletedDialogVisible) showDeleteAccountConfirmDialog();
+        else if(isErrorDialogVisible) showErrorDialog();
+    }
+
     private void showChangesWillBeLostDialog() {
+        isChangesWillBeLostDialogVisible = true;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.changes_not_saved_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.changes_not_saved_message))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        (dialogInterface, i) -> onUserProfileActionCallback.onUserProfileGoBack())
-                .setNegativeButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.cancel_button),
-                        (dialogInterface, i) -> dialogInterface.dismiss())
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button), (dialogInterface, i) -> {
+                            isChangesWillBeLostDialogVisible = false;
+                            onUserProfileActionCallback.onUserProfileGoBack();
+                        })
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.cancel_button), (dialogInterface, i) -> {
+                            isChangesWillBeLostDialogVisible = false;
+                            dialogInterface.dismiss();
+                        })
                 .show();
     }
 
     private void showEditUserNameConfirmDialog() {
+        isEditUserNameConfirmDialogVisible = true;
         String message = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.new_name_label) + ": " + this.userNameEditText.getText().toString();
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.are_you_sure_label))
                 .setMessage(message)
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        (dialogInterface, i) -> {
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button), (dialogInterface, i) -> {
+                            isEditUserNameConfirmDialogVisible = false;
                             if(calledFrom.equals(Common.CALLED_FROM_HUB)) {
                                 EcoWateringHub.setName(requireContext(), this.userNameEditText.getText().toString(), (response) -> {
                                     if(response.equals(EcoWateringHub.HUB_NAME_CHANGED_RESPONSE)) {
@@ -264,19 +283,20 @@ public class UserProfileFragment extends Fragment {
                                 });
                             }
                         })
-                .setNegativeButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.cancel_button),
-                        (dialogInterface, i) -> dialogInterface.dismiss())
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.cancel_button), (dialogInterface, i) -> {
+                            isEditUserNameConfirmDialogVisible = false;
+                            dialogInterface.dismiss();
+                        })
                 .show();
     }
 
     private void showDeleteAccountConfirmDialog() {
+        isDeleteAccountConfirmDialogVisible = true;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.delete_account_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.delete_account_message))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        (dialogInterface, i) -> {
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button), (dialogInterface, i) -> {
+                            isDeleteAccountConfirmDialogVisible = false;
                             if(calledFrom.equals(Common.CALLED_FROM_HUB)) {
                                 EcoWateringHub.deleteAccount(requireContext(), (response) -> {
                                     if(response.equals(EcoWateringHub.DEVICE_HUB_ACCOUNT_RESPONSE)) {
@@ -298,29 +318,34 @@ public class UserProfileFragment extends Fragment {
                                 });
                             }
                         })
-                .setNegativeButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> dialogInterface.dismiss())
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                            isDeleteAccountConfirmDialogVisible = false;
+                            dialogInterface.dismiss();
+                        })
                 .show();
     }
 
     private void showDeviceAccountDeletedDialog() {
+        isDeviceAccountDeletedDialogVisible = true;
         new AlertDialog.Builder(requireContext())
                 .setTitle(it.uniba.dib.sms2324.ecowateringcommon.R.string.device_account_successful_deleted_title)
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> onUserProfileActionCallback.restartApp())
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                    isDeviceAccountDeletedDialogVisible = false;
+                    onUserProfileActionCallback.restartApp();
+                })
                 .setCancelable(false)
                 .show();
     }
 
     private void showErrorDialog() {
+        isErrorDialogVisible = true;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_message))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> onUserProfileActionCallback.restartApp())
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                            isErrorDialogVisible = false;
+                            onUserProfileActionCallback.restartApp();
+                        })
                 .setCancelable(false)
                 .show();
     }

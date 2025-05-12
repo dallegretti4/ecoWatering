@@ -88,13 +88,10 @@ public class EcoWateringConfigurationFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        // ON BACK PRESSED CALLBACK SETUP
-        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback);
-
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback); // ON BACK PRESSED CALLBACK SETUP
         toolbarSetup(view);
         automateSystemSwitchCompactSetup(view);
-        sensorsAndWeatherRealTimeRefreshSetup(view);
-
+        backgroundRefreshSetup(view);
         // SENSORS SETUP
         ambientTemperatureSensorSetup(view);
         lightSensorSetup(view);
@@ -124,10 +121,10 @@ public class EcoWateringConfigurationFragment extends Fragment {
         });
     }
 
-    private void sensorsAndWeatherRealTimeRefreshSetup(@NonNull View view) {
-        SwitchCompat realTimeSensorsWeatherRefreshSwitch = view.findViewById(R.id.realTimeSensorsWeatherRefreshSwitch);
-        realTimeSensorsWeatherRefreshSwitch.setChecked(PersistentService.isPersistentServiceRunning(requireActivity()));
-        realTimeSensorsWeatherRefreshSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+    private void backgroundRefreshSetup(@NonNull View view) {
+        SwitchCompat backgroundRefreshSwitch = view.findViewById(R.id.backgroundRefreshSwitch);
+        backgroundRefreshSwitch.setChecked(PersistentService.isPersistentServiceRunning(requireActivity()));
+        backgroundRefreshSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(isChecked && !PersistentService.isPersistentServiceRunning(requireActivity())) {
                 PersistentService.startPersistentService(requireActivity(), requireContext());
             }

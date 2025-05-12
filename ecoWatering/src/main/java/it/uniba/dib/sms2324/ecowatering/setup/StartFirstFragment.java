@@ -15,9 +15,27 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import it.uniba.dib.sms2324.ecowatering.R;
+import it.uniba.dib.sms2324.ecowateringcommon.Common;
 
 public class StartFirstFragment extends Fragment {
+    private static final String USERNAME_OUT_STATE = "USERNAME_OUT_STATE";
     private EditText deviceNameEditText;
+    private Button finishButton;
+    private final TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if(!deviceNameEditText.getText().toString().equals("")) {
+                finishButton.setEnabled(true);
+            }
+            else {
+                if(finishButton.isEnabled()) finishButton.setEnabled(false);
+            }
+        }
+    };
     private OnFirstStartFinishCallback onFirstStartFinishCallback;
     public interface OnFirstStartFinishCallback {
         void onFinish(String deviceName);
@@ -44,27 +62,23 @@ public class StartFirstFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        deviceNameEditText = view.findViewById(R.id.deviceNameEditText);
-        Button finishButton = view.findViewById(R.id.firstStartFinishButton);
-        finishButton.setEnabled(false);
-        deviceNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        this.deviceNameEditText = view.findViewById(R.id.deviceNameEditText);
+        this.finishButton = view.findViewById(R.id.firstStartFinishButton);
+        this.finishButton.setEnabled(false); // LOCK FINISH BUTTON UNTIL USER CHOOSE A NAME
+        this.finishButton.setOnClickListener((v) -> showDeviceNameConfirmDialog());
+        this.deviceNameEditText.addTextChangedListener(this.textWatcher);   // LOGIC TO ENABLE THE FINISH BUTTON
+        // CONFIGURATION CHANGED CASE
+        if(savedInstanceState != null && savedInstanceState.getString(USERNAME_OUT_STATE) != null) {
+            this.deviceNameEditText.setText(savedInstanceState.getString(USERNAME_OUT_STATE));
+        }
+    }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if(!deviceNameEditText.getText().toString().equals("")) {
-                    finishButton.setEnabled(true);
-                }
-                else {
-                    if(finishButton.isEnabled()) finishButton.setEnabled(false);
-                }
-            }
-        });
-        finishButton.setOnClickListener((v) -> showDeviceNameConfirmDialog());
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(!deviceNameEditText.getText().toString().equals(Common.VOID_STRING_VALUE)) {
+            outState.putString(USERNAME_OUT_STATE, deviceNameEditText.getText().toString());
+        }
     }
 
     private void showDeviceNameConfirmDialog() {

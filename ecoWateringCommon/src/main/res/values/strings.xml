@@ -4,6 +4,7 @@
     <string name="agree">Agree</string>
     <string name="are_you_sure_label">Are you sure?</string>
     <string name="ambient_temperature_label">Ambient temperature</string>
+    <string name="background_refresh_label">Background refresh</string>
     <string name="bluetooth_button">Bluetooth</string>
     <string name="bt_connection_toolbar_title">Bluetooth connection</string>
     <string name="bt_not_supported_dialog_message">Please use WiFi connectivity to be authorized.</string>
@@ -37,7 +38,6 @@
     <string name="irrigation_system_turned_off">Irrigation system is Off.</string>
     <string name="irrigation_system_turned_on">Irrigation system is On.</string>
     <string name="light_uv_index_label">UV index</string>
-    <string name="location_label_textview">Position:</string>
     <string name="manage_remote_device_toolbar_title">Connected Devices</string>
     <string name="manual_ew_configuration_toolbar_title">ecoWatering Configuration</string>
     <string name="name_label">Name</string>
@@ -65,7 +65,7 @@
     <string name="sensor_light">Light sensor</string>
     <string name="sensor_list_empty">Sorry, no sensor founded.\nPlease, make you sure sensors are correctly connected to the ecoWateringHub and retry.</string>
     <string name="sensor_name_label">Sensor name: </string>
-    <string name="sensor_not_configured_info">If any sensor is not configured, ecoWatering will use Open-Meteo.com information. Sensors are configurable from ecoWateringHub only.</string>
+    <string name="sensor_not_configured_info">If any sensor is not configured, ecoWatering will use Open-Meteo.com information. Configure your sensors for a better performing.</string>
     <string name="sensor_relative_humidity">Relative humidity sensor</string>
     <string name="sensor_vendor_label">Vendor: </string>
     <string name="sensor_version_label">Version: </string>
