@@ -111,10 +111,8 @@ public class MainFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(BUNDLE_EWH_LIST_KEY, new ArrayList<>(this.ecoWateringHubList));
-        if(!toDisconnectHubID.equals(Common.NULL_STRING_VALUE)) {
-            outState.putString(TO_DISCONNECT_HUB_ID_OUT_STATE, toDisconnectHubID);
-        }
+        if((this.ecoWateringHubList != null) && (!this.ecoWateringHubList.isEmpty())) outState.putParcelableArrayList(BUNDLE_EWH_LIST_KEY, (new ArrayList<>(this.ecoWateringHubList)));
+        if(!toDisconnectHubID.equals(Common.NULL_STRING_VALUE)) outState.putString(TO_DISCONNECT_HUB_ID_OUT_STATE, toDisconnectHubID);
     }
 
     private void toolbarSetup(@NonNull View view) {

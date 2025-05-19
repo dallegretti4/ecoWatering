@@ -19,10 +19,10 @@ public class Common {
     // CONSTANTS
 
     public static final int ACTION_BACK_PRESSED = 1023;
-    public static final int ACTION_REMOTE_DEVICES_CONNECTED_RESTART_FRAGMENT = 1024;
-    public static final int ACTION_REMOTE_DEVICES_CONNECTED_SUCCESS_REMOVED = 1025;
+    public static final int BT_PERMISSION_REQUEST = 2001;
     public static final String CALLED_FROM_HUB = "CALLED_FROM_HUB";
     public static final String CALLED_FROM_DEVICE = "CALLED_FROM_DEVICE";
+    public static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     public static final int GPS_WIFI_ENABLE_REQUEST = 2003;
     public static final int GPS_ENABLE_REQUEST = 2004;
     public static final int GPS_BT_ENABLE_REQUEST = 2006;

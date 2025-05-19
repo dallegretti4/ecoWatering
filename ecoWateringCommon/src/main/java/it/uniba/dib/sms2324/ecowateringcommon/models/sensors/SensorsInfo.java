@@ -86,7 +86,7 @@ public class SensorsInfo implements Parcelable {
     }
 
     public boolean isLastUpdateValid(String lastUpdateTimeStamp) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.getDefault());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Common.DATE_FORMAT_STRING, Locale.getDefault());
         simpleDateFormat.setLenient(false);
         try {
             Date parsedDate = simpleDateFormat.parse(lastUpdateTimeStamp);

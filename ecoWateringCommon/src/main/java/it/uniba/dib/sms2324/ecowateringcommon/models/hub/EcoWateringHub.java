@@ -25,7 +25,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.SensorsInfo;
 
 public class EcoWateringHub implements Parcelable {
     private static final String BO_HUB_CONFIGURATION_COLUMN_NAME = "ecoWateringHubConfiguration";
-    public static final String HUB_EXISTS_RESPONSE = "0";
     public static final String HUB_NAME_CHANGED_RESPONSE = "hubNameSuccessfulChanged";
     public static final String DEVICE_HUB_ACCOUNT_RESPONSE = "hubAccountSuccessfulDeleted";
     public static final String TABLE_HUB_DEVICE_ID_COLUMN_NAME = "deviceID";
@@ -256,11 +255,9 @@ public class EcoWateringHub implements Parcelable {
         if((this.ecoWateringHubConfiguration.getAmbientTemperatureSensor() != null) &&
                 (this.ecoWateringHubConfiguration.getAmbientTemperatureSensor().getSensorID() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getAmbientTemperatureLastUpdate()))) {
-            Log.i(Common.THIS_LOG, "ambient temperature from Sensor");
             return this.sensorInfo.getAmbientTemperatureSensor();
         }
         else {
-            Log.i(Common.THIS_LOG, "ambient temperature from weather info");
             return this.weatherInfo.getAmbientTemperature();
         }
     }
@@ -283,7 +280,7 @@ public class EcoWateringHub implements Parcelable {
             return (this.sensorInfo.getLightSensor() / 120);
         }
         else {
-            Log.i(Common.THIS_LOG, "index UV from weatherInfo");
+            Log.i(Common.THIS_LOG, "index UV from Open-Meteo");
             return this.weatherInfo.getIndexUV();
         }
     }
@@ -297,11 +294,9 @@ public class EcoWateringHub implements Parcelable {
                 (this.ecoWateringHubConfiguration.getRelativeHumiditySensor() != null) &&
                 (this.ecoWateringHubConfiguration.getRelativeHumiditySensor().getSensorID() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getRelativeHumidityLastUpdate()))) {
-            Log.i(Common.THIS_LOG, "relative humidity from Sensor");
             return this.sensorInfo.getRelativeHumiditySensor();
         }
         else {
-            Log.i(Common.THIS_LOG, "relative humidity from weather info");
             return this.weatherInfo.getRelativeHumidity();
         }
     }

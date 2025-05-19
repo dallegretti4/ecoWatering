@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpHelper {
     public static final String HTTP_RESPONSE_ERROR = "error";
-    public static final String HTTP_RESPONSE_EXISTS_TRUE = "0";
     public static final String IRRIGATION_SYSTEM_STATE_OFF_RESPONSE = "irrigationSystemSwitchedOff";
     private static final String REQUEST_MODE_GET = "GET";
     private static final String REQUEST_MODE_POST = "POST";
@@ -46,6 +45,10 @@ public class HttpHelper {
     public static final String MODE_UPDATE_WEATHER_INFO = "UPDATE_WEATHER_INFO";
     public static final String MODE_SET_HUB_NAME = "SET_HUB_NAME";
     public static final String MODE_DELETE_HUB_ACCOUNT = "DELETE_HUB_ACCOUNT";
+    public static final String MODE_SEND_REQUEST = "SEND_REQUEST";
+    public static final String MODE_GET_DEVICE_REQUEST = "GET_DEVICE_REQUEST";
+    public static final String MODE_SET_IS_DATA_OBJECT_REFRESHING = "SET_IS_DATA_OBJECT_REFRESHING";
+    public static final String MODE_DELETE_DEVICE_REQUEST = "DELETE_DEVICE_REQUEST";
     public static final String TIME_PARAMETER = "TIME";
     public static final String SENSOR_TYPE_PARAMETER = "SENSOR_TYPE";
     public static final String SENSOR_ID_PARAMETER = "SENSOR_ID";
@@ -53,6 +56,8 @@ public class HttpHelper {
     public static final String NEW_NAME_PARAMETER = "NEW_NAME";
     public static final String REMOTE_DEVICE_PARAMETER = "REMOTE_DEVICE";
     public static final String VALUE_PARAMETER = "VALUE";
+    public static final String REQUEST_PARAMETER = "REQUEST";
+
 
     /**
      *

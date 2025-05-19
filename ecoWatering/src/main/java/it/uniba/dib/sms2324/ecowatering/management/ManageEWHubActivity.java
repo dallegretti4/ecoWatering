@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -18,12 +17,15 @@ import java.util.Objects;
 import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubAutomaticControlFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubManualControlFragment;
 
 public class ManageEWHubActivity extends AppCompatActivity implements
-        ManageEWHubManualControlFragment.OnUserActionCallback,
+        ManageHubManualControlFragment.OnHubActionChosenCallback,
         ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback {
     private static EcoWateringHub selectedEWHub;
     private FragmentManager fragmentManager;
@@ -32,15 +34,17 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_eco_watering_hub);
-        Bundle b = getIntent().getBundleExtra(Common.MANAGE_EWH_INTENT_OBJ);
-        selectedEWHub = Objects.requireNonNull(b).getParcelable(Common.MANAGE_EWH_INTENT_OBJ);
         fragmentManager = getSupportFragmentManager();
         if(savedInstanceState == null) {
-            if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
-                changeFragment(new ManageEWHubAutomatedControlFragment(), false);
-            }
-            else {
-                changeFragment(new ManageEWHubManualControlFragment(), false);
+            Bundle b = getIntent().getBundleExtra(Common.MANAGE_EWH_INTENT_OBJ);
+            selectedEWHub = Objects.requireNonNull(b).getParcelable(Common.MANAGE_EWH_INTENT_OBJ);
+            if(selectedEWHub != null) {
+                if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
+                    changeFragment(new ManageHubAutomaticControlFragment(), false);
+                }
+                else {
+                    changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), false);
+                }
             }
         }
     }
@@ -49,34 +53,86 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         if(selectedEWHub == null) { // ERROR CASE
-            showHttpErrorFaultDialog(this);
+            showHttpErrorFaultDialog();
         }
         if(!HttpHelper.isDeviceConnectedToInternet(this)) { // NO INTERNET CONNECTION CASE
             showInternetFaultDialog(this);
         }
     }
 
-    @Override
-    public void onAutomateIrrigationSystem() {
 
+    // FROM ManageHubManualControlFragment.OnHubActionChosenCallback
+    @Override
+    public void onBackPressedFromManageHub() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     @Override
-    public void onRemoteEWDevicesConnectedCardListener() {
+    public void refreshFragment() {
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
+                changeFragment(new ManageHubAutomaticControlFragment(), false);
+            }
+            else {
+                changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), false);
+            }
+        });
+    }
+
+    @Override
+    public void onSecondToolbarFunctionChosen() {
+        // GO BACK
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
+
+    @Override
+    public void manageConnectedRemoteDevices() {
         changeFragment(new ManageConnectedRemoteEWDevicesFragment(selectedEWHub.getDeviceID(), Common.CALLED_FROM_DEVICE), true);
     }
 
     @Override
-    public void onRefreshMenuItem() {
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
-            selectedEWHub = new EcoWateringHub(jsonResponse);
-            if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
-                changeFragment(new ManageEWHubAutomatedControlFragment(), false);
-            }
-            else {
-                changeFragment(new ManageEWHubManualControlFragment(), false);
-            }
-        });
+    public void automateEcoWateringSystem() {}
+
+    @Override
+    public void startDataObjectRefreshing() {
+        DeviceRequest.sendRequest(
+                selectedEWHub.getDeviceID(),
+                Common.getThisDeviceID(this),
+                DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING
+        );
+    }
+
+    @Override
+    public void stopDataObjectRefreshing() {
+        DeviceRequest.sendRequest(
+                selectedEWHub.getDeviceID(),
+                Common.getThisDeviceID(this),
+                DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING
+        );
+    }
+
+    @Override
+    public void configureSensor(int sensorType) {
+
+    }
+
+    @Override
+    public void forceSensorsUpdate(Common.OnMethodFinishCallback callback) {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        callback.canContinue();
+    }
+
+    @Override
+    public void restartApp() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     @Override
@@ -107,22 +163,14 @@ public class ManageEWHubActivity extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    protected static EcoWateringHub getSelectedEWHub() {
-        return selectedEWHub;
-    }
-
-    protected static void setSelectedEWHub(@NonNull EcoWateringHub ecoWateringHub) {
-        selectedEWHub = ecoWateringHub;
-    }
-
     /**
      * {@code @param:}
      *  {@code @NonNull} Context context;
      * Notify the user something went wrong with the database server.
      * Positive button restarts the app.
      */
-    private void showHttpErrorFaultDialog(@NonNull Context context) {
-        new AlertDialog.Builder(context)
+    private void showHttpErrorFaultDialog() {
+        new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_message))
                 .setPositiveButton(

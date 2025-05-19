@@ -1,5 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringhub.runnable.hub;
 
+import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 
@@ -12,7 +13,7 @@ public class RefreshHubRunnable implements Runnable {
     @Override
     public void run() {
         EcoWateringHub.getEcoWateringHubJsonString(this.hubID, (jsonResponse) -> {
-            if((jsonResponse != null) && (jsonResponse.equals("null"))) {
+            if((jsonResponse != null) && (jsonResponse.equals(Common.NULL_STRING_VALUE))) {
                 MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
             }
         });

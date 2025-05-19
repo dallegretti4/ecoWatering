@@ -36,6 +36,7 @@ import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 
 public class SensorConfigurationFragment extends Fragment {
     private static final String SENSOR_ADDED_SUCCESSFULLY_RESPONSE = "sensorAddedSuccessfully";
+    public static int sensorType;
     private EcoWateringSensor configSensor;
     private List<Sensor> sensorList;
     private final MenuProvider menuProvider = new MenuProvider() {
@@ -69,7 +70,11 @@ public class SensorConfigurationFragment extends Fragment {
     private static boolean isHttpErrorFaultDialogVisible;
 
     public SensorConfigurationFragment() {
+        this(sensorType);
+    }
+    public SensorConfigurationFragment(int sensorTypeInt) {
         super(R.layout.fragment_sensor_configuration);
+        sensorType = sensorTypeInt;
     }
 
     @Override
@@ -93,7 +98,7 @@ public class SensorConfigurationFragment extends Fragment {
         ((TextView) view.findViewById(R.id.sensorsConfigurationTitleTextView)).setText( // TITLE SETUP
                 String.format(
                     getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensors_configuration_title),
-                    EcoWateringConfigurationActivity.getConfigureSensorType())
+                    getStringSensorType())
         );
         sensorListViewSetup(view);
 
@@ -111,7 +116,7 @@ public class SensorConfigurationFragment extends Fragment {
         Toolbar toolbar = view.findViewById(R.id.toolBar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if(toolbar != null) {
-            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle(EcoWateringConfigurationActivity.getConfigureSensorType());
+            Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle(getStringSensorType());
             toolbar.setTitleTextAppearance(requireContext(), it.uniba.dib.sms2324.ecowateringcommon.R.style.toolBarTitleStyle);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setHomeAsUpIndicator(it.uniba.dib.sms2324.ecowateringcommon.R.drawable.back_icon);
@@ -121,7 +126,7 @@ public class SensorConfigurationFragment extends Fragment {
 
     private void selectedSensorDetachButtonSetup(@NonNull View view) {
         Button selectedSensorDetachButton = view.findViewById(R.id.selectedSensorDetachButton);
-        if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE)) {
+        if(sensorType == Sensor.TYPE_AMBIENT_TEMPERATURE) {
             configSensor = new AmbientTemperatureSensor(requireContext());
             if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
                     (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() != null)) {
@@ -131,7 +136,7 @@ public class SensorConfigurationFragment extends Fragment {
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
             }
         }
-        else if(EcoWateringConfigurationActivity.getConfigureSensorType().equals(EcoWateringSensor.CONFIGURE_SENSOR_TYPE_LIGHT)) {
+        else if(sensorType == Sensor.TYPE_LIGHT) {
             configSensor = new LightSensor(requireContext());
             if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
                     (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID() != null)) {
@@ -141,7 +146,7 @@ public class SensorConfigurationFragment extends Fragment {
                 selectedSensorDetachButton.setOnClickListener((v) -> showDetachSensorDialog());
             }
         }
-        else if(EcoWateringConfigurationActivity.getConfigureSensorType().equals(EcoWateringSensor.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY)) {
+        else if(sensorType == Sensor.TYPE_RELATIVE_HUMIDITY) {
             configSensor = new RelativeHumiditySensor(requireContext());
             if((MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
                     (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() != null)) {
@@ -197,17 +202,17 @@ public class SensorConfigurationFragment extends Fragment {
     }
 
     private void setSensorOnEWHub(Sensor chosenSensor) {
-        if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE) &&
+        if((sensorType == Sensor.TYPE_AMBIENT_TEMPERATURE) &&
                 (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor() != null) &&
                 (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
             requireActivity().runOnUiThread(this::showSensorAlreadyConfiguredDialog);
         }
-        else if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_LIGHT) &&
+        else if((sensorType == Sensor.TYPE_LIGHT) &&
                 (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor() != null) &&
                 (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getLightSensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
             requireActivity().runOnUiThread(this::showSensorAlreadyConfiguredDialog);
         }
-        else if(Objects.equals(EcoWateringConfigurationActivity.getConfigureSensorType(), EcoWateringSensor.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY) &&
+        else if((sensorType == Sensor.TYPE_RELATIVE_HUMIDITY) &&
                 (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor() != null) &&
                 (MainActivity.getThisEcoWateringHub().getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID().equals(EcoWateringSensor.getSensorId(chosenSensor)))) {
             requireActivity().runOnUiThread(this::showSensorAlreadyConfiguredDialog);
@@ -221,6 +226,18 @@ public class SensorConfigurationFragment extends Fragment {
                     requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
                 }
             });
+        }
+    }
+
+    private String getStringSensorType() {
+        switch (sensorType) {
+            case Sensor.TYPE_AMBIENT_TEMPERATURE:
+                return EcoWateringSensor.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE;
+            case Sensor.TYPE_LIGHT:
+                return EcoWateringSensor.CONFIGURE_SENSOR_TYPE_LIGHT;
+            case Sensor.TYPE_RELATIVE_HUMIDITY:
+                return EcoWateringSensor.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY;
+            default: return Common.NULL_STRING_VALUE;
         }
     }
 

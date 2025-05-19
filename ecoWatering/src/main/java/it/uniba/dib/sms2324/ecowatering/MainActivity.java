@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
         MainFragment.OnMainFragmentActionCallback,
         UserProfileFragment.OnUserProfileActionCallback {
+    public static String IS_FIRST_ACTIVITY_INTENT_KEY = "IS_FIRST_ACTIVITY";
     private static EcoWateringDevice thisEcoWateringDevice;
     private FragmentManager fragmentManager;
 
@@ -40,8 +41,9 @@ public class MainActivity extends AppCompatActivity implements
                     thisEcoWateringDevice = new EcoWateringDevice(existsResponse);
                     if(thisEcoWateringDevice.getEcoWateringHubList() == null || thisEcoWateringDevice.getEcoWateringHubList().isEmpty()) {
                         // NEVER CONNECTED TO A ECO WATERING HUB CASE
-                        ConnectToEWHubActivity.setIsFirstActivity(true);
-                        startActivity(new Intent(this, ConnectToEWHubActivity.class));
+                        Intent firstStartIntent = new Intent(this, ConnectToEWHubActivity.class);
+                        firstStartIntent.putExtra(IS_FIRST_ACTIVITY_INTENT_KEY, true);
+                        startActivity(firstStartIntent);
                         finish();
                     }
                     else {

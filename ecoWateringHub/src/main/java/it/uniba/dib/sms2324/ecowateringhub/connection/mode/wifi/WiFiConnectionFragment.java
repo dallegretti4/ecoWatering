@@ -197,6 +197,7 @@ public class WiFiConnectionFragment extends Fragment {
         if(wiFiConnectionRequestThread != null && wiFiConnectionRequestThread.isAlive()) {
             wiFiConnectionRequestThread.interrupt();
         }
+        Common.unlockLayout(requireActivity());
     }
 
     private void toolbarSetup(@NonNull View view) {

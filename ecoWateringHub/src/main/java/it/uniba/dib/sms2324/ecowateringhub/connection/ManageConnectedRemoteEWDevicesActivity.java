@@ -26,13 +26,17 @@ import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth.BtConnectionFragment;
 import it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi.WiFiConnectionFragment;
+import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundService;
 
 public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback,
         it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
         OnConnectionFinishCallback {
-    protected static final int BT_PERMISSION_REQUEST = 2001;
     private static FragmentManager fragmentManager;
+    private static boolean isDeviceAlreadyConnectedDialogVisible;
+    private static boolean isDeviceConnectedSuccessfullyVisible;
+    private static boolean isInternetFaultDialog;
+    private static boolean isErrorDialogVisible;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +45,12 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
 
         if(savedInstanceState == null) {    // NOT CONFIGURATION CHANGED CASE
             changeFragment(new ManageConnectedRemoteEWDevicesFragment(Common.getThisDeviceID(this), Common.CALLED_FROM_HUB), false);
+        }
+        else {  // CONFIGURATION CHANGED CASE
+            if(isInternetFaultDialog) runOnUiThread(this::showInternetFaultDialog);
+            else if(isErrorDialogVisible) runOnUiThread(this::showErrorDialog);
+            else if(isDeviceConnectedSuccessfullyVisible) runOnUiThread(this::showDeviceConnectedSuccessfully);
+            else if(isDeviceAlreadyConnectedDialogVisible) runOnUiThread(this::showDeviceAlreadyConnectedDialog);
         }
     }
 
@@ -60,6 +70,14 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
 
     @Override
     public void onManageConnectedDevicesRefresh() {
+        // CALLED AFTER LAST DEVICE HAS BEEN REMOVED
+        EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
+            MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
+            if((MainActivity.getThisEcoWateringHub().getRemoteDeviceList() == null) || (MainActivity.getThisEcoWateringHub().getRemoteDeviceList().isEmpty())) {
+                EcoWateringForegroundService.stopEcoWateringService(MainActivity.getThisEcoWateringHub(), this, EcoWateringForegroundService.DEVICE_REQUEST_REFRESHING_SERVICE_TYPE);
+            }
+        });
+        // REFRESH FRAGMENT
         startActivity(new Intent(this, ManageConnectedRemoteEWDevicesActivity.class));
         finish();
     }
@@ -82,7 +100,7 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
                                 Manifest.permission.BLUETOOTH_CONNECT,
                                 Manifest.permission.BLUETOOTH_SCAN
                         },
-                        BT_PERMISSION_REQUEST
+                        Common.BT_PERMISSION_REQUEST
                 );
             }
             else {
@@ -149,14 +167,14 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // CALLED IN ManageRemoteEWDevicesConnectedActivity IN onRemoteDeviceActionSelected()
+        // CALLED IN ConnectionChooserFragment IN onViewCreated()
         if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_HUB, false), false);
+            if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                fragmentManager.popBackStack();
             }
         }
         // REQUESTED IN ManageRemoteEWDevicesConnectedActivity IN onModeSelected()
-        else if(requestCode == BT_PERMISSION_REQUEST) {
+        else if(requestCode == Common.BT_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 changeFragment(new BtConnectionFragment(), false);
             }
@@ -201,12 +219,16 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
      * Positive button dismiss dialog.
      */
     private void showDeviceAlreadyConnectedDialog() {
+        isDeviceAlreadyConnectedDialogVisible = true;
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.remote_device_already_exists_title))
                 .setMessage(getString(R.string.remote_device_already_exists_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> dialogInterface.dismiss())
+                        ((dialogInterface, i) -> {
+                            isDeviceAlreadyConnectedDialogVisible = false;
+                            dialogInterface.dismiss();
+                        })
                 )
                 .setCancelable(false)
                 .create()
@@ -218,12 +240,18 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
      * Positive button restarts the MainFragment.
      */
     private void showDeviceConnectedSuccessfully() {
+        isDeviceConnectedSuccessfullyVisible = true;
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.remote_device_added_title))
                 .setMessage(getString(R.string.remote_device_added_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
+                            isDeviceConnectedSuccessfullyVisible = false;
+                            EcoWateringHub.getEcoWateringHubJsonString(
+                                    Common.getThisDeviceID(this),
+                                    (jsonResponse) -> EcoWateringForegroundService.startEcoWateringService(new EcoWateringHub(jsonResponse), this, EcoWateringForegroundService.DEVICE_REQUEST_REFRESHING_SERVICE_TYPE)
+                            );
                             fragmentManager.popBackStack();
                             fragmentManager.popBackStack();
                         })
@@ -237,18 +265,21 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
      * Positive button dismiss dialog.
      */
     private void showErrorDialog() {
+        isErrorDialogVisible = true;
         new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> EcoWateringHub.getEcoWateringHubJsonString(
-                                Common.getThisDeviceID(this),
-                                (jsonResponse) -> {
-                                    Common.restartApp(this);
-                                    finish();
-                                }
-                        ))
+                        ((dialogInterface, i) -> {
+                            isErrorDialogVisible = false;
+                            EcoWateringHub.getEcoWateringHubJsonString(
+                                    Common.getThisDeviceID(this),
+                                    (jsonResponse) -> {
+                                        Common.restartApp(this);
+                                        finish();
+                                    });
+                        })
                 )
                 .setCancelable(false)
                 .create()
@@ -260,18 +291,21 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
      * Positive button restarts the app.
      */
     private void showInternetFaultDialog() {
+        isInternetFaultDialog = true;
         new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_msg))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.retry_button),
                         ((dialogInterface, i) -> {
+                            isInternetFaultDialog = false;
                             Common.restartApp(this);
                             finish();
                         })
                 )
                 .setOnKeyListener((dialogInterface, keyCode, keyEvent) -> {
                     if(keyCode == KeyEvent.KEYCODE_BACK) {
+                        isInternetFaultDialog = false;
                         Common.restartApp(this);
                         finish();
                     }

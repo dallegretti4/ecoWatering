@@ -39,14 +39,12 @@
     <string name="try_to_connect_title">Wait a moment. We\'re try to connect…</string>
     <string name="unknown">Unknown</string>
     <string name="update_Location_button">Update position</string>
-    <string name="user_must_enable_location_permission_title">You have to allow the app, to know your location</string>
     <string name="user_must_enable_location_permission_message">Go to Setting->Privacy->Manage permissions and allow the app to know your location manually.</string>
     <string name="why_grant_location_permission_dialog_title">We need to know your position</string>
     <string name="why_grant_location_permission_dialog_message">Please grant location permission.\nWe will use your location, to allow the app to generate a consistently plane for your system, based on weather.</string>
     <string name="why_grant_location_permission_manually_dialog_message">Please grant location permission manually and restart the app.\n\nWe will use your location, to allow the app to generate a consistently plane for your system, based on weather.</string>
     <string name="why_use_bt_dialog_message">We will use your Bluetooth to allow you, to be paired with the ecoWatering Hub only.</string>
     <string name="why_use_location_address_dialog_message">We will use your location, to allow the app to generate a consistently plane for your system, based on weather.</string>
-    <string name="why_use_location_address_dialog_post_never_show_message">Go to Setting->privacy->Manage permissions and allow the app to know your location manually.</string>
     <string name="why_use_location_dialog_message">We will use your location, to be sure you are near to the ecoWatering Hub.</string>
     <string name="why_use_location_dialog_title">Please, allow us to know your location</string>
     <string name="wifi_connection_title">Select the ecoWatering Device</string>

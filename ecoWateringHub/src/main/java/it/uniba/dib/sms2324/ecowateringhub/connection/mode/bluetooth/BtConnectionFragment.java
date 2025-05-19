@@ -140,6 +140,7 @@ public class BtConnectionFragment extends Fragment {
         if(btConnectionRequestThread != null && btConnectionRequestThread.isAlive()) {
             btConnectionRequestThread.interrupt();
         }
+        Common.unlockLayout(requireActivity());
     }
 
     private void toolbarSetup(@NonNull View view) {

@@ -36,6 +36,7 @@ public class StartFirstFragment extends Fragment {
             }
         }
     };
+    private static boolean isDeviceNameConfirmDialogVisible;
     private OnFirstStartFinishCallback onFirstStartFinishCallback;
     public interface OnFirstStartFinishCallback {
         void onFinish(String deviceName);
@@ -70,6 +71,7 @@ public class StartFirstFragment extends Fragment {
         // CONFIGURATION CHANGED CASE
         if(savedInstanceState != null && savedInstanceState.getString(USERNAME_OUT_STATE) != null) {
             this.deviceNameEditText.setText(savedInstanceState.getString(USERNAME_OUT_STATE));
+            if(isDeviceNameConfirmDialogVisible) showDeviceNameConfirmDialog();
         }
     }
 
@@ -82,14 +84,21 @@ public class StartFirstFragment extends Fragment {
     }
 
     private void showDeviceNameConfirmDialog() {
+        isDeviceNameConfirmDialogVisible = true;
         String message = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.name_label) + ": " + deviceNameEditText.getText().toString();
         AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.are_you_sure_label))
                 .setMessage(message)
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button),
-                        (dialogInterface, i) -> onFirstStartFinishCallback.onFinish(deviceNameEditText.getText().toString()))
-                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.cancel_button), ((dialogInterface, i) -> dialogInterface.dismiss()))
+                        (dialogInterface, i) -> {
+                            isDeviceNameConfirmDialogVisible = false;
+                            onFirstStartFinishCallback.onFinish(deviceNameEditText.getText().toString());
+                        })
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.cancel_button), ((dialogInterface, i) -> {
+                    isDeviceNameConfirmDialogVisible = false;
+                    dialogInterface.dismiss();
+                }))
                 .setCancelable(false);
         dialog.show();
     }

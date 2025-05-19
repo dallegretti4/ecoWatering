@@ -27,7 +27,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.EcoWateringSensor;
 import it.uniba.dib.sms2324.ecowateringhub.R;
-import it.uniba.dib.sms2324.ecowateringhub.service.PersistentService;
+import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundService;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 
 public class EcoWateringConfigurationFragment extends Fragment {
@@ -123,13 +123,13 @@ public class EcoWateringConfigurationFragment extends Fragment {
 
     private void backgroundRefreshSetup(@NonNull View view) {
         SwitchCompat backgroundRefreshSwitch = view.findViewById(R.id.backgroundRefreshSwitch);
-        backgroundRefreshSwitch.setChecked(PersistentService.isPersistentServiceRunning(requireActivity()));
+        backgroundRefreshSwitch.setChecked(EcoWateringForegroundService.isEcoWateringServiceRunning(requireActivity()));
         backgroundRefreshSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(isChecked && !PersistentService.isPersistentServiceRunning(requireActivity())) {
-                PersistentService.startPersistentService(requireActivity(), requireContext());
+            if(isChecked && !EcoWateringForegroundService.isEcoWateringServiceRunning(requireActivity())) {
+                EcoWateringForegroundService.startEcoWateringService(MainActivity.getThisEcoWateringHub(), requireContext(), EcoWateringForegroundService.DATA_OBJECT_REFRESHING_SERVICE_TYPE);
             }
-            else if(!isChecked && PersistentService.isPersistentServiceRunning(requireActivity())) {
-                PersistentService.stopPersistentService(requireActivity(), requireContext());
+            else if(!isChecked && EcoWateringForegroundService.isEcoWateringServiceRunning(requireActivity())) {
+                EcoWateringForegroundService.stopEcoWateringService(MainActivity.getThisEcoWateringHub(), requireContext(), EcoWateringForegroundService.DATA_OBJECT_REFRESHING_SERVICE_TYPE);
             }
         });
     }

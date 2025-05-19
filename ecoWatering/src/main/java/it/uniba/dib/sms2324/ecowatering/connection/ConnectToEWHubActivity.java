@@ -3,13 +3,14 @@ package it.uniba.dib.sms2324.ecowatering.connection;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -28,20 +29,47 @@ import it.uniba.dib.sms2324.ecowatering.connection.mode.wifi.WiFiConnectionFragm
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 
 public class ConnectToEWHubActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
         OnConnectionFinishCallback {
-    protected static final int FIRST_BT_CONNECT_PERMISSION_REQUEST = 1016;
-    private static final int FIRST_LOCATION_PERMISSION_REQUEST = 1015;
-    protected static final int FIRST_WIFI_PERMISSION_REQUEST = 1017;
     private static FragmentManager fragmentManager;
     private static boolean isFirstActivity = false;
+    private static boolean isWhyUseLocationFirstDialogVisible;
+    private static boolean isWhyUseLocationDialogVisible;
+    private static boolean isDeviceAlreadyConnectedDialogVisible;
+    private static boolean isDeviceConnectedDialogVisible;
+    private static boolean isInternetFaultDialogVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_to_eco_watering_hub);
+        fragmentManager = getSupportFragmentManager();
+        if(savedInstanceState == null) {
+            Log.i(Common.THIS_LOG, "ConnectToEWHubActivity -> onCreate()");
+            if(getIntent().getBooleanExtra(MainActivity.IS_FIRST_ACTIVITY_INTENT_KEY, false)) {
+                isFirstActivity = true;
+                if(!SharedPreferencesHelper.readBooleanOnSharedPreferences(this, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_FILE_NAME, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_VALUE_KEY)) {
+                    SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_FILE_NAME, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_VALUE_KEY, true);
+                    showWhyUseLocationFirstDialog();
+                }
+                else {
+                    changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
+                }
+            }
+            else {
+                changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
+            }
+        }
+        else {
+            if(isWhyUseLocationFirstDialogVisible) runOnUiThread(this::showWhyUseLocationFirstDialog);
+            else if(isWhyUseLocationDialogVisible) runOnUiThread(this::showWhyUseLocationDialog);
+            else if(isDeviceAlreadyConnectedDialogVisible) runOnUiThread(this::showDeviceAlreadyConnectedDialog);
+            else if(isDeviceConnectedDialogVisible) runOnUiThread(this::showDeviceConnectedDialog);
+            else if(isInternetFaultDialogVisible) runOnUiThread(this::showInternetFaultDialog);
+        }
     }
 
     @Override
@@ -49,17 +77,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         super.onStart();
         // NO INTERNET CONNECTION CASE
         if(!HttpHelper.isDeviceConnectedToInternet(this)) {
-            showInternetFaultDialog(this);
-        }
-        else {
-            fragmentManager = getSupportFragmentManager();
-            // CHECK FIRST REQUEST PERMISSION
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                showWhyUseLocationPermissionDialog();
-            }
-            else {
-                changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
-            }
+            showInternetFaultDialog();
         }
     }
 
@@ -69,7 +87,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         if(mode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH)) {
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.BLUETOOTH_CONNECT}, FIRST_BT_CONNECT_PERMISSION_REQUEST);
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.BLUETOOTH_CONNECT}, Common.BT_PERMISSION_REQUEST);
             }
             else {
                 changeFragment(new BtConnectionFragment(), true);
@@ -79,7 +97,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         else if(mode.equals(OnConnectionFinishCallback.CONNECTION_MODE_WIFI)) {
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED &&
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.NEARBY_WIFI_DEVICES}, FIRST_WIFI_PERMISSION_REQUEST);
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.NEARBY_WIFI_DEVICES}, Common.WIFI_PERMISSION_REQUEST);
             }
             else {
                 changeFragment(new WiFiConnectionFragment(), true);
@@ -128,23 +146,20 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // CALLED IN ConnectToEWHubActivity IN onStart()
-        if(requestCode == FIRST_LOCATION_PERMISSION_REQUEST) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
-            }
-            else {
+        // CALLED IN ConnectionChooserFragment IN onViewCreated()
+        if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
+            if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 showWhyUseLocationDialog();
             }
         }
         // CALLED IN onModeSelected()
-        else if(requestCode == FIRST_BT_CONNECT_PERMISSION_REQUEST) {
+        else if(requestCode == Common.BT_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 changeFragment(new BtConnectionFragment(), true);
             }
         }
         // CALLED IN onModeSelected()
-        else if (requestCode == FIRST_WIFI_PERMISSION_REQUEST) {
+        else if (requestCode == Common.WIFI_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 changeFragment(new WiFiConnectionFragment(), true);
             }
@@ -177,24 +192,17 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    public static void setIsFirstActivity(boolean value) {
-        isFirstActivity = value;
-    }
-
-    private void showWhyUseLocationPermissionDialog() {
+    private void showWhyUseLocationFirstDialog() {
+        isWhyUseLocationFirstDialogVisible = true;
         new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_dialog_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_dialog_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.next_button),
-                        (dialogInterface, i) -> ActivityCompat.requestPermissions(
-                                this,
-                                new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
-                                FIRST_LOCATION_PERMISSION_REQUEST
-                        ))
-                .setNegativeButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> finish())
+                        (dialogInterface, i) -> {
+                            isWhyUseLocationFirstDialogVisible = false;
+                            changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
+                        })
                 .setCancelable(false)
                 .show();
     }
@@ -205,21 +213,38 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
      * Negative button to restart app.
      */
     private void showWhyUseLocationDialog() {
+        isWhyUseLocationDialogVisible = true;
+        String title = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_dialog_title);
+        String message = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_dialog_message);
+        String buttonName = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.retry_button);
+        DialogInterface.OnClickListener onClickListener = (dialog, i) -> {
+            isWhyUseLocationDialogVisible = false;
+            startActivity(new Intent(ConnectToEWHubActivity.this, MainActivity.class));
+            finish();
+        };
+        if(!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            title = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_address_dialog_post_never_show_title);
+            message = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_address_dialog_post_never_show_message);
+            buttonName = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.go_to_settings_button);
+            onClickListener = (dialogInterface, i) -> {
+                isWhyUseLocationDialogVisible = false;
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY, true);
+                Intent goToSettingIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                goToSettingIntent.setData(uri);
+                startActivity(goToSettingIntent);
+            };
+        }
         AlertDialog.Builder dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_dialog_title))
-                .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_dialog_message))
-                .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_message))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.go_to_settings_button),
-                        ((dialogInterface, i) -> {
-                            Intent goToSettingIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            Uri uri = Uri.fromParts("package", getPackageName(), null);
-                            goToSettingIntent.setData(uri);
-                            startActivity(goToSettingIntent);
-                        }))
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(buttonName, onClickListener)
                 .setNegativeButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> finish()))
+                        ((dialogInterface, i) -> {
+                            isWhyUseLocationDialogVisible = false;
+                            finish();
+                        }))
                 .setCancelable(false);
         dialog.show();
     }
@@ -229,12 +254,14 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
      * Positive button to callback with result.
      */
     private void showDeviceAlreadyConnectedDialog() {
+        isDeviceAlreadyConnectedDialogVisible = true;
         new android.app.AlertDialog.Builder(this)
                 .setTitle(getString(R.string.remote_device_already_added_title))
                 .setMessage(getString(R.string.remote_device_already_added_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
+                            isDeviceAlreadyConnectedDialogVisible = false;
                             startActivity(new Intent(this, ConnectToEWHubActivity.class));
                             finish();
                         }))
@@ -247,12 +274,14 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
      * Positive button to callback with result.
      */
     private void showDeviceConnectedDialog() {
+        isDeviceConnectedDialogVisible = true;
         android.app.AlertDialog.Builder dialog = new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.remote_device_added_success_title))
                 .setMessage(getString(R.string.remote_device_added_success_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
+                            isDeviceConnectedDialogVisible = false;
                             if(isFirstActivity) {
                                 isFirstActivity = false;
                             }
@@ -269,19 +298,22 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
      * Notify the user there isn't internet connection.
      * Positive button restarts the app.
      */
-    private void showInternetFaultDialog(@NonNull Context context) {
-        new AlertDialog.Builder(context)
+    private void showInternetFaultDialog() {
+        isInternetFaultDialogVisible = true;
+        new AlertDialog.Builder(this)
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title))
                 .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_msg))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.retry_button),
                         ((dialogInterface, i) -> {
+                            isInternetFaultDialogVisible = false;
                             startActivity(new Intent(this, MainActivity.class));
                             finish();
                         })
                 )
                 .setOnKeyListener((dialogInterface, keyCode, keyEvent) -> {
                     if(keyCode == KeyEvent.KEYCODE_BACK) {
+                        isInternetFaultDialogVisible = false;
                         startActivity(new Intent(this, MainActivity.class));
                         finish();
                     }

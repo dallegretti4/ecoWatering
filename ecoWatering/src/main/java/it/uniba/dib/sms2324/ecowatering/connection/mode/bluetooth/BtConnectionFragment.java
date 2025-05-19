@@ -112,6 +112,12 @@ public class BtConnectionFragment extends Fragment {
         }
    }
 
+   @Override
+   public void onPause() {
+        super.onPause();
+       Common.unlockLayout(requireActivity());
+   }
+
    private void toolbarSetup(@NonNull View view) {
        Toolbar toolbar = view.findViewById(R.id.toolBar);
        ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
