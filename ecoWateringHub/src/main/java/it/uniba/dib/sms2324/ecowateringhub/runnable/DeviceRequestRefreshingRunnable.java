@@ -48,27 +48,39 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
 
     private void solveDeviceRequest(@NonNull Context context, @NonNull EcoWateringHub hub, DeviceRequest deviceRequest) {
         // CHECK IS DEVICE REQUEST VALID
-        if(!deviceRequest.isValidDeviceRequest()) {
-            deviceRequest.delete();
+        if(deviceRequest.isValidDeviceRequest()) {
+            switch (deviceRequest.getRequest()) {
+                // SWITCH ON IRRIGATION SYSTEM CASE
+                case DeviceRequest.REQUEST_SWITCH_ON_IRRIGATION_SYSTEM:
+                    hub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(context), true);
+                    break;
+                // SWITCH OFF IRRIGATION SYSTEM CASE
+                case DeviceRequest.REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM:
+                    hub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(context), false);
+                    break;
+                // START BACKGROUND REFRESHING CASE
+                case DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING:
+                    hub.getEcoWateringHubConfiguration().setIsDataObjectRefreshing(context, true, (response) -> {
+                        if (response.equals(EcoWateringForegroundService.SUCCESS_RESPONSE_SET_IS_DATA_OBJECT_REFRESHING)) {
+                            EcoWateringForegroundService.dataObjectRefreshingThread = new Thread(new DataObjectRefreshingRunnable(this.context, this.hub));
+                            EcoWateringForegroundService.dataObjectRefreshingThread.start();
+                            deviceRequest.delete();
+                        }
+                    });
+                    break;
+                // STOP BACKGROUND REFRESHING
+                case DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING:
+                    hub.getEcoWateringHubConfiguration().setIsDataObjectRefreshing(context, false, (response) -> {
+                        if (response.equals(EcoWateringForegroundService.SUCCESS_RESPONSE_SET_IS_DATA_OBJECT_REFRESHING)) {
+                            EcoWateringForegroundService.dataObjectRefreshingThread.interrupt();
+                            deviceRequest.delete();
+                        }
+                    });
+                    break;
+
+                default: break;
+            }
         }
-        // START BACKGROUND REFRESHING CASE
-        else if(deviceRequest.getRequest().equals(DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING)) {
-            hub.getEcoWateringHubConfiguration().setIsDataObjectRefreshing(context, true, (response) -> {
-                if(response.equals(EcoWateringForegroundService.SUCCESS_RESPONSE_SET_IS_DATA_OBJECT_REFRESHING)) {
-                    EcoWateringForegroundService.dataObjectRefreshingThread = new Thread(new DataObjectRefreshingRunnable(this.context, this.hub));
-                    EcoWateringForegroundService.dataObjectRefreshingThread.start();
-                    deviceRequest.delete();
-                }
-            });
-        }
-        // STOP BACKGROUND REFRESHING
-        else if(deviceRequest.getRequest().equals(DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING)) {
-            hub.getEcoWateringHubConfiguration().setIsDataObjectRefreshing(context, false, (response) -> {
-                if(response.equals(EcoWateringForegroundService.SUCCESS_RESPONSE_SET_IS_DATA_OBJECT_REFRESHING)) {
-                    EcoWateringForegroundService.dataObjectRefreshingThread.interrupt();
-                    deviceRequest.delete();
-                }
-            });
-        }
+        deviceRequest.delete();
     }
 }

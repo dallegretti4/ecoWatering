@@ -22,7 +22,8 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.models.IrrigationSystem;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlanPreview;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubAutomaticControlFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubManualControlFragment;
@@ -41,7 +42,8 @@ public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
         StartSecondFragment.OnSecondStartFinishCallback,
         ManageHubManualControlFragment.OnHubActionChosenCallback,
-        it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment.OnUserProfileActionCallback {
+        it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment.OnUserProfileActionCallback,
+        SensorConfigurationFragment.OnSensorConfiguredCallback {
     private static final int FORCE_SENSORS_INTERVAL_DURATION = 500; // millis
     public static boolean isSimulation = true;
     private static EcoWateringHub thisEcoWateringHub;
@@ -63,6 +65,10 @@ public class MainActivity extends AppCompatActivity implements
                 // NOT FIRST START CASE
                 if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
                     thisEcoWateringHub = new EcoWateringHub(existsResponse);
+                    IrrigationPlanPreview.getIrrigationPlanPreviewJsonString(thisEcoWateringHub, Common.getThisDeviceID(this), (response) -> {
+                        new IrrigationPlanPreview(response).updateIrrigationPlanOnServer(Common.getThisDeviceID(this), Common.getThisDeviceID(this));
+                    });
+
                     checkEcoWateringServiceNeedToStart();
                     forceSensorsUpdate(this, () -> {
                         if(thisEcoWateringHub.getEcoWateringHubConfiguration().isAutomated()) changeFragment(new ManageHubAutomaticControlFragment(), true);
@@ -173,13 +179,14 @@ public class MainActivity extends AppCompatActivity implements
     public void automateEcoWateringSystem() {}
 
     @Override
-    public void startDataObjectRefreshing() {
-        EcoWateringForegroundService.startEcoWateringService(thisEcoWateringHub, this, EcoWateringForegroundService.DATA_OBJECT_REFRESHING_SERVICE_TYPE);
+    public void setDataObjectRefreshing(boolean value) {
+        if(value) EcoWateringForegroundService.startEcoWateringService(thisEcoWateringHub, this, EcoWateringForegroundService.DATA_OBJECT_REFRESHING_SERVICE_TYPE);
+        else EcoWateringForegroundService.stopEcoWateringService(thisEcoWateringHub, this, EcoWateringForegroundService.DATA_OBJECT_REFRESHING_SERVICE_TYPE);
     }
 
     @Override
-    public void stopDataObjectRefreshing() {
-        EcoWateringForegroundService.stopEcoWateringService(thisEcoWateringHub, this, EcoWateringForegroundService.DATA_OBJECT_REFRESHING_SERVICE_TYPE);
+    public void setIrrigationSystemState(boolean value) {
+        thisEcoWateringHub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), value);
     }
 
     @Override
@@ -208,6 +215,19 @@ public class MainActivity extends AppCompatActivity implements
     public void restartApp() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
+    }
+
+    // FROM SensorConfigurationFragment.OnSensorConfiguredCallback
+    @Override
+    public void onSensorConfigured(int sensorResult) {
+        if(sensorResult == Common.ACTION_BACK_PRESSED) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
+        else if(sensorResult == Common.REFRESH_FRAGMENT) {
+            fragmentManager.popBackStack();
+            changeFragment(new SensorConfigurationFragment(), true);
+        }
     }
 
     /**

@@ -21,6 +21,8 @@ public class DeviceRequest {
     public static final String TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME = "caller";
     public static final String TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME = "request";
     public static final String TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME = "date";
+    public static final String REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM = "SWITCH_OFF_IRRIGATION_SYSTEM";
+    public static final String REQUEST_SWITCH_ON_IRRIGATION_SYSTEM = "SWITCH_ON_IRRIGATION_SYSTEM";
     public static final String REQUEST_FORCE_SENSORS_UPDATE = "FORCE_SENSORS_UPDATE";
     public static final String SUCCESS_RESPONSE_FORCE_SENSORS_UPDATE = "sensorsUpdateForced";
     public static final String REQUEST_START_DATA_OBJECT_REFRESHING = "START_DATA_OBJECT_REFRESHING";
@@ -96,6 +98,9 @@ public class DeviceRequest {
         }).start();
     }
 
+    public String getCaller() {
+        return this.caller;
+    }
     public String getRequest() {
         return this.request;
     }

@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringcommon.models;
+package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -22,10 +22,6 @@ public class IrrigationSystem implements Parcelable {
     private static final String TABLE_IRRIGATION_SYSTEM_STATE_COLUMN_NAME = "state";
     private String model;
     private boolean state;
-
-    public interface OnChangeStateCallback {
-        void onStateChanged(boolean requestedState, boolean outcome);
-    }
 
     // CONSTRUCTOR
     public IrrigationSystem(String jsonString) {
@@ -74,9 +70,8 @@ public class IrrigationSystem implements Parcelable {
      * @param deviceID from the caller device;
      * @param irrigationSystemID from the irrigation System;
      * @param state true to switch on the irrigation system, false to switch off;
-     * @param callback to manage the HTTP response.
      */
-    public void setState(String deviceID, String irrigationSystemID, boolean state, OnChangeStateCallback callback) {
+    public void setState(String deviceID, String irrigationSystemID, boolean state) {
         // CONVERT STATE
         int stateInt = 0;
         if(state) {
@@ -87,24 +82,18 @@ public class IrrigationSystem implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_IRRIGATION_SYSTEM_STATE + "\",\"" +
                 TABLE_IRRIGATION_SYSTEM_ID_COLUMN_NAME + "\":\"" + irrigationSystemID + "\",\"" +
                 TABLE_IRRIGATION_SYSTEM_STATE_COLUMN_NAME + "\":\"" + stateInt + "\"}";
-        Thread changeStateThread = new Thread(() -> {
+        new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
             Log.i(Common.THIS_LOG, "irrSysChangeState response: " + response);
             if(response != null) {
                 if(state && response.equals(IRRIGATION_SYSTEM_STATE_ON_RESPONSE)) {
                     this.state = true;
-                    callback.onStateChanged(true, true);
                 }
                 else if(!state && response.equals(HttpHelper.IRRIGATION_SYSTEM_STATE_OFF_RESPONSE)) {
                     this.state = false;
-                    callback.onStateChanged(false, true);
-                }
-                else {
-                    callback.onStateChanged(false, false);
                 }
             }
-        });
-        changeStateThread.start();
+        }).start();
     }
 
     @NonNull

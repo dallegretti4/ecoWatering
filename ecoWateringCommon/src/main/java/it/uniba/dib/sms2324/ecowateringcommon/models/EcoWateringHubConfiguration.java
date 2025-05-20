@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.AmbientTemperatureSensor;
 import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.LightSensor;
 import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.RelativeHumiditySensor;

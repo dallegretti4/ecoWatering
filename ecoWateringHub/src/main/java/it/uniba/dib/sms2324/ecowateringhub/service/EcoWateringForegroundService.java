@@ -135,7 +135,7 @@ public class EcoWateringForegroundService extends Service {
         return new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle(context.getString(R.string.sensors_notification_title))
                 .setContentText(text)
-                .setSmallIcon(R.drawable.main_app_logo_no_bg)
+                .setSmallIcon(it.uniba.dib.sms2324.ecowateringcommon.R.drawable.small_simple_logo)
                 .build();
     }
 

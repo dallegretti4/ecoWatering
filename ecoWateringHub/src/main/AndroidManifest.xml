@@ -44,10 +44,6 @@
             android:name=".connection.ManageConnectedRemoteEWDevicesActivity"
             android:exported="false"/>
 
-        <activity
-            android:name=".configuration.EcoWateringConfigurationActivity"
-            android:exported="false"/>
-
         <service
             android:name=".service.EcoWateringForegroundService"
             android:foregroundServiceType="specialUse"

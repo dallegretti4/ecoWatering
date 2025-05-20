@@ -33,9 +33,8 @@ import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class ManageHubManualControlFragment extends Fragment {
-    private static final String IRRIGATION_SYSTEM_STATE_CHANGED_OUT_STATE = "IRRIGATION_SYSTEM_STATE_CHANGED_OUT_STATE";
     private static final int REFRESH_FRAGMENT_FROM_HUB_INTERVAL = 3 * 1000;
-    private static final int WAITING_TIME_AFTER_BACKGROUND_REFRESHING_ACTION = 6 * 1000;
+    private static final int WAITING_TIME_AFTER_FRAGMENT_RESTART_REFRESHING_ACTION = 4 * 1000;
     private static String calledFrom;
     private static EcoWateringHub hub;
     private final int primary_color;
@@ -47,8 +46,8 @@ public class ManageHubManualControlFragment extends Fragment {
         void onSecondToolbarFunctionChosen();
         void manageConnectedRemoteDevices();
         void automateEcoWateringSystem();
-        void startDataObjectRefreshing();
-        void stopDataObjectRefreshing();
+        void setIrrigationSystemState(boolean value);
+        void setDataObjectRefreshing(boolean value);
         void configureSensor(int sensorType);
         void forceSensorsUpdate(Common.OnMethodFinishCallback callback);
         void restartApp();
@@ -60,7 +59,7 @@ public class ManageHubManualControlFragment extends Fragment {
         }
     };
     private final Handler refreshManualControlFragmentHandler = new Handler(Looper.getMainLooper());
-    private static boolean isStateChangedDialogVisible;
+    private static boolean isSwitchIrrigationSystemDialogVisible;
     private static boolean isHttpErrorFaultDialogVisible;
 
     public ManageHubManualControlFragment() {
@@ -95,6 +94,7 @@ public class ManageHubManualControlFragment extends Fragment {
         super.onDetach();
         Log.i(Common.THIS_LOG, "onDetach()");
         this.onHubActionChosenCallback = null;
+        Common.unlockLayout(requireActivity());
     }
 
     @Override
@@ -115,7 +115,7 @@ public class ManageHubManualControlFragment extends Fragment {
         else {  // CONFIGURATION CHANGED CASE
             fragmentLayoutSetup(view);
             Common.hideLoadingFragment(view, R.id.manageHubManualControlFragmentContainer , R.id.includeLoadingFragment);
-            if(isStateChangedDialogVisible) showStateChangedDialog(savedInstanceState.getBoolean(IRRIGATION_SYSTEM_STATE_CHANGED_OUT_STATE));
+            if(isSwitchIrrigationSystemDialogVisible) showSwitchIrrigationSystemDialog(!hub.getEcoWateringHubConfiguration().getIrrigationSystem().getState());
             else if(isHttpErrorFaultDialogVisible) showHttpErrorFaultDialog();
         }
     }
@@ -127,7 +127,10 @@ public class ManageHubManualControlFragment extends Fragment {
                 hub = new EcoWateringHub(jsonResponse);
                 if(onHubActionChosenCallback != null) {
                     onHubActionChosenCallback.forceSensorsUpdate(() -> {
-                        if(getView() != null) requireActivity().runOnUiThread(() -> fragmentLayoutSetup(getView()));
+                        if(getView() != null) requireActivity().runOnUiThread(() -> {
+                            Common.unlockLayout(requireActivity());
+                            fragmentLayoutSetup(getView());
+                        });
                     });
                 }
             });
@@ -141,7 +144,7 @@ public class ManageHubManualControlFragment extends Fragment {
         super.onResume();
         Log.i(Common.THIS_LOG, "onResume()");
         new Thread(() -> {
-            try {Thread.sleep(WAITING_TIME_AFTER_BACKGROUND_REFRESHING_ACTION);}
+            try {Thread.sleep(WAITING_TIME_AFTER_FRAGMENT_RESTART_REFRESHING_ACTION);}
             catch (InterruptedException e) {throw new RuntimeException(e);}
             // AUTO REFRESH FRAGMENT
             refreshManualControlFragmentHandler.post(refreshManualControlFragmentRunnable);
@@ -153,13 +156,6 @@ public class ManageHubManualControlFragment extends Fragment {
         super.onPause();
         Log.i(Common.THIS_LOG, "onPause()");
         refreshManualControlFragmentHandler.removeCallbacks(refreshManualControlFragmentRunnable);
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        if(isStateChangedDialogVisible && hub.getEcoWateringHubConfiguration().getIrrigationSystem().getState()) {
-            outState.putBoolean(IRRIGATION_SYSTEM_STATE_CHANGED_OUT_STATE, true);
-        }
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -224,6 +220,10 @@ public class ManageHubManualControlFragment extends Fragment {
         TextView uvIndexTextView = view.findViewById(R.id.lightIndexTextView);
         uvIndexTextView.setText(String.valueOf((int)(hub.getIndexUV())));
         uvIndexTextView.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        // PRECIPITATION CARD SETUP
+        ((TextView) view.findViewById(R.id.precipitationValueTextView)).setText(String.valueOf(hub.getWeatherInfo().getPrecipitation()));
+        view.findViewById(R.id.precipitationValueContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        ((TextView) view.findViewById(R.id.precipitationLabelTextView)).setText(getString(hub.getWeatherInfo().getPrecipitationStringResourceId()));
     }
 
     private void remoteDevicesConnectedCardSetup(@NonNull View view) {
@@ -255,43 +255,13 @@ public class ManageHubManualControlFragment extends Fragment {
             irrigationSystemValueStateTextView.setText(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.off_value));
             irrigationSystemStateSwitchCompat.setChecked(false);
         }
-        irrigationSystemStateSwitchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(isChecked) {
-                hub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(
-                        Common.getThisDeviceID(requireContext()),
-                        hub.getDeviceID(),
-                        true,
-                        (requestedState, outcome) -> {
-                            if(requestedState && outcome) {
-                                requireActivity().runOnUiThread(() -> {
-                                    irrigationSystemValueStateTextView.setText(getString(R.string.on_value));
-                                    showStateChangedDialog(true);
-                                });
-                            }
-                            else {
-                                requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
-                            }
-                        });
-            }
-            else {
-                hub.getEcoWateringHubConfiguration().getIrrigationSystem().setState(
-                        Common.getThisDeviceID(requireContext()),
-                        hub.getDeviceID(),
-                        false,
-                        ((requestedState, outcome) -> {
-                            if(!requestedState && outcome) {
-                                requireActivity().runOnUiThread(() -> {
-                                    irrigationSystemValueStateTextView.setText(getString(R.string.off_value));
-                                    showStateChangedDialog(false);
-                                });
-                            }
-                            else {
-                                requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
-                            }
-                        })
-                );
-            }
-        });
+        // NEED TO HIDE LOADING FRAGMENT AFTER STATE CHANGED CASE
+        if(view.findViewById(R.id.includeLoadingFragment).getVisibility() == View.VISIBLE) {
+            Common.hideLoadingFragment(view, R.id.manageHubManualControlFragmentContainer , R.id.includeLoadingFragment);
+        }
+        irrigationSystemStateSwitchCompat.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> requireActivity().runOnUiThread(() -> showSwitchIrrigationSystemDialog(isChecked))
+        );
     }
 
     private void automateEcoWateringSystemCardSetup(@NonNull View view) {
@@ -309,21 +279,26 @@ public class ManageHubManualControlFragment extends Fragment {
         SwitchCompat backgroundRefreshSwitch = view.findViewById(R.id.backgroundRefreshSwitch);
         backgroundRefreshSwitch.setOnCheckedChangeListener(null);
         backgroundRefreshSwitch.setChecked(hub.getEcoWateringHubConfiguration().isDataObjectRefreshing());
+        backgroundRefreshSwitch.setEnabled(true);
 
         backgroundRefreshSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             refreshManualControlFragmentHandler.removeCallbacks(refreshManualControlFragmentRunnable); // TO STOP FRAGMENT REFRESHING
             new Thread(() -> {
-                try {Thread.sleep(WAITING_TIME_AFTER_BACKGROUND_REFRESHING_ACTION);}
-                catch (InterruptedException e) {throw new RuntimeException(e);}
+                try {Thread.sleep(WAITING_TIME_AFTER_FRAGMENT_RESTART_REFRESHING_ACTION);}
+                catch (InterruptedException e) {e.printStackTrace();}
                 refreshManualControlFragmentHandler.post(refreshManualControlFragmentRunnable); // TO RESTART FRAGMENT REFRESHING AFTER TIME
             }).start();
             // LOGIC
-            if(isChecked && !hub.getEcoWateringHubConfiguration().isDataObjectRefreshing()) {
-                onHubActionChosenCallback.startDataObjectRefreshing();
-            }
-            else if (!isChecked && hub.getEcoWateringHubConfiguration().isDataObjectRefreshing()) {
-                onHubActionChosenCallback.stopDataObjectRefreshing();
-            }
+            new Thread(() -> {
+                try {Thread.sleep(1000);}
+                catch (InterruptedException e) {e.printStackTrace();}
+                if(isChecked && !hub.getEcoWateringHubConfiguration().isDataObjectRefreshing()) {
+                    onHubActionChosenCallback.setDataObjectRefreshing(true);
+                }
+                else if (!isChecked && hub.getEcoWateringHubConfiguration().isDataObjectRefreshing()) {
+                    onHubActionChosenCallback.setDataObjectRefreshing(false);
+                }
+            }).start();
         });
     }
 
@@ -334,12 +309,18 @@ public class ManageHubManualControlFragment extends Fragment {
                 (hub.getEcoWateringHubConfiguration().getAmbientTemperatureSensor().getSensorID() == null)) {
             view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.VISIBLE);
         }
+        else {
+            view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.GONE);
+        }
         view.findViewById(R.id.ambientTemperatureSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
         view.findViewById(R.id.ambientTemperatureSensorCard).setOnClickListener((v) -> onHubActionChosenCallback.configureSensor(Sensor.TYPE_AMBIENT_TEMPERATURE));
         // LIGHT SENSOR CARD SETUP
         if((hub.getEcoWateringHubConfiguration().getLightSensor() == null) ||
                 (hub.getEcoWateringHubConfiguration().getLightSensor().getSensorID() == null)) {
             view.findViewById(R.id.lightSensorNotConfiguredNotification).setVisibility(View.VISIBLE);
+        }
+        else {
+            view.findViewById(R.id.lightSensorNotConfiguredNotification).setVisibility(View.GONE);
         }
         view.findViewById(R.id.lightSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
         view.findViewById(R.id.lightSensorCard).setOnClickListener((v) -> onHubActionChosenCallback.configureSensor(Sensor.TYPE_LIGHT));
@@ -348,29 +329,40 @@ public class ManageHubManualControlFragment extends Fragment {
                 (hub.getEcoWateringHubConfiguration().getRelativeHumiditySensor().getSensorID() == null)) {
             view.findViewById(R.id.relativeHumiditySensorNotConfiguredNotification).setVisibility(View.VISIBLE);
         }
+        else {
+            view.findViewById(R.id.relativeHumiditySensorNotConfiguredNotification).setVisibility(View.GONE);
+        }
         view.findViewById(R.id.relativeHumiditySensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
         view.findViewById(R.id.relativeHumiditySensorCard).setOnClickListener((v) -> onHubActionChosenCallback.configureSensor(Sensor.TYPE_RELATIVE_HUMIDITY));
     }
 
-    private void showStateChangedDialog(boolean newState) {
-        isStateChangedDialogVisible = true;
-        String title;
-        if(newState) {
-            title = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.irrigation_system_turned_on);
-        }
-        else {
-            title = getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.irrigation_system_turned_off);
-        }
+    private void showSwitchIrrigationSystemDialog(boolean isChecked) {
+        isSwitchIrrigationSystemDialogVisible = true;
+        String title = getString(R.string.irrigation_system_switch_off_dialog);
+        if(isChecked) { title = getString(R.string.irrigation_system_switch_on_dialog); }
         new AlertDialog.Builder(requireContext())
                 .setTitle(title)
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        ((dialogInterface, i) -> {
-                            isStateChangedDialogVisible = false;
-                            dialogInterface.dismiss();
-                        })
-                )
-                .setCancelable(false)
+                .setPositiveButton(getString(R.string.confirm_button), (dialogInterface, i) -> {
+                        isSwitchIrrigationSystemDialogVisible = false;
+                        requireActivity().runOnUiThread(() -> {
+                            Common.lockLayout(requireActivity());
+                            Common.showLoadingFragment(requireView(), R.id.manageHubManualControlFragmentContainer, R.id.includeLoadingFragment);
+                        });
+                        refreshManualControlFragmentHandler.removeCallbacks(refreshManualControlFragmentRunnable);
+                        new Thread(() -> {
+                            try { Thread.sleep(WAITING_TIME_AFTER_FRAGMENT_RESTART_REFRESHING_ACTION); }
+                            catch (InterruptedException e) {e.printStackTrace();}
+                            refreshManualControlFragmentHandler.post(refreshManualControlFragmentRunnable);
+                        }).start();
+                        new Thread(() -> {
+                            try {Thread.sleep(1000);}
+                            catch (InterruptedException e) {e.printStackTrace();}
+                            onHubActionChosenCallback.setIrrigationSystemState(isChecked);
+                        }).start();
+                }).setNegativeButton(getString(R.string.close_button), (dialogInterface, i) -> {
+                        isSwitchIrrigationSystemDialogVisible = false;
+                        dialogInterface.dismiss();
+                }).setCancelable(false)
                 .show();
     }
 

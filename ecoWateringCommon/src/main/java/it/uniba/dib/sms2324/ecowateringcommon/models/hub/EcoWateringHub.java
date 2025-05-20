@@ -19,8 +19,9 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
 import it.uniba.dib.sms2324.ecowateringcommon.models.EcoWateringHubConfiguration;
-import it.uniba.dib.sms2324.ecowateringcommon.models.IrrigationSystem;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlan;
 import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.SensorsInfo;
 
 public class EcoWateringHub implements Parcelable {
@@ -32,8 +33,8 @@ public class EcoWateringHub implements Parcelable {
     private static final String TABLE_HUB_ADDRESS_COLUMN_NAME = "address";
     private static final String TABLE_HUB_CITY_COLUMN_NAME = "city";
     private static final String TABLE_HUB_COUNTRY_COLUMN_NAME = "country";
-    private static final String TABLE_HUB_LATITUDE_COLUMN_NAME = "latitude";
-    private static final String TABLE_HUB_LONGITUDE_COLUMN_NAME = "longitude";
+    public static final String TABLE_HUB_LATITUDE_COLUMN_NAME = "latitude";
+    public static final String TABLE_HUB_LONGITUDE_COLUMN_NAME = "longitude";
     private static final String TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME = "remoteDeviceList";
     private String deviceID;
     private String name;
@@ -48,6 +49,7 @@ public class EcoWateringHub implements Parcelable {
     private EcoWateringHubConfiguration ecoWateringHubConfiguration;
     private WeatherInfo weatherInfo;
     private SensorsInfo sensorInfo;
+    private IrrigationPlan irrigationPlan;
 
     // CONSTRUCTOR
     public EcoWateringHub(String jsonString) {
@@ -79,6 +81,10 @@ public class EcoWateringHub implements Parcelable {
             // SENSORS INFO RECOVERING
             if(!jsonOBJ.getString(SensorsInfo.BO_SENSORS_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE)) {
                 this.sensorInfo = new SensorsInfo(jsonOBJ.getString(SensorsInfo.BO_SENSORS_INFO_OBJ_NAME));
+            }
+            // IRRIGATION PLAN RECOVERING
+            if(!jsonOBJ.getString(IrrigationPlan.BO_IRRIGATION_PLAN_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
+                this.irrigationPlan = new IrrigationPlan(jsonOBJ.getString(IrrigationPlan.BO_IRRIGATION_PLAN_COLUMN_NAME));
             }
         }
         catch(JSONException e) {
@@ -216,6 +222,14 @@ public class EcoWateringHub implements Parcelable {
      */
     public String getDeviceID() {
         return this.deviceID;
+    }
+
+    public double getLatitude() {
+        return this.latitude;
+    }
+
+    public double getLongitude() {
+        return this.longitude;
     }
 
     /**

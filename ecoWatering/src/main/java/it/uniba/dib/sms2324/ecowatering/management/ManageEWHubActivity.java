@@ -97,21 +97,15 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     public void automateEcoWateringSystem() {}
 
     @Override
-    public void startDataObjectRefreshing() {
-        DeviceRequest.sendRequest(
-                selectedEWHub.getDeviceID(),
-                Common.getThisDeviceID(this),
-                DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING
-        );
+    public void setDataObjectRefreshing(boolean value) {
+        if(value) DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING);
+        else DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING);
     }
 
     @Override
-    public void stopDataObjectRefreshing() {
-        DeviceRequest.sendRequest(
-                selectedEWHub.getDeviceID(),
-                Common.getThisDeviceID(this),
-                DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING
-        );
+    public void setIrrigationSystemState(boolean value) {
+        if(value) DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_SWITCH_ON_IRRIGATION_SYSTEM);
+        else DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM);
     }
 
     @Override
@@ -121,11 +115,6 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void forceSensorsUpdate(Common.OnMethodFinishCallback callback) {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         callback.canContinue();
     }
 

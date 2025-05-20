@@ -17,14 +17,16 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class WeatherInfo implements Parcelable {
     public static final String BO_WEATHER_INFO_OBJ_NAME = "weatherInfo";
-    private static final String BO_WEATHER_INFO_TIME_COLUMN_NAME = "time";
+    public static final String BO_WEATHER_INFO_TIME_COLUMN_NAME = "time";
     private static final String BO_WEATHER_INFO_AMBIENT_TEMPERATURE_COLUMN_NAME = "temperature_2m";
     private static final String BO_WEATHER_INFO_RELATIVE_HUMIDITY_COLUMN_NAME = "relative_humidity_2m";
+    private static final String BO_WEATHER_INFO_PRECIPITATION_COLUMN_NAME = "precipitation";
     private static final String BO_WEATHER_INFO_WEATHER_CODE_COLUMN_NAME = "weather_code";
     private static final String BO_WEATHER_INFO_UV_INDEX_COLUMN_NAME = "uv_index";
     private String time;
     private double ambientTemperature;
     private double relativeHumidity;
+    private double precipitation;
     private int weatherCode;
     private double indexUV;
 
@@ -34,9 +36,9 @@ public class WeatherInfo implements Parcelable {
             this.time = jsonOBJ.getString(WeatherInfo.BO_WEATHER_INFO_TIME_COLUMN_NAME);
             this.ambientTemperature = jsonOBJ.getDouble(WeatherInfo.BO_WEATHER_INFO_AMBIENT_TEMPERATURE_COLUMN_NAME);
             this.relativeHumidity = jsonOBJ.getDouble(WeatherInfo.BO_WEATHER_INFO_RELATIVE_HUMIDITY_COLUMN_NAME);
+            this.precipitation = jsonOBJ.getDouble(WeatherInfo.BO_WEATHER_INFO_PRECIPITATION_COLUMN_NAME);
             this.weatherCode = jsonOBJ.getInt(WeatherInfo.BO_WEATHER_INFO_WEATHER_CODE_COLUMN_NAME);
             this.indexUV = jsonOBJ.getDouble(WeatherInfo.BO_WEATHER_INFO_UV_INDEX_COLUMN_NAME);
-            Log.i(Common.THIS_LOG, "weatherInfo obj: time: " + this.time + ", ambientTemperature: " + this.ambientTemperature + ", relativeHumidity: " + this.relativeHumidity +  ", weatherCode: " + this.weatherCode + ", UV index: " + this.indexUV);
         }
         catch(JSONException e) {
             e.printStackTrace();
@@ -88,6 +90,15 @@ public class WeatherInfo implements Parcelable {
         }
     }
 
+    public int getPrecipitationStringResourceId() {
+        if(this.precipitation == 0.0) return R.string.precipitation_label_no_precipitation;
+        else if(this.precipitation >= 0.1 && this.precipitation <= 1.0) return R.string.precipitation_label_chance_light_precipitation;
+        else if(this.precipitation >= 1.1 && this.precipitation <= 3.0) return R.string.precipitation_label_light_precipitation;
+        else if(this.precipitation >= 3.1 && this.precipitation <= 10.0) return R.string.precipitation_label_moderate_precipitation;
+        else if(this.precipitation >= 10.1 && this.precipitation <= 25.0) return R.string.precipitation_label_heavy_precipitation;
+        else return R.string.precipitation_label_intense_precipitation;
+    }
+
     public static void updateWeatherInfo(@NonNull Context context) {
         new Thread(() -> {
             String jsonString = "{\"" + EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
@@ -108,6 +119,9 @@ public class WeatherInfo implements Parcelable {
     public double getRelativeHumidity() {
         return relativeHumidity;
     }
+    public double getPrecipitation() {
+        return this.precipitation;
+    }
     public int getWeatherCode() {
         return this.weatherCode;
     }
@@ -121,6 +135,7 @@ public class WeatherInfo implements Parcelable {
         time = in.readString();
         ambientTemperature = in.readDouble();
         relativeHumidity = in.readDouble();
+        precipitation = in.readDouble();
         weatherCode = in.readInt();
         indexUV = in.readDouble();
     }
@@ -147,6 +162,7 @@ public class WeatherInfo implements Parcelable {
         parcel.writeString(time);
         parcel.writeDouble(ambientTemperature);
         parcel.writeDouble(relativeHumidity);
+        parcel.writeDouble(precipitation);
         parcel.writeInt(weatherCode);
         parcel.writeDouble(indexUV);
     }

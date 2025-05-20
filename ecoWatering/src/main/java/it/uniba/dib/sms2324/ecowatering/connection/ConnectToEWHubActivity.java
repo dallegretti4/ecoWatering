@@ -243,6 +243,9 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
                             isWhyUseLocationDialogVisible = false;
+                            if(!isFirstActivity) {
+                                startActivity(new Intent(this, MainActivity.class));
+                            }
                             finish();
                         }))
                 .setCancelable(false);

@@ -39,6 +39,10 @@ public class SensorConfigurationFragment extends Fragment {
     public static int sensorType;
     private EcoWateringSensor configSensor;
     private List<Sensor> sensorList;
+    private OnSensorConfiguredCallback onSensorConfiguredCallback;
+    public interface OnSensorConfiguredCallback {
+        void onSensorConfigured(int sensorResult);
+    }
     private final MenuProvider menuProvider = new MenuProvider() {
         @Override
         public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
@@ -57,10 +61,6 @@ public class SensorConfigurationFragment extends Fragment {
             return false;
         }
     };
-    private OnSensorConfiguredCallback onSensorConfiguredCallback;
-    protected interface OnSensorConfiguredCallback {
-        void onSensorConfigured(int sensorResult);
-    }
     private static Sensor chosenSensor;
     private static boolean isSensorChosenDialogVisible;
     private static boolean isSensorAlreadyConfiguredDialogVisible;
