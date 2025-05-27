@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import it.uniba.dib.sms2324.ecowateringcommon.R;
+import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
 
 public class EcoWateringHubAdapter extends ArrayAdapter<EcoWateringHub> {
     private final Context context;
@@ -32,7 +33,7 @@ public class EcoWateringHubAdapter extends ArrayAdapter<EcoWateringHub> {
             convertView = LayoutInflater.from(context).inflate(R.layout.list_item_ecowatering_hub, parent, false);
         }
         ImageView weatherImageView = convertView.findViewById(R.id.weatherIconImageView);
-        weatherImageView.setImageResource(hub.getWeatherInfo().getWeatherImageResourceId());
+        weatherImageView.setImageResource(WeatherInfo.getWeatherImageResourceId(hub.getWeatherInfo().getWeatherCode()));
         TextView firstItemTextView = convertView.findViewById(R.id.firstItemTextView);
         firstItemTextView.setText(hub.getName());
         TextView secondItemTextView = convertView.findViewById(R.id.secondItemTextView);

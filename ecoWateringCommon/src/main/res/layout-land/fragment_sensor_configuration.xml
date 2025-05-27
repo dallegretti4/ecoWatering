@@ -10,7 +10,6 @@
         android:id="@+id/toolBar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/ew_primary_color"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <!-- FRAGMENT -->
@@ -44,7 +43,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/rounded_square_shape"
-                    android:backgroundTint="@color/ew_primary_color_50"
                     android:elevation="4dp"
                     android:scaleX="0.95"
                     android:scaleY="0.95"
@@ -57,19 +55,28 @@
                         android:text="@string/selected_sensor_label"
                         android:textSize="24sp"
                         android:textAlignment="center"
-                        android:textColor="@color/white"
+                        android:textColor="@color/black_white_100"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
                 <TextView
-                    android:id="@+id/selectedSensorValueTextView"
+                    android:id="@+id/selectedSensorNameTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="5dp"
+                    android:layout_marginTop="2dp"
                     android:text="@string/no_sensor_selected_label"
                     android:textSize="18sp"
+                    android:textStyle="bold"
                     android:textAlignment="center"
                     app:layout_constraintTop_toBottomOf="@+id/selectedSensorTitleCard"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+                <TextView
+                    android:id="@+id/selectedSensorVendorTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    app:layout_constraintTop_toBottomOf="@+id/selectedSensorNameTextView"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent" />
                 <View
@@ -79,14 +86,14 @@
                     android:layout_marginTop="5dp"
                     android:background="@color/black_white_80"
                     android:visibility="gone"
-                    app:layout_constraintTop_toBottomOf="@id/selectedSensorValueTextView"/>
+                    app:layout_constraintTop_toBottomOf="@id/selectedSensorVendorTextView"/>
                 <Button
                     android:id="@+id/selectedSensorDetachButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="@string/detach_button"
-                    android:textColor="@color/white"
+                    android:textColor="@color/black_white_100"
                     android:backgroundTint="@color/ew_secondary_color_30"
                     android:visibility="gone"
                     app:layout_constraintTop_toBottomOf="@+id/selectedSensorCardDivisor"
@@ -124,12 +131,10 @@
                 app:layout_constraintTop_toTopOf="parent"/>
             <ListView
                 android:id="@+id/sensorsListView"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:background="@color/white"
                 android:elevation="8dp"
-                app:layout_constraintWidth_percent="0.75"
                 app:layout_constraintTop_toBottomOf="@+id/sensorsConfigurationTitleTextView"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"/>

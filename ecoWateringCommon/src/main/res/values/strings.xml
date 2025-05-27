@@ -2,9 +2,12 @@
 <resources>
     <string name="add_remote_device_button">Add remote device</string>
     <string name="agree">Agree</string>
-    <string name="are_you_sure_label">Are you sure?</string>
     <string name="ambient_temperature_label">Ambient temperature</string>
-    <string name="background_refresh_label">Background refresh</string>
+    <string name="are_you_sure_label">Are you sure?</string>
+    <string name="automate_system_message">We make this irrigation plan for the next 7 days.\nIn order to deliver a personalized and responsive service, we can edit the plan, according to weather forecast changes over the days.\nYour sensors will have an important role to improve your experience.</string>
+    <string name="automate_system_title">We are happy to take cure of your system!</string>
+    <string name="automate_system_toolbar_title">Automate system</string>
+    <string name="background_refreshing_label">Background refreshing</string>
     <string name="bluetooth_button">Bluetooth</string>
     <string name="bt_connection_toolbar_title">Bluetooth connection</string>
     <string name="bt_not_supported_dialog_message">Please use WiFi connectivity to be authorized.</string>
@@ -14,17 +17,19 @@
     <string name="changes_not_saved_title">Changes have not yet been saved</string>
     <string name="close_button">Close</string>
     <string name="configuration_label">Configuration</string>
-    <string name="configuration_not_automated">Not automated</string>
-    <string name="configuration_not_automated_message">Turn to automatic control</string>
+    <string name="configuration_not_automated">System not automated!</string>
+    <string name="configuration_not_automated_message">Try our automatic control</string>
     <string name="configure_label">Configure</string>
     <string name="confirm_button">Confirm</string>
     <string name="connect_to_hub_toolbar_title">Connect to ecoWatering Hub</string>
     <string name="connection_chooser_fragment_title_device">To connect to your ecoWatering system, you need to receive the request from your EcoWateringHub.\n\nChoose the way you like to receive the request.</string>
     <string name="connection_chooser_fragment_title_hub">Choose the way you like to authorize a remote ecoWatering Device.</string>
+    <string name="date_builder_label">%1$s %2$s, %3$d</string>
     <string name="delete_account_button">Delete account</string>
     <string name="delete_account_message">Your data would be destroyed forever.</string>
     <string name="delete_account_title">Do you really want to delete your account?</string>
     <string name="detach_button">Detach</string>
+    <string name="detach_sensor_dialog_title">Are you sure to detach this sensor?</string>
     <string name="device_account_successful_deleted_title">Account deleted</string>
     <string name="device_id_label">DeviceID:</string>
     <string name="disconnect">Disconnect</string>
@@ -37,23 +42,29 @@
     <string name="hub_not_available_title">Sorry, this hub seems to be not available</string>
     <string name="internet_connection_fault_msg">Please, connect to Internet and retry.</string>
     <string name="internet_connection_fault_title">Device is not connected to Internet</string>
+    <string name="irrigation_plan_agree_dialog_message">You can always stop following the plan and keep manual control on the system.</string>
+    <string name="irrigation_plan_agree_dialog_title">Do you agree our irrigation plan?</string>
     <string name="irrigation_system_label">Irrigation System</string>
     <string name="irrigation_system_switch_off_dialog">Do you want to switch off the irrigation system?</string>
     <string name="irrigation_system_switch_on_dialog">Do you want to switch on the irrigation system?</string>
     <string name="irrigation_system_turned_off">Irrigation system is Off.</string>
     <string name="irrigation_system_turned_on">Irrigation system is On.</string>
+    <string name="light_uv_index_max_label">max UV index</string>
     <string name="light_uv_index_label">UV index</string>
     <string name="manage_remote_device_toolbar_title">Connected Devices</string>
     <string name="manual_ew_configuration_toolbar_title">ecoWatering Configuration</string>
     <string name="name_label">Name</string>
     <string name="next_button">Next</string>
     <string name="new_name_label">New name</string>
+    <string name="no_sensor_selected_label">No sensor selected</string>
+    <string name="notification_data_object_refreshing_disabled">Background refreshing disabled</string>
     <string name="off_value">Off</string>
     <string name="ok_button">OK</string>
     <string name="on_value">On</string>
     <string name="refresh">Refresh</string>
     <string name="relative_humidity_label">Relative humidity</string>
     <string name="relative_humidity_percent_label">Relative humidity percent</string>
+    <string name="relative_humidity_mean_percent_label">Mean relative humidity percent</string>
     <string name="remote_devices_connected_case">Select \"+\" item on the toolbar to add new remote devices..</string>
     <string name="remote_device_connection_toolbar_title">Add new ecoWatering Device</string>
     <string name="remote_device_remove_it_self_from_hub_confirm_title">This is your device, are you sure you want to remove that?</string>
@@ -70,10 +81,12 @@
     <string name="precipitation_label_moderate_precipitation">Moderate rain expected</string>
     <string name="precipitation_label_no_precipitation">No precipitation expected</string>
     <string name="precipitation_measurement_unit">mm</string>
+    <string name="selected_sensor_label">Selected sensor</string>
     <string name="sensor_added_successfully">Sensor is successfully configured</string>
     <string name="sensor_already_configured">This sensor is already configured.</string>
     <string name="sensor_ambient_temperature">Ambient temperature sensor</string>
     <string name="sensor_chosen_title_dialog">Do you want to use this sensor?</string>
+    <string name="sensor_detached_title">Sensor successfully detached</string>
     <string name="sensor_light">Light sensor</string>
     <string name="sensor_list_empty">Sorry, no sensor founded.\nPlease, make you sure sensors are correctly connected to the ecoWateringHub and retry.</string>
     <string name="sensor_name_label">Sensor name: </string>
@@ -100,8 +113,31 @@
     <string name="wifi_connection_toolbar_title">WiFi connection</string>
     <string name="wifi_not_supported_dialog_message">Please use Bluetooth connectivity to be authorized.</string>
     <string name="wifi_not_supported_dialog_tile">This device not supports WiFi connectivity</string>
+
     <plurals name="remote_devices_connected_plurals">
+        <item quantity="zero">remote ecoWatering Device connected</item>
         <item quantity="one">remote ecoWatering Device connected</item>
         <item quantity="other">remote ecoWatering Devices connected</item>
     </plurals>
+
+    <plurals name="irrigation_minutes_plan_plurals">
+        <item quantity="zero">irrigation minute planned.\nNo irrigation needed</item>
+        <item quantity="one">irrigation minute planned</item>
+        <item quantity="other">irrigation minutes planned</item>
+    </plurals>
+
+    <string-array name="month_names">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
 </resources>

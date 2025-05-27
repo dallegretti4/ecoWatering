@@ -63,74 +63,8 @@
         android:visibility="gone"/>
 
     <!-- DISCONNECT DEVICE CARD -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/disconnectDeviceBackgroundCard"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black_white_0"
-        android:alpha="0.7"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"/>
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <include
         android:id="@+id/disconnectDeviceCard"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/rounded_square_shape"
-        android:scaleX="0.9"
-        android:scaleY="0.9"
-        android:elevation="8dp"
-        android:padding="15dp"
-        android:visibility="gone"
-        app:layout_constraintWidth_percent="0.95"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
-        <TextView
-            android:id="@+id/disconnectDeviceTitleTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/remove_remote_device_confirm_title"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
-        <TextView
-            android:id="@+id/disconnectDeviceMessageTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/remove_remote_device_confirm_message"
-            android:textAlignment="center"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@+id/disconnectDeviceTitleTextView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
-        <Button
-            android:id="@+id/cancelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/ew_secondary_color"
-            android:text="@string/cancel_button"
-            android:textColor="@color/black_white_100"
-            app:layout_constraintTop_toBottomOf="@+id/disconnectDeviceMessageTextView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/disconnectRemoteDeviceButton"/>
-        <Button
-            android:id="@+id/disconnectRemoteDeviceButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:backgroundTint="@color/ew_secondary_color_30"
-            android:text="@string/disconnect"
-            android:textColor="@color/black_white_100"
-            app:layout_constraintTop_toBottomOf="@+id/disconnectDeviceMessageTextView"
-            app:layout_constraintLeft_toRightOf="@+id/cancelButton"
-            app:layout_constraintRight_toRightOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+        layout="@layout/card_disconnect_device"
+        android:visibility="gone"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

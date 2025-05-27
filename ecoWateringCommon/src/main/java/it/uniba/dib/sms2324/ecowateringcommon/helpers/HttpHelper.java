@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpHelper {
     public static final String HTTP_RESPONSE_ERROR = "error";
-    public static final String IRRIGATION_SYSTEM_STATE_OFF_RESPONSE = "irrigationSystemSwitchedOff";
     private static final String REQUEST_MODE_GET = "GET";
     private static final String REQUEST_MODE_POST = "POST";
     private static final String REQUEST_PROPERTY_CONTENT_TYPE_LABEL = "Content-Type";
@@ -51,6 +50,8 @@ public class HttpHelper {
     public static final String MODE_DELETE_DEVICE_REQUEST = "DELETE_DEVICE_REQUEST";
     public static final String MODE_GET_IRRIGATION_PLAN_PREVIEW = "GET_IRRIGATION_PLAN_PREVIEW";
     public static final String MODE_UPDATE_IRRIGATION_PLAN = "UPDATE_IRRIGATION_PLAN";
+    public static final String MODE_SET_IS_AUTOMATED = "SET_IS_AUTOMATED";
+    public static final String MODE_UPDATE_SENSOR_LIST = "UPDATE_SENSOR_LIST";
     public static final String TIME_PARAMETER = "TIME";
     public static final String SENSOR_TYPE_PARAMETER = "SENSOR_TYPE";
     public static final String SENSOR_ID_PARAMETER = "SENSOR_ID";

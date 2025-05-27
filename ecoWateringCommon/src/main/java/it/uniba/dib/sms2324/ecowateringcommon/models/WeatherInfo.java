@@ -18,11 +18,11 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 public class WeatherInfo implements Parcelable {
     public static final String BO_WEATHER_INFO_OBJ_NAME = "weatherInfo";
     public static final String BO_WEATHER_INFO_TIME_COLUMN_NAME = "time";
-    private static final String BO_WEATHER_INFO_AMBIENT_TEMPERATURE_COLUMN_NAME = "temperature_2m";
-    private static final String BO_WEATHER_INFO_RELATIVE_HUMIDITY_COLUMN_NAME = "relative_humidity_2m";
+    private static final String BO_WEATHER_INFO_AMBIENT_TEMPERATURE_COLUMN_NAME = "ambientTemperature";
+    private static final String BO_WEATHER_INFO_RELATIVE_HUMIDITY_COLUMN_NAME = "relativeHumidity";
     private static final String BO_WEATHER_INFO_PRECIPITATION_COLUMN_NAME = "precipitation";
-    private static final String BO_WEATHER_INFO_WEATHER_CODE_COLUMN_NAME = "weather_code";
-    private static final String BO_WEATHER_INFO_UV_INDEX_COLUMN_NAME = "uv_index";
+    private static final String BO_WEATHER_INFO_WEATHER_CODE_COLUMN_NAME = "weatherCode";
+    private static final String BO_WEATHER_INFO_UV_INDEX_COLUMN_NAME = "indexUV";
     private String time;
     private double ambientTemperature;
     private double relativeHumidity;
@@ -45,8 +45,8 @@ public class WeatherInfo implements Parcelable {
         }
     }
 
-    public int getWeatherImageResourceId() {
-        switch(this.weatherCode) {
+    public static int getWeatherImageResourceId(int weatherCode) {
+        switch(weatherCode) {
             // SUN CASE
             case 0:
             case 1:
@@ -90,22 +90,23 @@ public class WeatherInfo implements Parcelable {
         }
     }
 
-    public int getPrecipitationStringResourceId() {
-        if(this.precipitation == 0.0) return R.string.precipitation_label_no_precipitation;
-        else if(this.precipitation >= 0.1 && this.precipitation <= 1.0) return R.string.precipitation_label_chance_light_precipitation;
-        else if(this.precipitation >= 1.1 && this.precipitation <= 3.0) return R.string.precipitation_label_light_precipitation;
-        else if(this.precipitation >= 3.1 && this.precipitation <= 10.0) return R.string.precipitation_label_moderate_precipitation;
-        else if(this.precipitation >= 10.1 && this.precipitation <= 25.0) return R.string.precipitation_label_heavy_precipitation;
+    public static int getPrecipitationStringResourceId(double precipitation) {
+        if(precipitation == 0.0) return R.string.precipitation_label_no_precipitation;
+        else if(precipitation >= 0.1 && precipitation <= 1.0) return R.string.precipitation_label_chance_light_precipitation;
+        else if(precipitation >= 1.1 && precipitation <= 3.0) return R.string.precipitation_label_light_precipitation;
+        else if(precipitation >= 3.1 && precipitation <= 10.0) return R.string.precipitation_label_moderate_precipitation;
+        else if(precipitation >= 10.1 && precipitation <= 25.0) return R.string.precipitation_label_heavy_precipitation;
         else return R.string.precipitation_label_intense_precipitation;
     }
 
-    public static void updateWeatherInfo(@NonNull Context context) {
-        new Thread(() -> {
-            String jsonString = "{\"" + EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                    HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_WEATHER_INFO + "\"}";
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "updateWeatherInfo response: " + response);
-        }).start();
+    // BLOCKER
+    public static void updateWeatherInfo(@NonNull Context context, @NonNull EcoWateringHub hub) {
+        String jsonString = "{\"" + EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
+                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_WEATHER_INFO + "\",\"" +
+                EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + hub.getLatitude() + ",\"" +
+                EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + "}";
+        String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+        Log.i(Common.THIS_LOG, "updateWeatherInfo response: " + response);
     }
 
     public String getTime() {

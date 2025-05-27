@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment;
@@ -28,7 +29,7 @@ import it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth.BtConnectio
 import it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi.WiFiConnectionFragment;
 import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundService;
 
-public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity implements
+public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback,
         it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
         OnConnectionFinishCallback {
@@ -70,16 +71,18 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
 
     @Override
     public void onManageConnectedDevicesRefresh() {
-        // CALLED AFTER LAST DEVICE HAS BEEN REMOVED
+        // CALLED ALSO AFTER LAST DEVICE HAS BEEN REMOVED
         EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
             MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
-            if((MainActivity.getThisEcoWateringHub().getRemoteDeviceList() == null) || (MainActivity.getThisEcoWateringHub().getRemoteDeviceList().isEmpty())) {
-                EcoWateringForegroundService.stopEcoWateringService(MainActivity.getThisEcoWateringHub(), this, EcoWateringForegroundService.DEVICE_REQUEST_REFRESHING_SERVICE_TYPE);
+            // ECO WATERING FOREGROUND SERVICE NEED TO BE STOPPED
+            if(((MainActivity.getThisEcoWateringHub().getRemoteDeviceList() == null) || MainActivity.getThisEcoWateringHub().getRemoteDeviceList().isEmpty()) &&
+                    (!MainActivity.getThisEcoWateringHub().isDataObjectRefreshing())) {
+                EcoWateringForegroundService.stopEcoWateringForegroundService(this);
             }
+            // REFRESH FRAGMENT
+            startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
+            finish();
         });
-        // REFRESH FRAGMENT
-        startActivity(new Intent(this, ManageConnectedRemoteEWDevicesActivity.class));
-        finish();
     }
 
     @Override
@@ -121,7 +124,7 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
 
     @Override
     public void onConnectionChooserBackPressed() {
-        startActivity(new Intent(this, ManageConnectedRemoteEWDevicesActivity.class));
+        startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
         finish();
     }
 
@@ -167,8 +170,11 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // CALLED IN ConnectionChooserFragment IN onViewCreated()
+        // REQUESTED IN ConnectionChooserFragment IN onViewCreated()
         if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
+            if(!SharedPreferencesHelper.readBooleanOnSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY)) {
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY, true);
+            }
             if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 fragmentManager.popBackStack();
             }
@@ -190,7 +196,6 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if(requestCode == Common.GPS_WIFI_ENABLE_REQUEST) {
             fragmentManager.popBackStack();
             if(resultCode == RESULT_OK) {
@@ -248,12 +253,8 @@ public class ManageConnectedRemoteEWDevicesActivity extends AppCompatActivity im
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
                             isDeviceConnectedSuccessfullyVisible = false;
-                            EcoWateringHub.getEcoWateringHubJsonString(
-                                    Common.getThisDeviceID(this),
-                                    (jsonResponse) -> EcoWateringForegroundService.startEcoWateringService(new EcoWateringHub(jsonResponse), this, EcoWateringForegroundService.DEVICE_REQUEST_REFRESHING_SERVICE_TYPE)
-                            );
-                            fragmentManager.popBackStack();
-                            fragmentManager.popBackStack();
+                            startActivity(new Intent(this, MainActivity.class));
+                            finish();
                         })
                 )
                 .setCancelable(false)

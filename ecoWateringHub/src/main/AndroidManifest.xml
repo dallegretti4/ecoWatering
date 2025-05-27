@@ -41,7 +41,7 @@
         </activity>
 
         <activity
-            android:name=".connection.ManageConnectedRemoteEWDevicesActivity"
+            android:name=".connection.ManageEcoWateringDevicesConnectionActivity"
             android:exported="false"/>
 
         <service

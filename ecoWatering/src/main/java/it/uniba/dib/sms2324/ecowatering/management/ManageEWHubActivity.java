@@ -20,13 +20,17 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.AutomateSystemFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubAutomaticControlFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubManualControlFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.SensorConfigurationFragment;
 
 public class ManageEWHubActivity extends AppCompatActivity implements
-        ManageHubManualControlFragment.OnHubActionChosenCallback,
-        ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback {
+        ManageHubManualControlFragment.OnHubManualActionChosenCallback,
+        ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback,
+        SensorConfigurationFragment.OnSensorConfigurationActionCallback,
+        AutomateSystemFragment.OnAutomateSystemActionCallback {
     private static EcoWateringHub selectedEWHub;
     private FragmentManager fragmentManager;
 
@@ -39,7 +43,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
             Bundle b = getIntent().getBundleExtra(Common.MANAGE_EWH_INTENT_OBJ);
             selectedEWHub = Objects.requireNonNull(b).getParcelable(Common.MANAGE_EWH_INTENT_OBJ);
             if(selectedEWHub != null) {
-                if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
+                if(selectedEWHub.isAutomated()) {
                     changeFragment(new ManageHubAutomaticControlFragment(), false);
                 }
                 else {
@@ -63,16 +67,16 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     // FROM ManageHubManualControlFragment.OnHubActionChosenCallback
     @Override
-    public void onBackPressedFromManageHub() {
+    public void onBackPressedFromManageHubManual() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
     @Override
-    public void refreshFragment() {
+    public void refreshManageHubManualFragment() {
         EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
-            if(selectedEWHub.getEcoWateringHubConfiguration().isAutomated()) {
+            if(selectedEWHub.isAutomated()) {
                 changeFragment(new ManageHubAutomaticControlFragment(), false);
             }
             else {
@@ -82,7 +86,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onSecondToolbarFunctionChosen() {
+    public void onManualSecondToolbarFunctionChosen() {
         // GO BACK
         startActivity(new Intent(this, MainActivity.class));
         finish();
@@ -94,7 +98,13 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void automateEcoWateringSystem() {}
+    public void automateEcoWateringSystem() {
+        fragmentManager.popBackStack();
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            changeFragment(new AutomateSystemFragment(selectedEWHub, Common.CALLED_FROM_DEVICE), true);
+        });
+    }
 
     @Override
     public void setDataObjectRefreshing(boolean value) {
@@ -109,14 +119,15 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void configureSensor(int sensorType) {
-
+    public void configureSensor(String sensorType) {
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            changeFragment(new SensorConfigurationFragment(selectedEWHub, Common.CALLED_FROM_DEVICE, sensorType), true);
+        });
     }
 
     @Override
-    public void forceSensorsUpdate(Common.OnMethodFinishCallback callback) {
-        callback.canContinue();
-    }
+    public void forceSensorsUpdate() {}
 
     @Override
     public void restartApp() {
@@ -142,6 +153,52 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void addNewRemoteDevice() {} // NOT USED BY ECO WATERING DEVICE
+
+    // FROM SensorConfigurationFragment.OnSensorConfigurationActionCallback
+
+    @Override
+    public void onSensorConfigurationGoBack() {
+        Bundle b = new Bundle();
+        b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
+        Intent startIntent = new Intent(this, ManageEWHubActivity.class);
+        startIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
+        startActivity(startIntent);
+        finish();
+    }
+    @Override
+    public void onSensorConfigurationRefreshFragment(String sensorType) {
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            fragmentManager.popBackStack();
+            changeFragment(new SensorConfigurationFragment(selectedEWHub, Common.CALLED_FROM_DEVICE, sensorType), true);
+        });
+    }
+    @Override
+    public void onSensorConfigurationRestartApp() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
+
+    // FROM AutomateSystemFragment.OnAutomateSystemActionCallback
+    @Override
+    public void onAutomateSystemGoBack() {
+        Bundle b = new Bundle();
+        b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
+        Intent restartIntent = new Intent(this, ManageEWHubActivity.class);
+        restartIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
+        startActivity(restartIntent);
+        finish();
+    }
+
+    @Override
+    public void onAutomateSystemFinish() {
+        Bundle b = new Bundle();
+        b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
+        Intent restartIntent = new Intent(this, ManageEWHubActivity.class);
+        restartIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
+        startActivity(restartIntent);
+        finish();
+    }
 
     private void changeFragment(Fragment fragment, boolean addToBackStack) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

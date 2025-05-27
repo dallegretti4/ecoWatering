@@ -30,7 +30,8 @@
             android:scaleX="1.25"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:contentDescription="@string/configure_label" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,17 +54,17 @@
         android:elevation="1dp"
         android:scaleX="0.95"
         android:scaleY="0.95"
+        app:layout_constraintVertical_chainStyle="spread"
         app:layout_constraintTop_toBottomOf="@+id/titleConfigurationCards">
         <TextView
             android:id="@+id/isNotAutomatedTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
             android:textAlignment="center"
             android:text="@string/configuration_not_automated"
-            android:textSize="24sp"
+            android:textSize="20sp"
             android:textColor="@color/ew_secondary_color_30"
+            android:gravity="center"
             app:layout_constraintWidth_percent="0.7"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/isNotAutomatedSuggestTextView"
@@ -72,29 +73,40 @@
             android:id="@+id/isNotAutomatedSuggestTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
             android:textAlignment="center"
             android:text="@string/configuration_not_automated_message"
-            android:textSize="20sp"
+            android:textSize="18sp"
+            android:gravity="center"
             app:layout_constraintWidth_percent="0.7"
             app:layout_constraintTop_toBottomOf="@+id/isNotAutomatedTextView"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"/>
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/irrigationSystemAutomateControlSwitchCompat"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             app:layout_constraintWidth_percent="0.3"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent">
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/irrigationSystemAutomateControlSwitchCompat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <!-- BACKGROUND REFRESH -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/realTimeSensorsWeatherRefreshCard"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/rounded_square_shape"
         android:scaleY="0.95"
         android:scaleX="0.95"
@@ -104,26 +116,36 @@
             android:id="@+id/realTimeSensorsWeatherRefreshTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/background_refresh_label"
-            android:textSize="24sp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="@string/background_refreshing_label"
+            android:textSize="20sp"
             android:textAlignment="center"
+            android:gravity="center"
             app:layout_constraintWidth_percent="0.7"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"/>
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/backgroundRefreshSwitch"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
+            android:layout_height="0dp"
             app:layout_constraintWidth_percent="0.3"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent">
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/backgroundRefreshSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                app:layout_constraintWidth_percent="0.3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 
     <!-- AMBIENT TEMPERATURE SENSOR CARD -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -183,7 +205,8 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"/>
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:contentDescription="@string/ambient_temperature_label" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <TextView
                 android:layout_width="wrap_content"
@@ -211,6 +234,7 @@
             android:backgroundTint="@color/black_white_70"
             android:scaleX="2"
             android:scaleY="2"
+            android:contentDescription="@string/configure_label"
             app:layout_constraintWidth_percent="0.15"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="parent"
@@ -277,7 +301,8 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"/>
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:contentDescription="@string/sensor_light" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <TextView
                 android:layout_width="wrap_content"
@@ -304,6 +329,7 @@
             android:backgroundTint="@color/black_white_70"
             android:scaleX="2"
             android:scaleY="2"
+            android:contentDescription="@string/configure_label"
             app:layout_constraintWidth_percent="0.15"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="parent"
@@ -367,6 +393,7 @@
                     android:minHeight="36dp"
                     android:background="@drawable/sensor_relative_humidity_icon"
                     android:backgroundTint="@color/black_white_100"
+                    android:contentDescription="@string/relative_humidity_label"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -398,6 +425,7 @@
             android:backgroundTint="@color/black_white_70"
             android:scaleX="2"
             android:scaleY="2"
+            android:contentDescription="@string/configure_label"
             app:layout_constraintWidth_percent="0.15"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="parent"
@@ -426,13 +454,16 @@
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:contentDescription="@string/sensor_not_configured_info" />
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:text="@string/sensor_not_configured_info"
             android:textColor="@color/black_white_50"
+            android:gravity="center"
+            android:textAlignment="center"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toRightOf="@+id/infoNoSensorConfiguredImageView"
             app:layout_constraintRight_toRightOf="parent"/>

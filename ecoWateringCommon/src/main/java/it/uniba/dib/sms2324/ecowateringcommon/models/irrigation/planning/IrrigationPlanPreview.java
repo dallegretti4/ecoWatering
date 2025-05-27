@@ -53,7 +53,9 @@ public class IrrigationPlanPreview extends IrrigationPlan {
                 HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + caller + "\",\"" +
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_IRRIGATION_PLAN_PREVIEW + "\",\"" +
                 EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + hub.getLatitude() + ",\"" +
-                EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + "}";
+                EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + ",\"" +
+                BO_FORECAST_DAYS_COLUMN_NAME + "\":" + FORECAST_DAYS + "}";
+        Log.i(Common.THIS_LOG, "------------------------>QUERY: " + jsonString);
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
             Log.i(Common.THIS_LOG, "getIrrigationPlanPreview response: " + response);

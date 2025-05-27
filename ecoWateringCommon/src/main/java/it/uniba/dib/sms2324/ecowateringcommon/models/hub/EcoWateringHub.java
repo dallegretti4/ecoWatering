@@ -18,14 +18,17 @@ import java.util.List;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
-import it.uniba.dib.sms2324.ecowateringcommon.models.EcoWateringHubConfiguration;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlan;
-import it.uniba.dib.sms2324.ecowateringcommon.models.sensors.SensorsInfo;
+import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
 
 public class EcoWateringHub implements Parcelable {
-    private static final String BO_HUB_CONFIGURATION_COLUMN_NAME = "ecoWateringHubConfiguration";
+    private static final String IS_AUTOMATED_TRUE_VALUE = "1";
+    private static final String IS_DATA_OBJECT_REFRESHING_TRUE_VALUE = "1";
+    public static final String SET_IS_AUTOMATED_SUCCESS_RESPONSE = "ecoWateringHubAutomated";
+    public static final String SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE = "isDataObjectRefreshingSet";
+    private static final String BO_IRRIGATION_SYSTEM_COLUMN_NAME = "irrigationSystem";
     public static final String HUB_NAME_CHANGED_RESPONSE = "hubNameSuccessfulChanged";
     public static final String DEVICE_HUB_ACCOUNT_RESPONSE = "hubAccountSuccessfulDeleted";
     public static final String TABLE_HUB_DEVICE_ID_COLUMN_NAME = "deviceID";
@@ -36,6 +39,8 @@ public class EcoWateringHub implements Parcelable {
     public static final String TABLE_HUB_LATITUDE_COLUMN_NAME = "latitude";
     public static final String TABLE_HUB_LONGITUDE_COLUMN_NAME = "longitude";
     private static final String TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME = "remoteDeviceList";
+    public static final String TABLE_HUB_IS_AUTOMATED_COLUMN_NAME = "isAutomated";
+    public static final String TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME = "isDataObjectRefreshing";
     private String deviceID;
     private String name;
     private String address;
@@ -44,9 +49,11 @@ public class EcoWateringHub implements Parcelable {
     private double latitude;
     private double longitude;
     private List<String> remoteDeviceList;
+    private boolean isAutomated;
+    private boolean isDataObjectRefreshing;
 
     // NOT ON DATABASE
-    private EcoWateringHubConfiguration ecoWateringHubConfiguration;
+    private IrrigationSystem irrigationSystem;
     private WeatherInfo weatherInfo;
     private SensorsInfo sensorInfo;
     private IrrigationPlan irrigationPlan;
@@ -70,9 +77,13 @@ public class EcoWateringHub implements Parcelable {
                     this.remoteDeviceList.add(jsonRemoteDeviceList.getString(i));
                 }
             }
-            // ECO WATERING HUB CONFIGURATION RECOVERING
-            if(!jsonOBJ.getString(BO_HUB_CONFIGURATION_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
-                this.ecoWateringHubConfiguration = new EcoWateringHubConfiguration(jsonOBJ.getString(BO_HUB_CONFIGURATION_COLUMN_NAME));
+            // IS AUTOMATED RECOVERING
+            this.isAutomated = jsonOBJ.getString(TABLE_HUB_IS_AUTOMATED_COLUMN_NAME).equals(IS_AUTOMATED_TRUE_VALUE);
+            // IS BACKGROUND REFRESHING RECOVERING
+            this.isDataObjectRefreshing = jsonOBJ.getString(TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME).equals(IS_DATA_OBJECT_REFRESHING_TRUE_VALUE);
+            // IRRIGATION SYSTEM RECOVERING
+            if(!jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
+                this.irrigationSystem = new IrrigationSystem(jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME));
             }
             // WEATHER INFO RECOVERING
             if(!jsonOBJ.getString(WeatherInfo.BO_WEATHER_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE)) {
@@ -156,6 +167,14 @@ public class EcoWateringHub implements Parcelable {
         });
         getHubObjThread.start();
     }
+    public static String getEcoWateringHubJsonStringNoThread(String hubID) {
+        String jsonString = "{\"" +
+                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
+                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_HUB_OBJ + "\"}";
+        String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+        Log.i(Common.THIS_LOG, "getEWHubObj No Thread response: " + response);
+        return response;
+    }
 
     public String addNewRemoteDevice(@NonNull Context context, @NonNull String remoteDeviceID) {
         String jsonString = "{\"" +
@@ -195,6 +214,38 @@ public class EcoWateringHub implements Parcelable {
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
             Log.i(Common.THIS_LOG, "setHubName response: " + response);
+            callback.getResponse(response);
+        }).start();
+    }
+
+    public void setIsAutomated(boolean value, Common.OnStringResponseGivenCallback callback) {
+        int intValue = 0;
+        if(value) {
+            intValue = 1;
+        }
+        String jsonString = "{\"" +
+                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + this.deviceID + "\",\"" +
+                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_IS_AUTOMATED + "\",\"" +
+                HttpHelper.VALUE_PARAMETER + "\":\"" + intValue + "\"}";
+        new Thread(() -> {
+            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+            Log.i(Common.THIS_LOG, "setIsAutomated response: " + response);
+            callback.getResponse(response);
+        }).start();
+    }
+
+    public void setIsDataObjectRefreshing(@NonNull Context context, boolean value, Common.OnStringResponseGivenCallback callback) {// CONVERT STATE
+        int valueInt = 0;
+        if(value) {
+            valueInt = 1;
+        }
+        String jsonString = "{\"" +
+                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
+                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_IS_DATA_OBJECT_REFRESHING + "\",\"" +
+                HttpHelper.VALUE_PARAMETER + "\":\"" + valueInt + "\"}";
+        new Thread(() -> {
+            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+            Log.i(Common.THIS_LOG, "setIsDataObjectRefreshing response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -239,10 +290,6 @@ public class EcoWateringHub implements Parcelable {
         return this.address + ", " + this.city + " - " + this.country;
     }
 
-    public EcoWateringHubConfiguration getEcoWateringHubConfiguration() {
-        return this.ecoWateringHubConfiguration;
-    }
-
     public WeatherInfo getWeatherInfo() {
         return this.weatherInfo;
     }
@@ -257,6 +304,21 @@ public class EcoWateringHub implements Parcelable {
         return new ArrayList<>();
     }
 
+    public boolean isAutomated() {
+        return this.isAutomated;
+    }
+    public boolean isDataObjectRefreshing() {
+        return this.isDataObjectRefreshing;
+    }
+
+    public IrrigationSystem getIrrigationSystem() {
+        return this.irrigationSystem;
+    }
+
+    public SensorsInfo getSensorInfo() {
+        return this.sensorInfo;
+    }
+
     @NonNull
     @Override
     public String toString() { return this.name + " - " + this.deviceID; }
@@ -266,10 +328,9 @@ public class EcoWateringHub implements Parcelable {
      * @return double: ambient temperature value.
      */
     public double getAmbientTemperature() {
-        if((this.ecoWateringHubConfiguration.getAmbientTemperatureSensor() != null) &&
-                (this.ecoWateringHubConfiguration.getAmbientTemperatureSensor().getSensorID() != null) &&
+        if((this.sensorInfo != null) && (this.sensorInfo.getAmbientTemperatureChosenSensor() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getAmbientTemperatureLastUpdate()))) {
-            return this.sensorInfo.getAmbientTemperatureSensor();
+            return this.sensorInfo.getAmbientTemperatureSensorValue();
         }
         else {
             return this.weatherInfo.getAmbientTemperature();
@@ -283,15 +344,11 @@ public class EcoWateringHub implements Parcelable {
     public double getIndexUV() {
         int hourFromTimestamp = Integer.parseInt(this.weatherInfo.getTime().split("T")[1].split(":")[0]);
         boolean isInRangeTime = (hourFromTimestamp >= 7 && hourFromTimestamp < 16);
-        if((this.weatherInfo.getWeatherCode() >= 0) &&
-                (this.weatherInfo.getWeatherCode() <= 3) &&
-                (this.ecoWateringHubConfiguration != null) &&
-                (this.ecoWateringHubConfiguration.getLightSensor() != null) &&
-                (this.ecoWateringHubConfiguration.getLightSensor().getSensorID() != null) &&
-                (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getLightLastUpdate())) &&
-                isInRangeTime) {
+        if((this.weatherInfo.getWeatherCode() >= 0) && (this.weatherInfo.getWeatherCode() <= 3) &&
+                (this.sensorInfo != null) && (this.sensorInfo.getLightChosenSensor() != null) &&
+                (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getLightLastUpdate())) && isInRangeTime) {
             Log.i(Common.THIS_LOG, "index UV from Sensor");
-            return (this.sensorInfo.getLightSensor() / 120);
+            return (this.sensorInfo.getLightSensorValue() / 120);
         }
         else {
             Log.i(Common.THIS_LOG, "index UV from Open-Meteo");
@@ -304,11 +361,9 @@ public class EcoWateringHub implements Parcelable {
      * @return double: relative humidity value.
      */
     public double getRelativeHumidity() {
-        if((this.ecoWateringHubConfiguration != null) &&
-                (this.ecoWateringHubConfiguration.getRelativeHumiditySensor() != null) &&
-                (this.ecoWateringHubConfiguration.getRelativeHumiditySensor().getSensorID() != null) &&
+        if((this.sensorInfo != null) && (this.sensorInfo.getRelativeHumidityChosenSensor() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getRelativeHumidityLastUpdate()))) {
-            return this.sensorInfo.getRelativeHumiditySensor();
+            return this.sensorInfo.getRelativeHumiditySensorValue();
         }
         else {
             return this.weatherInfo.getRelativeHumidity();
@@ -316,6 +371,7 @@ public class EcoWateringHub implements Parcelable {
     }
 
     // PARCELABLE IMPLEMENTATION
+
     protected EcoWateringHub(Parcel in) {
         deviceID = in.readString();
         name = in.readString();
@@ -325,29 +381,12 @@ public class EcoWateringHub implements Parcelable {
         latitude = in.readDouble();
         longitude = in.readDouble();
         remoteDeviceList = in.createStringArrayList();
-        ecoWateringHubConfiguration = in.readParcelable(EcoWateringHubConfiguration.class.getClassLoader());
+        isAutomated = in.readByte() != 0;
+        isDataObjectRefreshing = in.readByte() != 0;
+        irrigationSystem = in.readParcelable(IrrigationSystem.class.getClassLoader());
         weatherInfo = in.readParcelable(WeatherInfo.class.getClassLoader());
         sensorInfo = in.readParcelable(SensorsInfo.class.getClassLoader());
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(deviceID);
-        dest.writeString(name);
-        dest.writeString(address);
-        dest.writeString(city);
-        dest.writeString(country);
-        dest.writeDouble(latitude);
-        dest.writeDouble(longitude);
-        dest.writeStringList(remoteDeviceList);
-        dest.writeParcelable(ecoWateringHubConfiguration, flags);
-        dest.writeParcelable(weatherInfo, flags);
-        dest.writeParcelable(sensorInfo, flags);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
+        irrigationPlan = in.readParcelable(IrrigationPlan.class.getClassLoader());
     }
 
     public static final Creator<EcoWateringHub> CREATOR = new Creator<EcoWateringHub>() {
@@ -361,4 +400,27 @@ public class EcoWateringHub implements Parcelable {
             return new EcoWateringHub[size];
         }
     };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(deviceID);
+        dest.writeString(name);
+        dest.writeString(address);
+        dest.writeString(city);
+        dest.writeString(country);
+        dest.writeDouble(latitude);
+        dest.writeDouble(longitude);
+        dest.writeStringList(remoteDeviceList);
+        dest.writeByte((byte) (isAutomated ? 1 : 0));
+        dest.writeByte((byte) (isDataObjectRefreshing ? 1 : 0));
+        dest.writeParcelable(irrigationSystem, flags);
+        dest.writeParcelable(weatherInfo, flags);
+        dest.writeParcelable(sensorInfo, flags);
+        dest.writeParcelable(irrigationPlan, flags);
+    }
 }

@@ -41,7 +41,7 @@ public class DeviceRequest {
     }
 
     public static ArrayList<DeviceRequest> getDeviceRequestList(String jsonString) {
-        if((jsonString != null) && (!jsonString.equals(Common.NULL_STRING_VALUE))) {
+        if((jsonString != null) && (!jsonString.equals(Common.NULL_STRING_VALUE)) && (!jsonString.equals(HttpHelper.HTTP_RESPONSE_ERROR))) {
             ArrayList<DeviceRequest> returnArray = new ArrayList<>();
             try {
                 JSONArray jsonArray = new JSONArray(jsonString);

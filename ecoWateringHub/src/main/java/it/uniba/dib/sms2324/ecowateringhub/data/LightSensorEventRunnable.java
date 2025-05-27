@@ -1,4 +1,4 @@
-package it.uniba.dib.sms2324.ecowateringhub.runnable.sensors;
+package it.uniba.dib.sms2324.ecowateringhub.data;
 
 import android.util.Log;
 

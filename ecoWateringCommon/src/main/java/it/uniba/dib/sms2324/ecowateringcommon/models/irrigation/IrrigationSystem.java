@@ -16,6 +16,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
 public class IrrigationSystem implements Parcelable {
     private static final String IRRIGATION_SYSTEM_SIMULATION_MODEL_NAME = "DALL - Irrigation System - SIMULATED";
     private static final String IRRIGATION_SYSTEM_STATE_ON_RESPONSE = "irrigationSystemSwitchedOn";
+    private static final String IRRIGATION_SYSTEM_STATE_OFF_RESPONSE = "irrigationSystemSwitchedOff";
     private static final String STATE_TRUE_VALUE = "1";
     private static final String TABLE_IRRIGATION_SYSTEM_ID_COLUMN_NAME = "id";
     public static final String TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME = "model";
@@ -89,7 +90,7 @@ public class IrrigationSystem implements Parcelable {
                 if(state && response.equals(IRRIGATION_SYSTEM_STATE_ON_RESPONSE)) {
                     this.state = true;
                 }
-                else if(!state && response.equals(HttpHelper.IRRIGATION_SYSTEM_STATE_OFF_RESPONSE)) {
+                else if(!state && response.equals(IRRIGATION_SYSTEM_STATE_OFF_RESPONSE)) {
                     this.state = false;
                 }
             }

@@ -10,20 +10,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class IrrigationPlan implements Parcelable {
-    protected static final int FORECAST_DAYS = 7;
+    protected static final int FORECAST_DAYS = 7; // MAX 16
     public static final String BO_IRRIGATION_PLAN_COLUMN_NAME = "irrigationPlan";
-    protected static final String TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME = "days";
-    protected static final String TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME = "ambientTemperature";
-    protected static final String TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME = "indexUV";
-    protected static final String TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME = "relativeHumidity";
-    protected static final String TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME = "weatherCode";
-    protected static final String TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME = "precipitation";
-    protected static final String TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME = "irrigationMinutesPlan";
+    private static final String TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME = "days";
+    private static final String TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME = "ambientTemperature";
+    private static final String TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME = "indexUV";
+    private static final String TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME = "relativeHumidity";
+    private static final String TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME = "weatherCode";
+    private static final String TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME = "precipitation";
+    private static final String TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME = "irrigationMinutesPlan";
+    protected static final String BO_FORECAST_DAYS_COLUMN_NAME = "forecast_days";
     protected String[] days = new String[FORECAST_DAYS];
     protected double[] ambientTemperature = new double[FORECAST_DAYS];
     protected double[] indexUV = new double[FORECAST_DAYS];
@@ -64,9 +67,7 @@ public class IrrigationPlan implements Parcelable {
                     this.irrigationMinutesPlan[i] = irrigationMinutesPlanJsonArray.getDouble(i);
                 }
             }
-            catch (JSONException e) {
-                e.printStackTrace();
-            }
+            catch (JSONException ignored) {}
         }
     }
 
@@ -113,6 +114,22 @@ public class IrrigationPlan implements Parcelable {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
             Log.i(Common.THIS_LOG, "updateIrrigationPlan response: " + response);
         }).start();
+    }
+
+    public ArrayList<IrrigationDailyPlan> getIrrigationDailyPlanList() {
+        ArrayList<IrrigationDailyPlan> returnArrayList = new ArrayList<>();
+        for(int i=0; i<FORECAST_DAYS; i++) {
+            returnArrayList.add(new IrrigationDailyPlan(
+                    this.days[i],
+                    this.ambientTemperature[i],
+                    this.indexUV[i],
+                    this.relativeHumidity[i],
+                    this.weatherCode[i],
+                    this.precipitation[i],
+                    this.irrigationMinutesPlan[i])
+            );
+        }
+        return returnArrayList;
     }
 
 

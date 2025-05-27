@@ -8,8 +8,6 @@ import androidx.annotation.NonNull;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 
 public class SharedPreferencesHelper {
-    public static final String REQUEST_REFRESHING_FILE_NAME = "REQUEST_REFRESHING";
-    public static final String REQUEST_REFRESHING_VALUE_KEY = "REQUEST_REFRESHING_VALUE_KEY";
     public static final String FIRST_START_FLAG_FILE_NAME = "IS_FIRST_START_CHECK";
     public static final String FIRST_START_FLAG_VALUE_KEY = "IS_FIRST_START";
     public static final String FIRST_START_VALUE_FLAG = "true";
