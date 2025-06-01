@@ -186,10 +186,10 @@ public class StartFirstFragment extends Fragment {
                         if (location != null) {
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
-                            Log.i(Common.THIS_LOG, "latitude: " + latitude + " - longitude: " + longitude);
+                            Log.i(Common.LOG_NORMAL, "latitude: " + latitude + " - longitude: " + longitude);
                             callback.onLocationFound(getAddressFromCoordinate(latitude, longitude));
                         } else {
-                            Log.i(Common.THIS_LOG, "location null");
+                            Log.i(Common.LOG_NORMAL, "location null");
                             callback.onLocationFound(null);
                         }
                     });
@@ -216,7 +216,7 @@ public class StartFirstFragment extends Fragment {
         SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
         settingsClient.checkLocationSettings(builder.build())
                 .addOnSuccessListener(locationSettingsResponse -> {
-                    Log.i(Common.THIS_LOG, "GPS already enabled");
+                    Log.i(Common.LOG_NORMAL, "GPS already enabled");
                     callback.getResult(Common.GPS_ENABLED_RESULT);
                 })
                 .addOnFailureListener(e -> {

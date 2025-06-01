@@ -49,7 +49,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
         <include
             android:id="@+id/weatherInfoCard"
-            layout="@layout/weather_info_card"
+            layout="@layout/card_weather_info"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/dateContainer"

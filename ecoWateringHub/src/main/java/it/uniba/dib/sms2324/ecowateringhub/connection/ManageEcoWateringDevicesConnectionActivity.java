@@ -74,11 +74,8 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
         // CALLED ALSO AFTER LAST DEVICE HAS BEEN REMOVED
         EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
             MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
-            // ECO WATERING FOREGROUND SERVICE NEED TO BE STOPPED
-            if(((MainActivity.getThisEcoWateringHub().getRemoteDeviceList() == null) || MainActivity.getThisEcoWateringHub().getRemoteDeviceList().isEmpty()) &&
-                    (!MainActivity.getThisEcoWateringHub().isDataObjectRefreshing())) {
-                EcoWateringForegroundService.stopEcoWateringForegroundService(this);
-            }
+            // CHECK ECO WATERING FOREGROUND SERVICE NEED TO BE STOPPED
+            EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this, MainActivity.getThisEcoWateringHub());
             // REFRESH FRAGMENT
             startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
             finish();
@@ -172,9 +169,6 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // REQUESTED IN ConnectionChooserFragment IN onViewCreated()
         if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
-            if(!SharedPreferencesHelper.readBooleanOnSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY)) {
-                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY, true);
-            }
             if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 fragmentManager.popBackStack();
             }

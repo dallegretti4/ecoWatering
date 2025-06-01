@@ -4,8 +4,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
-
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
 import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
@@ -31,6 +29,6 @@ public class DataObjectRefreshingRunnable implements Runnable {
         SensorsInfo.updateSensorList(this.context, this.hub.getDeviceID(), SensorsInfo.CONFIGURE_SENSOR_TYPE_LIGHT, EcoWateringSensor.getConnectedSensorList(this.context, SensorsInfo.CONFIGURE_SENSOR_TYPE_LIGHT));
         new Thread(new RelativeHumiditySensorRunnable(context, this.hub, duration)).start();
         SensorsInfo.updateSensorList(this.context, this.hub.getDeviceID(), SensorsInfo.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY, EcoWateringSensor.getConnectedSensorList(this.context, SensorsInfo.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY));
-        new Thread(new LightSensorEventRunnable()).start(); // TO DEBUG BACKGROUND SERVICE WORK
+        // new Thread(new LightSensorEventRunnable()).start(); // TO DEBUG BACKGROUND SERVICE WORK
     }
 }

@@ -19,7 +19,6 @@ public class IrrigationPlanPreview extends IrrigationPlan {
     private static final String BO_IRRIGATION_PLAN_RELATIVE_HUMIDITY_PARAMETER = "relative_humidity_2m_mean";
     private static final String BO_IRRIGATION_PLAN_WEATHER_CODE_PARAMETER = "weather_code";
     private static final String BO_IRRIGATION_PLAN_PRECIPITATION_PARAMETER = "precipitation_sum";
-    private static final double BASE_MINUTES = 20.0;
 
     public IrrigationPlanPreview(String jsonString) {
         if(jsonString != null && !jsonString.equals(Common.NULL_STRING_VALUE)) {
@@ -55,10 +54,10 @@ public class IrrigationPlanPreview extends IrrigationPlan {
                 EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + hub.getLatitude() + ",\"" +
                 EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + ",\"" +
                 BO_FORECAST_DAYS_COLUMN_NAME + "\":" + FORECAST_DAYS + "}";
-        Log.i(Common.THIS_LOG, "------------------------>QUERY: " + jsonString);
+        Log.i(Common.LOG_NORMAL, "------------------------>QUERY: " + jsonString);
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "getIrrigationPlanPreview response: " + response);
+            Log.i(Common.LOG_NORMAL, "getIrrigationPlanPreview response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -72,7 +71,7 @@ public class IrrigationPlanPreview extends IrrigationPlan {
     }
 
     private double generateIrrigationMinutesPerDay(int index) {
-        double totalMinutes = BASE_MINUTES;
+        double totalMinutes = BASE_DAILY_IRRIGATION_MINUTES;
         // NO IRRIGATION IF PRECIPITATION > 2
         if(this.precipitation[index] > 2.0) return 0;
         // +10% IF UV INDEX > 6

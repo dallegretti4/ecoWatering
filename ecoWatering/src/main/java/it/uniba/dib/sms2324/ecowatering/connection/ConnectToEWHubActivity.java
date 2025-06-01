@@ -26,10 +26,12 @@ import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
 import it.uniba.dib.sms2324.ecowatering.connection.mode.bluetooth.BtConnectionFragment;
 import it.uniba.dib.sms2324.ecowatering.connection.mode.wifi.WiFiConnectionFragment;
+import it.uniba.dib.sms2324.ecowatering.management.ManageEWHubActivity;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class ConnectToEWHubActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
@@ -48,10 +50,10 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_connect_to_eco_watering_hub);
         fragmentManager = getSupportFragmentManager();
         if(savedInstanceState == null) {
-            Log.i(Common.THIS_LOG, "ConnectToEWHubActivity -> onCreate()");
+            Log.i(Common.LOG_NORMAL, "ConnectToEWHubActivity -> onCreate()");
             if(getIntent().getBooleanExtra(MainActivity.IS_FIRST_ACTIVITY_INTENT_KEY, false)) {
                 isFirstActivity = true;
-                if(!SharedPreferencesHelper.readBooleanOnSharedPreferences(this, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_FILE_NAME, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_VALUE_KEY)) {
+                if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_FILE_NAME, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_VALUE_KEY)) {
                     SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_FILE_NAME, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_VALUE_KEY, true);
                     showWhyUseLocationFirstDialog();
                 }
@@ -149,7 +151,8 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         // CALLED IN ConnectionChooserFragment IN onViewCreated()
         if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                showWhyUseLocationDialog();
+                startActivity(new Intent(this, MainActivity.class));
+                finish();
             }
         }
         // CALLED IN onModeSelected()

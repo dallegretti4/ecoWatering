@@ -22,10 +22,12 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlanPreview;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.AutomateSystemFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
-import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubAutomaticControlFragment;
-import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubManualControlFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.hub.ManageHubAutomaticControlFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.hub.ManageHubFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.hub.ManageHubManualControlFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.SensorConfigurationFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment;
 import it.uniba.dib.sms2324.ecowateringhub.data.DataObjectRefreshingRunnable;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements
         StartFirstFragment.OnFirstStartFinishCallback,
         StartSecondFragment.OnSecondStartFinishCallback,
         ManageHubManualControlFragment.OnHubManualActionChosenCallback,
+        ManageHubAutomaticControlFragment.OnManageHubAutomaticControlActionCallback,
         it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment.OnUserProfileActionCallback,
         AutomateSystemFragment.OnAutomateSystemActionCallback,
         it.uniba.dib.sms2324.ecowateringcommon.ui.SensorConfigurationFragment.OnSensorConfigurationActionCallback {
@@ -55,43 +58,39 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Common.lockLayout(this);
         fragmentManager = getSupportFragmentManager();
-        if(savedInstanceState == null) {    // CHECK IS NOT CONFIGURATION CHANGED
-            changeFragment(new LoadingFragment(), false);    // SHOW LOADING FRAGMENT
-            EcoWateringHub.exists(Common.getThisDeviceID(this), ((existsResponse) -> {  // CHECK DEVICE IS REGISTERED
-                // NOT FIRST START CASE
-                if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
-                    thisEcoWateringHub = new EcoWateringHub(existsResponse);
-                    new Thread(new DataObjectRefreshingRunnable(this, thisEcoWateringHub, DataObjectRefreshingRunnable.FORCE_SENSORS_DURATION)).start(); // FORCE SENSORS AND WEATHER INFO REFRESHING
-                    checkEcoWateringServiceNeedToStart();
-                    if(thisEcoWateringHub.isAutomated()) changeFragment(new ManageHubAutomaticControlFragment(), true);
-                    else changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_HUB, thisEcoWateringHub), true);
-                }
-                else {  // FIRST START CASE
-                    if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) changeFragment(new StartFirstFragment(), false);
-                    else runOnUiThread(this::showWhyGrantLocationPermissionDialog);
-                }
-            }));
-        }
-        else {
-            if(isWhyGrantLocationPermissionDialogVisible) runOnUiThread(this::showWhyGrantLocationPermissionDialog);
-            else if(isHttpErrorFaultDialogVisible) runOnUiThread(this::showInternetFaultDialog);
-            else if(isInternetFaultDialog) runOnUiThread(this::showInternetFaultDialog);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if(!HttpHelper.isDeviceConnectedToInternet(this)) runOnUiThread(this::showInternetFaultDialog);
+        if(HttpHelper.isDeviceConnectedToInternet(this)) {
+            if(savedInstanceState == null) {
+                Common.lockLayout(this); // CHECK IS NOT CONFIGURATION CHANGED
+                changeFragment(new LoadingFragment(), false);    // SHOW LOADING FRAGMENT
+                EcoWateringHub.exists(Common.getThisDeviceID(this), ((existsResponse) -> {  // CHECK DEVICE IS REGISTERED
+                    // NOT FIRST START CASE
+                    if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
+                        thisEcoWateringHub = new EcoWateringHub(existsResponse);    // INSTANCE OF THIS HUB
+                        new Thread(new DataObjectRefreshingRunnable(this, thisEcoWateringHub, DataObjectRefreshingRunnable.FORCE_SENSORS_DURATION)).start(); // FORCE SENSORS AND WEATHER INFO REFRESHING
+                        EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this, thisEcoWateringHub);
+                        if(thisEcoWateringHub.isAutomated()) changeFragment(new ManageHubAutomaticControlFragment(Common.CALLED_FROM_HUB, thisEcoWateringHub), true);
+                        else changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_HUB, thisEcoWateringHub), true);
+                    }
+                    else {  // FIRST START CASE
+                        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) changeFragment(new StartFirstFragment(), false);
+                        else runOnUiThread(this::showWhyGrantLocationPermissionDialog);
+                    }
+                }));
+            }
+            else {
+                if(isWhyGrantLocationPermissionDialogVisible) runOnUiThread(this::showWhyGrantLocationPermissionDialog);
+                else if(isHttpErrorFaultDialogVisible) runOnUiThread(this::showInternetFaultDialog);
+                else if(isInternetFaultDialog) runOnUiThread(this::showInternetFaultDialog);
+            }
+        } else showInternetFaultDialog();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         // USER IS RETURNED FROM SETTING CASE
-        if(SharedPreferencesHelper.readBooleanOnSharedPreferences(this, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY)) {
+        if(SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY)) {
             SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY, false);
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) changeFragment(new StartFirstFragment(), false);
             else runOnUiThread(this::showWhyGrantLocationPermissionDialog);
@@ -141,14 +140,14 @@ public class MainActivity extends AppCompatActivity implements
         }));
     }
 
-    // FROM ManageHubManualControlFragment
+    // FROM ManageHubFragment.OnManageHubActionCallback
     @Override
-    public void onBackPressedFromManageHubManual() {
+    public void onManageHubBackPressed() {
         finish();
     }
 
     @Override
-    public void refreshManageHubManualFragment() {
+    public void onManageHubRefreshFragment() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
@@ -160,43 +159,18 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void refreshDataObject(EcoWateringHub.OnEcoWateringHubGivenCallback callback) {
+        new Thread(new DataObjectRefreshingRunnable(this, thisEcoWateringHub, ManageHubFragment.DATA_OBJECT_REFRESHING_DURATION)).start();
+        EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
+            thisEcoWateringHub = new EcoWateringHub(jsonResponse);
+            callback.getEcoWateringHub(thisEcoWateringHub);
+        }));
+    }
+
+    @Override
     public void manageConnectedRemoteDevices() {
         startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
         finish();
-    }
-
-    @Override
-    public void automateEcoWateringSystem() {
-        fragmentManager.popBackStack();
-        EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
-            thisEcoWateringHub = new EcoWateringHub(jsonResponse);
-            changeFragment(new AutomateSystemFragment(thisEcoWateringHub, Common.CALLED_FROM_HUB), true);
-        });
-    }
-
-    @Override
-    public void setDataObjectRefreshing(boolean value) {
-        thisEcoWateringHub.setIsDataObjectRefreshing(this, value, (response) -> {
-            if(response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) {
-                if(value) {
-                    EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
-                        thisEcoWateringHub = new EcoWateringHub(jsonResponse);
-                        EcoWateringForegroundService.startEcoWateringForegroundService(this, thisEcoWateringHub);
-                    });
-                }
-                else {
-                    if((thisEcoWateringHub.getRemoteDeviceList() == null) || thisEcoWateringHub.getRemoteDeviceList().isEmpty()) EcoWateringForegroundService.stopEcoWateringForegroundService(this);
-                }
-            }
-            else {
-                runOnUiThread(this::showHttpErrorFaultDialog);
-            }
-        });
-    }
-
-    @Override
-    public void setIrrigationSystemState(boolean value) {
-        thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), value);
     }
 
     @Override
@@ -208,12 +182,50 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    // FROM ManageHubAutomaticControlFragment.OnHubAutomaticActionChosenCallback
     @Override
-    public void forceSensorsUpdate() {
+    public void controlSystemManually() {
+        thisEcoWateringHub.setIsAutomated(false, (response) -> {
+            if(!response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE))
+                runOnUiThread(this::showHttpErrorFaultDialog);
+        });
+    }
+
+    // FROM ManageHubManualControlFragment.OnHubManualActionChosenCallback
+
+    @Override
+    public void automateEcoWateringSystem() {
         EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
             thisEcoWateringHub = new EcoWateringHub(jsonResponse);
-            new Thread(new DataObjectRefreshingRunnable(this, thisEcoWateringHub, DataObjectRefreshingRunnable.FORCE_SENSORS_DURATION)).start();
+            fragmentManager.popBackStack();
+            changeFragment(new AutomateSystemFragment(thisEcoWateringHub, Common.CALLED_FROM_HUB), true);
         });
+    }
+
+    @Override
+    public void setIrrigationSystemState(boolean value) {
+        thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), value);
+    }
+
+    @Override
+    public void setDataObjectRefreshing(boolean value) {
+        thisEcoWateringHub.setIsDataObjectRefreshing(this, value, (response) -> {
+            if(response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) {
+                EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
+                    thisEcoWateringHub = new EcoWateringHub(jsonResponse);
+                    EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this, thisEcoWateringHub);
+                }));
+            }
+            else {
+                runOnUiThread(this::showHttpErrorFaultDialog);
+            }
+        });
+    }
+
+    @Override   // CALLED FROM UserProfileFragment.OnUserProfileActionCallback AND AutomateSystemFragment.OnAutomateSystemActionCallback TOO
+    public void restartApp() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     // FROM UserProfileFragment
@@ -227,12 +239,6 @@ public class MainActivity extends AppCompatActivity implements
     public void onUserProfileRefresh() {
         fragmentManager.popBackStack();
         changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment(Common.CALLED_FROM_HUB), true);
-    }
-
-    @Override   // CALLED FROM ManageHubManualControlFragment TOO
-    public void restartApp() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
     }
 
     // FROM SensorConfigurationFragment.OnSensorConfigurationActionCallback
@@ -263,9 +269,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onAutomateSystemFinish() {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+    public void onAutomateSystemAgreeIrrigationPlan(@NonNull IrrigationPlanPreview irrigationPlanPreview) {
+        irrigationPlanPreview.updateIrrigationPlanOnServer(this, Common.getThisDeviceID(this)); // UPDATE IRRIGATION PLAN ON SERVER
+        thisEcoWateringHub.setIsAutomated(true, (response) -> {
+            if(response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
+                EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
+                    thisEcoWateringHub = new EcoWateringHub(jsonResponse);
+                    EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this, thisEcoWateringHub);
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                }));
+            }
+            else runOnUiThread(this::showHttpErrorFaultDialog);
+        });
     }
 
     /**
@@ -280,16 +296,6 @@ public class MainActivity extends AppCompatActivity implements
             fragmentTransaction.addToBackStack(null);
         }
         fragmentTransaction.commit();
-    }
-
-    private void checkEcoWateringServiceNeedToStart() {
-        if((thisEcoWateringHub.isDataObjectRefreshing()) ||
-                ((thisEcoWateringHub.getRemoteDeviceList() != null) && !thisEcoWateringHub.getRemoteDeviceList().isEmpty())) {
-            EcoWateringForegroundService.startEcoWateringForegroundService(this, thisEcoWateringHub);
-        }
-        else {  // TO BE SURE ECO WATERING FOREGROUND SERVICE IS NO ALIVE
-            EcoWateringForegroundService.stopEcoWateringForegroundService(this);
-        }
     }
 
     private void updateSensorsList() {
@@ -327,7 +333,7 @@ public class MainActivity extends AppCompatActivity implements
         isWhyGrantLocationPermissionDialogVisible = true;
         AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle(getString(R.string.why_grant_location_permission_dialog_title));
         // CHECK IF IS FIRST START
-        boolean firstStartDialogFlag = SharedPreferencesHelper.readStringOnSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY).equals(Common.NULL_STRING_VALUE);
+        boolean firstStartDialogFlag = SharedPreferencesHelper.readStringFromSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY).equals(Common.NULL_STRING_VALUE);
         // USER MUST GRANT LOCATION PERMISSION MANUALLY CASE
         if((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) &&
                 (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) && (!firstStartDialogFlag)) {

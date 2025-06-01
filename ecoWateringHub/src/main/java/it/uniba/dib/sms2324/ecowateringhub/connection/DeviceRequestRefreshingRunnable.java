@@ -22,12 +22,12 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
 
     @Override
     public void run() {
-        DeviceRequest.getDeviceRequestFromServer(Common.getThisDeviceID(context), (jsonResponse) -> {
+        DeviceRequest.getDeviceRequestFromServer(Common.getThisDeviceID(this.context), (jsonResponse) -> {
             if(jsonResponse != null) {
                 ArrayList<DeviceRequest> deviceRequestList = DeviceRequest.getDeviceRequestList(jsonResponse);
                 if((deviceRequestList != null) && (!deviceRequestList.isEmpty())) {
                     for(DeviceRequest deviceRequest : deviceRequestList) {
-                        new Thread(() -> solveDeviceRequest(context, this.hub, deviceRequest)).start();
+                        new Thread(() -> solveDeviceRequest(deviceRequest)).start();
                     }
                 }
             }
@@ -35,35 +35,51 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
 
     }
 
-    private void solveDeviceRequest(@NonNull Context context, @NonNull EcoWateringHub hub, DeviceRequest deviceRequest) {
+    private void solveDeviceRequest(DeviceRequest deviceRequest) {
         deviceRequest.delete(); // FOR FIRST, TO BE SURE, NEXT DeviceRequestsRefreshingRunnable CAN'T FIND THIS REQUEST
         // CHECK IS DEVICE REQUEST VALID
         if(deviceRequest.isValidDeviceRequest()) {
             switch (deviceRequest.getRequest()) {
                 // SWITCH ON IRRIGATION SYSTEM CASE
                 case DeviceRequest.REQUEST_SWITCH_ON_IRRIGATION_SYSTEM:
-                    hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(context), true);
+                    this.hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(this.context), true);
                     break;
                 // SWITCH OFF IRRIGATION SYSTEM CASE
                 case DeviceRequest.REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM:
-                    hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(context), false);
+                    this.hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(this.context), false);
                     break;
                 // START BACKGROUND REFRESHING CASE
                 case DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING:
-                    hub.setIsDataObjectRefreshing(context, true, (response) -> {
-                        if (response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) {
-                            EcoWateringForegroundService.startEcoWateringForegroundService(this.context, this.hub);
-                        }
+                    this.hub.setIsDataObjectRefreshing(this.context, true, (response) -> {
+                        if (response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE))
+                            EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this.context, this.hub);
                     });
                     break;
-                // STOP BACKGROUND REFRESHING
+                // STOP BACKGROUND REFRESHING CASE
                 case DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING:
-                    hub.setIsDataObjectRefreshing(context, false, (response) -> {
+                    this.hub.setIsDataObjectRefreshing(this.context, false, (response) -> {
                         if ((response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) &&
-                                ((this.hub.getRemoteDeviceList() == null) || this.hub.getRemoteDeviceList().isEmpty())) {
-                            EcoWateringForegroundService.stopEcoWateringForegroundService(this.context);
-                        }
+                                ((this.hub.getRemoteDeviceList() == null) || this.hub.getRemoteDeviceList().isEmpty()))
+                            EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this.context, this.hub);
                     });
+                    break;
+                //  ENABLE AUTOMATE SYSTEM CASE
+                case DeviceRequest.REQUEST_ENABLE_AUTOMATE_SYSTEM:
+                    this.hub.setIsAutomated(true, (response -> {
+                        if(response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
+                            if(this.hub.getIrrigationPlan() != null) EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this.context, this.hub);
+                            else {
+                                EcoWateringHub.getEcoWateringHubJsonString(this.hub.getDeviceID(), (jsonResponse -> {
+                                    EcoWateringHub tmpHub = new EcoWateringHub(jsonResponse);
+                                    EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this.context, tmpHub);
+                                }));
+                            }
+                        }
+                    }));
+                    break;
+
+                case DeviceRequest.REQUEST_DISABLE_AUTOMATE_SYSTEM:
+                    this.hub.setIsAutomated(false, (response -> {}));
                     break;
 
                 default: break;

@@ -106,7 +106,7 @@ public class WeatherInfo implements Parcelable {
                 EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + hub.getLatitude() + ",\"" +
                 EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + "}";
         String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.THIS_LOG, "updateWeatherInfo response: " + response);
+        Log.i(Common.LOG_NORMAL, "updateWeatherInfo response: " + response);
     }
 
     public String getTime() {

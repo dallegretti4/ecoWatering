@@ -48,6 +48,7 @@ public class ConnectionChooserFragment extends Fragment {
             onConnectionChooserActionCallback.onConnectionChooserBackPressed();
         }
     };
+    private static boolean isWhyAppUseLocationPermissionDialogVisible;
     private static boolean isUserMustGivePermissionManuallyDialogVisible;
 
    @Override
@@ -88,20 +89,23 @@ public class ConnectionChooserFragment extends Fragment {
         if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // APP CAN'T REQUEST PERMISSION CASE
             if((!ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) &&
-                    (SharedPreferencesHelper.readBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY))) {
+                    (SharedPreferencesHelper.readBooleanFromSharedPreferences(requireContext(), SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY))) {
                 showUserMustGivePermissionManuallyDialog();
             }
-            else {  // APP CAN REQUEST PERMISSION CASE
-                ActivityCompat.requestPermissions(requireActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, Common.LOCATION_PERMISSION_REQUEST);
-            }
+            // APP CAN REQUEST PERMISSION CASE
+            else  if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(requireContext(), SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY))
+                showWhyAppUseLocationPermissionDialog();
+            else ActivityCompat.requestPermissions(requireActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, Common.LOCATION_PERMISSION_REQUEST);
         }
         else {
             if(savedInstanceState == null) {    // NORMAL START CASE
                 bluetoothModeButton.setOnClickListener((v) -> onConnectionChooserActionCallback.onModeSelected(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH));
                 wifiModeButton.setOnClickListener((v) -> onConnectionChooserActionCallback.onModeSelected(OnConnectionFinishCallback.CONNECTION_MODE_WIFI));
             }
-            else {  // CONFIGURATION CHANGED CASE
-                if(isUserMustGivePermissionManuallyDialogVisible) showUserMustGivePermissionManuallyDialog();
+            // CONFIGURATION CHANGED CASE
+            else {
+                if(isWhyAppUseLocationPermissionDialogVisible) showWhyAppUseLocationPermissionDialog();
+                else if(isUserMustGivePermissionManuallyDialogVisible) showUserMustGivePermissionManuallyDialog();
             }
         }
     }
@@ -109,8 +113,8 @@ public class ConnectionChooserFragment extends Fragment {
     @Override
     public void onResume() {
        super.onResume();
-       if(SharedPreferencesHelper.readBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY)) {
-           Log.i(Common.THIS_LOG, "ConnectionChooserFragment -> onResume()");
+       if(SharedPreferencesHelper.readBooleanFromSharedPreferences(requireContext(), SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY)) {
+           Log.i(Common.LOG_NORMAL, "ConnectionChooserFragment -> onResume()");
            SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY, false);
            // ACCESS FINE LOCATION PERMISSION REQUIRED
            if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -200,6 +204,30 @@ public class ConnectionChooserFragment extends Fragment {
         else {
             titleTextView.setText(R.string.connection_chooser_fragment_title_device);
         }
+    }
+
+    private void showWhyAppUseLocationPermissionDialog() {
+       isWhyAppUseLocationPermissionDialogVisible = true;
+       new AlertDialog.Builder(requireContext())
+               .setTitle(getString(R.string.why_use_location_dialog_title))
+               .setMessage(getString(R.string.why_use_location_dialog_message))
+               .setPositiveButton(
+                       getString(R.string.next_button),
+                       (dialogInterface, i) -> {
+                           isWhyAppUseLocationPermissionDialogVisible = false;
+                           if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(requireContext(), SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY)) {
+                               SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY, true);
+                           }
+                           ActivityCompat.requestPermissions(requireActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, Common.LOCATION_PERMISSION_REQUEST);
+                       }
+               ).setNegativeButton(
+                       getString(R.string.close_button),
+                       (dialogInterface, i) -> {
+                           isWhyAppUseLocationPermissionDialogVisible = false;
+                           if(this.onConnectionChooserActionCallback != null) this.onConnectionChooserActionCallback.onConnectionChooserBackPressed();
+                       }
+               ).setCancelable(false)
+               .show();
     }
 
     private void showUserMustGivePermissionManuallyDialog() {

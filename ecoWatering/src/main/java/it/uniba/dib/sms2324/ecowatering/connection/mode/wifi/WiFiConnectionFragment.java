@@ -62,11 +62,11 @@ public class WiFiConnectionFragment extends Fragment {
     private final WifiP2pManager.ActionListener wifiP2pActionListener = new WifiP2pManager.ActionListener() {
         @Override
         public void onSuccess() {
-            Log.i(Common.THIS_LOG, "group removed");
+            Log.i(Common.LOG_NORMAL, "group removed");
         }
         @Override
         public void onFailure(int i) {
-            Log.i(Common.THIS_LOG, "group not removed");
+            Log.i(Common.LOG_NORMAL, "group not removed");
         }
     };
 
@@ -167,7 +167,7 @@ public class WiFiConnectionFragment extends Fragment {
         SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
         settingsClient.checkLocationSettings(builder.build())
                 .addOnSuccessListener(locationSettingsResponse -> {
-                    Log.i(Common.THIS_LOG, "GPS already enabled");
+                    Log.i(Common.LOG_NORMAL, "GPS already enabled");
                     callback.getResult(Common.GPS_ENABLED_RESULT);
                 })
                 .addOnFailureListener(e -> {
@@ -192,7 +192,7 @@ public class WiFiConnectionFragment extends Fragment {
             }
             @Override
             public void onFailure(int i) {
-                Log.i(Common.THIS_LOG, "Error: group not created. i: " + i);
+                Log.i(Common.LOG_NORMAL, "Error: group not created. i: " + i);
                 callback.getResult(WIFI_GROUP_CREATED_FAILURE_RESULT);
             }
         });

@@ -85,7 +85,7 @@ public class UserProfileFragment extends Fragment {
     private static boolean isErrorDialogVisible;
     public UserProfileFragment() {
         this(calledFrom);
-        Log.i(Common.THIS_LOG, "UserProfileFragment no parameter constructor, calledFrom: " + calledFrom);
+        Log.i(Common.LOG_NORMAL, "UserProfileFragment no parameter constructor, calledFrom: " + calledFrom);
     }
     public UserProfileFragment(String calledFromString) {
         super(R.layout.fragment_user_profile);
@@ -128,10 +128,12 @@ public class UserProfileFragment extends Fragment {
                     this.userNameEditText.setText(currentUserName);
                     lockUserNameEdit();
                     Common.hideLoadingFragment(view, R.id.mainFragmentLayout, R.id.includeLoadingFragment);
+                    Common.unlockLayout(requireActivity());
                 });
             });
         }
         else {
+            Common.unlockLayout(requireActivity());
             // EDITED USER NAME RECOVERING FROM CONFIGURATION CHANGES
             if(savedInstanceState.getString(EDITED_USER_NAME) != null) {
                 unlockUserNameEdit();

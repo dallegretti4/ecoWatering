@@ -186,7 +186,7 @@ public class BtConnectionFragment extends Fragment {
         SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
         settingsClient.checkLocationSettings(builder.build())
                 .addOnSuccessListener(locationSettingsResponse -> {
-                    Log.i(Common.THIS_LOG, "GPS already enabled");
+                    Log.i(Common.LOG_NORMAL, "GPS already enabled");
                     callback.getResult(Common.GPS_ENABLED_RESULT);
                 })
                 .addOnFailureListener(e -> {

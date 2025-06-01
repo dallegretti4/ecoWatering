@@ -17,9 +17,9 @@ public class LightSensorEventRunnable implements Runnable {
     public void run() {
         SimpleDateFormat sdf = new SimpleDateFormat(TIMESTAMP_FORMAT, Locale.getDefault());
         String date = sdf.format(new Date());
-        Log.i(Common.THIS_LOG, date);
+        Log.i(Common.LOG_NORMAL, date);
         String jsonString = "{\"" + HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_LIGHT_SENSOR_EVENT + "\",\"" + HttpHelper.TIME_PARAMETER + "\":\"" + date + "\"}";
         String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.THIS_LOG, "light sensor event response: " + response);
+        Log.i(Common.LOG_NORMAL, "light sensor event response: " + response);
     }
 }

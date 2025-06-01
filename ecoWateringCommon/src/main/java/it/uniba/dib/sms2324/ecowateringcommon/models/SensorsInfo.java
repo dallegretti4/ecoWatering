@@ -82,7 +82,6 @@ public class SensorsInfo implements Parcelable {
                 JSONArray jsonArray = new JSONArray(jsonOBJ.getString(TABLE_SENSORS_INFO_LIGHT_SENSOR_LIST_COLUMN_NAME));
                 for(int i=0; i<jsonArray.length(); i++) {
                     this.lightSensorList.add(jsonArray.getString(i));
-                    Log.i(Common.THIS_LOG, "------------------------------>" + this.lightSensorList.get(i));
                 }
             }
             if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_LIGHT_CHOSEN_SENSOR_COLUMN_NAME)) {
@@ -111,7 +110,7 @@ public class SensorsInfo implements Parcelable {
             if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_LAST_UPDATE_COLUMN_NAME)) {
                 this.relativeHumidityLastUpdate = jsonOBJ.getString(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_LAST_UPDATE_COLUMN_NAME);
             }
-            Log.i(Common.THIS_LOG, "SensorsInfo -> ambTemp:" + this.ambientTemperatureSensorValue + ", light:" + this.lightSensorValue + ", relHum: " + this.relativeHumiditySensorValue);
+            Log.i(Common.LOG_NORMAL, "SensorsInfo -> ambTemp:" + this.ambientTemperatureSensorValue + ", light:" + this.lightSensorValue + ", relHum: " + this.relativeHumiditySensorValue);
         }
         catch(JSONException e) {
             e.printStackTrace();
@@ -200,7 +199,7 @@ public class SensorsInfo implements Parcelable {
                 HttpHelper.SENSOR_ID_PARAMETER + "\":\"" + sensorID + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "addNewSensor response: " + response);
+            Log.i(Common.LOG_NORMAL, "addNewSensor response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -220,7 +219,7 @@ public class SensorsInfo implements Parcelable {
                     HttpHelper.VALUE_PARAMETER + "\":\"" + jsonSensorArrayList + "\"}";
             new Thread(() -> {
                 String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-                Log.i(Common.THIS_LOG, "updateSensorList response: " + response);
+                Log.i(Common.LOG_NORMAL, "updateSensorList response: " + response);
             }).start();
         }
     }
@@ -233,7 +232,7 @@ public class SensorsInfo implements Parcelable {
                 HttpHelper.SENSOR_TYPE_PARAMETER + "\":\"" + sensorType + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "detach sensor response: " + response);
+            Log.i(Common.LOG_NORMAL, "detach sensor response: " + response);
             callback.getResponse(response);
         }).start();
     }

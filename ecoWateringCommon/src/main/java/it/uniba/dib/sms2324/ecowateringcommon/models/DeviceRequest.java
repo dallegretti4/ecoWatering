@@ -1,6 +1,9 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models;
 
+import android.content.Context;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,12 +26,10 @@ public class DeviceRequest {
     public static final String TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME = "date";
     public static final String REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM = "SWITCH_OFF_IRRIGATION_SYSTEM";
     public static final String REQUEST_SWITCH_ON_IRRIGATION_SYSTEM = "SWITCH_ON_IRRIGATION_SYSTEM";
-    public static final String REQUEST_FORCE_SENSORS_UPDATE = "FORCE_SENSORS_UPDATE";
-    public static final String SUCCESS_RESPONSE_FORCE_SENSORS_UPDATE = "sensorsUpdateForced";
+    public static final String REQUEST_ENABLE_AUTOMATE_SYSTEM = "ENABLE_AUTOMATE_SYSTEM";
+    public static final String REQUEST_DISABLE_AUTOMATE_SYSTEM = "DISABLE_AUTOMATE_SYSTEM";
     public static final String REQUEST_START_DATA_OBJECT_REFRESHING = "START_DATA_OBJECT_REFRESHING";
-    public static final String SUCCESS_RESPONSE_START_BACKGROUND_REFRESHING = "backgroundRefreshingStarted";
     public static final String REQUEST_STOP_DATA_OBJECT_REFRESHING = "STOP_DATA_OBJECT_REFRESHING";
-    public static final String SUCCESS_RESPONSE_STOP_BACKGROUND_REFRESHING = "backgroundRefreshingStopped";
     private final String id;
     private final String caller;
     private final String request;
@@ -68,20 +69,20 @@ public class DeviceRequest {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_DEVICE_REQUEST + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "getDeviceRequest response: " + response);
+            Log.i(Common.LOG_NORMAL, "getDeviceRequest response: " + response);
             callback.getResponse(response);
         }).start();
     }
 
-    public static void sendRequest(String hubID, String caller, String request) {
+    public static void sendRequest(@NonNull Context context, String hubID, String request) {
         String jsonString = "{\"" +
                 EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + caller + "\",\"" +
+                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SEND_REQUEST + "\",\"" +
                 HttpHelper.REQUEST_PARAMETER + "\":\"" + request + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "sendRequest response: " + response);
+            Log.i(Common.LOG_NORMAL, "sendRequest response: " + response);
         }).start();
     }
 
@@ -94,7 +95,7 @@ public class DeviceRequest {
                 TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME + "\":\"" + this.date + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "deleteDeviceRequest response: " + response);
+            Log.i(Common.LOG_NORMAL, "deleteDeviceRequest response: " + response);
         }).start();
     }
 

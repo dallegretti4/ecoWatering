@@ -26,7 +26,7 @@ public class BtDiscoveryThread extends Thread {
                     if(!BtConnectionFragment.getBtDeviceList().contains(device)) {
                         @SuppressLint("MissingPermission") String deviceName = device.getName();
                         if(deviceName != null) {
-                            Log.i(Common.THIS_LOG, "device founded");
+                            Log.i(Common.LOG_NORMAL, "device founded");
                             BtConnectionFragment.addToBtDeviceList(device);
                             BtConnectionFragment.addToDeviceListAdapter(deviceName);
                         }

@@ -32,9 +32,7 @@ public abstract class EcoWateringSensor implements SensorEventListener {
     }
 
     public void register() {
-        if(this.sensor != null && this.sensorManager != null) {
-            this.sensorManager.registerListener(this, this.sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        }
+        if(this.sensor != null && this.sensorManager != null) this.sensorManager.registerListener(this, this.sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void unregister() {
@@ -48,7 +46,7 @@ public abstract class EcoWateringSensor implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if((event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) || (event.sensor.getType() == Sensor.TYPE_LIGHT) || (event.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY)) {
-            Log.i(Common.THIS_LOG, "light sensor event: " + event.values[0]);
+            Log.i(Common.LOG_NORMAL, "light sensor event: " + event.values[0]);
             this.currentValue = event.values[0];
         }
     }

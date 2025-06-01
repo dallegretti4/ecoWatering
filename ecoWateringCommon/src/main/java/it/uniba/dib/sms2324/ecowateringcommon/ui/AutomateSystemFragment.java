@@ -37,7 +37,8 @@ public class AutomateSystemFragment extends Fragment {
     private OnAutomateSystemActionCallback onAutomateSystemActionCallback;
     public interface OnAutomateSystemActionCallback {
         void onAutomateSystemGoBack();
-        void onAutomateSystemFinish();
+        void restartApp();
+        void onAutomateSystemAgreeIrrigationPlan(@NonNull IrrigationPlanPreview irrigationPlanPreview);
     }
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
         @Override
@@ -152,15 +153,7 @@ public class AutomateSystemFragment extends Fragment {
                         getString(R.string.confirm_button),
                         (dialogInterface, i) -> {
                             isAgreeIrrigationPlanConfirmDialogVisible = false;
-                            hub.setIsAutomated(true, (response) -> {
-                                if(!response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
-                                    requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
-                                }
-                                else {
-                                    irrigationPlanPreview.updateIrrigationPlanOnServer(hub.getDeviceID(), Common.getThisDeviceID(requireContext()));
-                                    this.onAutomateSystemActionCallback.onAutomateSystemFinish();
-                                }
-                            });
+                            this.onAutomateSystemActionCallback.onAutomateSystemAgreeIrrigationPlan(irrigationPlanPreview);
                         }
                 ).setNegativeButton(getString(R.string.close_button), (dialogInterface, i) -> {
                     isAgreeIrrigationPlanConfirmDialogVisible = false;
@@ -178,13 +171,13 @@ public class AutomateSystemFragment extends Fragment {
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.retry_button),
                         ((dialogInterface, i) -> {
                             isHttpErrorFaultDialogVisible = false;
-                            this.onAutomateSystemActionCallback.onAutomateSystemFinish();
+                            this.onAutomateSystemActionCallback.restartApp();
                         })
                 )
                 .setOnKeyListener((dialogInterface, keyCode, keyEvent) -> {
                     if(keyCode == KeyEvent.KEYCODE_BACK) {
                         isHttpErrorFaultDialogVisible = false;
-                        this.onAutomateSystemActionCallback.onAutomateSystemFinish();
+                        this.onAutomateSystemActionCallback.restartApp();
                     }
                     return false;
                 })

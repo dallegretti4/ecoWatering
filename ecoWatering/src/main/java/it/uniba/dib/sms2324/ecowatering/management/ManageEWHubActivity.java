@@ -20,17 +20,22 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlanPreview;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.AutomateSystemFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment;
-import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubAutomaticControlFragment;
-import it.uniba.dib.sms2324.ecowateringcommon.ui.ManageHubManualControlFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.hub.ManageHubAutomaticControlFragment;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.hub.ManageHubManualControlFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.SensorConfigurationFragment;
 
 public class ManageEWHubActivity extends AppCompatActivity implements
         ManageHubManualControlFragment.OnHubManualActionChosenCallback,
+        ManageHubAutomaticControlFragment.OnManageHubAutomaticControlActionCallback,
         ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback,
         SensorConfigurationFragment.OnSensorConfigurationActionCallback,
         AutomateSystemFragment.OnAutomateSystemActionCallback {
+
+    private static final long WAITING_TIME_AFTER_AUTOMATE_SYSTEM_DEVICE_REQUEST = 2 * 1000;
     private static EcoWateringHub selectedEWHub;
     private FragmentManager fragmentManager;
 
@@ -44,10 +49,10 @@ public class ManageEWHubActivity extends AppCompatActivity implements
             selectedEWHub = Objects.requireNonNull(b).getParcelable(Common.MANAGE_EWH_INTENT_OBJ);
             if(selectedEWHub != null) {
                 if(selectedEWHub.isAutomated()) {
-                    changeFragment(new ManageHubAutomaticControlFragment(), false);
+                    changeFragment(new ManageHubAutomaticControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), true);
                 }
                 else {
-                    changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), false);
+                    changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), true);
                 }
             }
         }
@@ -65,75 +70,92 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
 
 
-    // FROM ManageHubManualControlFragment.OnHubActionChosenCallback
+    // FROM ManageHubFragment.OnHubActionChosenCallback
     @Override
-    public void onBackPressedFromManageHubManual() {
+    public void onManageHubBackPressed() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
     @Override
-    public void refreshManageHubManualFragment() {
+    public void onManageHubRefreshFragment() {
         EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
-            if(selectedEWHub.isAutomated()) {
-                changeFragment(new ManageHubAutomaticControlFragment(), false);
-            }
-            else {
-                changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), false);
-            }
+            fragmentManager.popBackStack();
+            if(selectedEWHub.isAutomated()) changeFragment(new ManageHubAutomaticControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), true);
+            else changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), true);
         });
     }
 
     @Override
     public void onManualSecondToolbarFunctionChosen() {
         // GO BACK
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+        onManageHubBackPressed();
+    }
+
+    @Override
+    public void refreshDataObject(EcoWateringHub.OnEcoWateringHubGivenCallback callback) {
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            callback.getEcoWateringHub(selectedEWHub);
+        }));
     }
 
     @Override
     public void manageConnectedRemoteDevices() {
-        changeFragment(new ManageConnectedRemoteEWDevicesFragment(selectedEWHub.getDeviceID(), Common.CALLED_FROM_DEVICE), true);
-    }
-
-    @Override
-    public void automateEcoWateringSystem() {
         fragmentManager.popBackStack();
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
-            selectedEWHub = new EcoWateringHub(jsonResponse);
-            changeFragment(new AutomateSystemFragment(selectedEWHub, Common.CALLED_FROM_DEVICE), true);
-        });
-    }
-
-    @Override
-    public void setDataObjectRefreshing(boolean value) {
-        if(value) DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING);
-        else DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING);
-    }
-
-    @Override
-    public void setIrrigationSystemState(boolean value) {
-        if(value) DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_SWITCH_ON_IRRIGATION_SYSTEM);
-        else DeviceRequest.sendRequest(selectedEWHub.getDeviceID(), Common.getThisDeviceID(this), DeviceRequest.REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM);
+        changeFragment(new ManageConnectedRemoteEWDevicesFragment(selectedEWHub.getDeviceID(), Common.CALLED_FROM_DEVICE), true);
     }
 
     @Override
     public void configureSensor(String sensorType) {
         EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
+            fragmentManager.popBackStack();
             changeFragment(new SensorConfigurationFragment(selectedEWHub, Common.CALLED_FROM_DEVICE, sensorType), true);
         });
     }
 
-    @Override
-    public void forceSensorsUpdate() {}
-
-    @Override
+    @Override   // CALLED FROM AutomateSystemFragment.OnAutomateSystemActionCallback TOO
     public void restartApp() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
+
+    //  CALLED FROM ManageHubManualControlFragment.OnHubManualActionChosenCallback
+
+    @Override
+    public void automateEcoWateringSystem() {
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            fragmentManager.popBackStack();
+            changeFragment(new AutomateSystemFragment(selectedEWHub, Common.CALLED_FROM_DEVICE), true);
+        });
+    }
+
+    @Override
+    public void setIrrigationSystemState(boolean value) {
+        if(value) DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_SWITCH_ON_IRRIGATION_SYSTEM);
+        else DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM);
+    }
+
+    @Override
+    public void setDataObjectRefreshing(boolean value) {
+        if(value) DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING);
+        else DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING);
+    }
+
+    //  CALLED FROM ManageHubAutomaticControlFragment.OnManageHubAutomaticControlActionCallback
+    @Override
+    public void controlSystemManually() {
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_DISABLE_AUTOMATE_SYSTEM);
+        }));
+    }
+
+
+    //  CALLED FROM ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback
 
     @Override
     public void onManageConnectedDevicesGoBack() {
@@ -191,13 +213,21 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onAutomateSystemFinish() {
-        Bundle b = new Bundle();
-        b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
-        Intent restartIntent = new Intent(this, ManageEWHubActivity.class);
-        restartIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
-        startActivity(restartIntent);
-        finish();
+    public void onAutomateSystemAgreeIrrigationPlan(@NonNull IrrigationPlanPreview irrigationPlanPreview) {
+        irrigationPlanPreview.updateIrrigationPlanOnServer(this, selectedEWHub.getDeviceID());
+        DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_ENABLE_AUTOMATE_SYSTEM);
+        changeFragment(new LoadingFragment(), false);
+        try { Thread.sleep(WAITING_TIME_AFTER_AUTOMATE_SYSTEM_DEVICE_REQUEST); }
+        catch (InterruptedException ignored) {}
+        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse -> {
+            selectedEWHub = new EcoWateringHub(jsonResponse);
+            Bundle b = new Bundle();
+            b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
+            Intent restartIntent = new Intent(this, ManageEWHubActivity.class);
+            restartIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
+            startActivity(restartIntent);
+            finish();
+        }));
     }
 
     private void changeFragment(Fragment fragment, boolean addToBackStack) {

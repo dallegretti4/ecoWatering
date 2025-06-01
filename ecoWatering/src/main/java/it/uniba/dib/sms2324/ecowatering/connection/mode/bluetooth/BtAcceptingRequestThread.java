@@ -45,7 +45,7 @@ public class BtAcceptingRequestThread extends Thread {
             byte[] buffer = new byte[1024];
             int byteRead = inputStream.read(buffer);
             String response = new String(buffer, 0, byteRead);
-            Log.i(Common.THIS_LOG, "btAcceptThread response: " + response);
+            Log.i(Common.LOG_NORMAL, "btAcceptThread response: " + response);
             callback.getResponse(response);
         }
         catch(IOException e) {

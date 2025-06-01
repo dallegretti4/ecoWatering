@@ -10,16 +10,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
+import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
 
 public class IrrigationDailyPlan {
-    private static final String LANGUAGE_ENGLISH = "en";
-    private static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_ST = "st";
-    private static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_ND = "nd";
-    private static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_RD = "rd";
-    private static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_TH = "th";
-    private static final String DATE_SPLITTER = "-";
     private final String day;
     private final double ambientTemperature;
     private final double indexUV;
@@ -38,55 +33,41 @@ public class IrrigationDailyPlan {
         this.irrigationMinutesPlan = irrigationMinutesPlan;
     }
 
-    protected String getDay() {
-        return this.day;
-    }
-
-    protected int getSpecificDay() {
-        return Integer.parseInt(this.day.split(DATE_SPLITTER)[2]);
-    }
-
-    protected int getSpecificMonth() {
-        return Integer.parseInt(this.day.split(DATE_SPLITTER)[1]);
-    }
-
-    protected int getSpecificYear() {
-        return Integer.parseInt(this.day.split(DATE_SPLITTER)[0]);
-    }
-
-    protected double getAmbientTemperature() {
+    private double getAmbientTemperature() {
         return this.ambientTemperature;
     }
 
-    protected double getIndexUV() {
+    private double getIndexUV() {
         return this.indexUV;
     }
 
-    protected double getRelativeHumidity() {
+    private double getRelativeHumidity() {
         return this.relativeHumidity;
     }
 
-    protected int getWeatherCode() {
+    private int getWeatherCode() {
         return this.weatherCode;
     }
 
-    protected double getPrecipitation() {
+    private double getPrecipitation() {
         return this.precipitation;
     }
 
-    protected double getIrrigationMinutesPlan() {
+    public double getIrrigationMinutesPlan() {
         return this.irrigationMinutesPlan;
     }
 
 
     public View drawIrrigationDailyPlan(@NonNull Context context, LinearLayout container, int primary_color_50) {
         View view = LayoutInflater.from(context).inflate(R.layout.list_item_irrigation_daily_plan, container, false);
-        String day = String.valueOf(this.getSpecificDay());
-        if(context.getResources().getConfiguration().getLocales().get(0).getLanguage().equals(LANGUAGE_ENGLISH)) {
-            day = concatDayEnglishLanguage(this.getSpecificDay(), day);  // ENGLISH LANGUAGE CASE
-        }
-        String month = context.getResources().getStringArray(R.array.month_names)[this.getSpecificMonth()-1];
-        int year = this.getSpecificYear();
+        // DAY RECOVERING
+        String day = String.valueOf(Common.getSpecificDay(this.day));
+        if(context.getResources().getConfiguration().getLocales().get(0).getLanguage().equals(Common.LANGUAGE_ENGLISH))
+            day = Common.concatDayEnglishLanguage(Common.getSpecificDay(this.day), day);  // ENGLISH LANGUAGE CASE
+        // MONTH RECOVERING
+        String month = context.getResources().getStringArray(R.array.month_names)[Common.getSpecificMonth(this.day)-1];
+        int year = Common.getSpecificYear(this.day);  // YEAR RECOVERING
+
         view.findViewById(R.id.dateContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
         ((TextView) view.findViewById(R.id.dateTextView)).setText(context.getString(R.string.date_builder_label, month, day, year));
         view.findViewById(R.id.weatherIconImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
@@ -105,40 +86,17 @@ public class IrrigationDailyPlan {
         ((TextView) view.findViewById(R.id.precipitationValueTextView)).setText(String.valueOf(this.getPrecipitation()));
         ((TextView) view.findViewById(R.id.precipitationLabelTextView)).setText(context.getString(WeatherInfo.getPrecipitationStringResourceId(this.getPrecipitation())));
         ((TextView) view.findViewById(R.id.irrigationMinutesPlanTextView)).setText(String.valueOf((int) this.getIrrigationMinutesPlan()));
+        // IRRIGATION MINUTES SETUP
         int quantity;
-        if(this.getIrrigationMinutesPlan() > 0 && this.getIrrigationMinutesPlan() <1) {
+        if(this.getIrrigationMinutesPlan() > 0 && this.getIrrigationMinutesPlan() <1)
             quantity = 1;
-        }
-        else if(this.getIrrigationMinutesPlan() > 1 && this.getIrrigationMinutesPlan() < 2) {
+        else if(this.getIrrigationMinutesPlan() > 1 && this.getIrrigationMinutesPlan() < 2)
             quantity = 2;
-        }
-        else {
+        else
             quantity = (int) this.getIrrigationMinutesPlan();
-        }
-        ((TextView) view.findViewById(R.id.irrigationMinutesPlanLabelTextView)).setText(
-                context.getResources().getQuantityString(
+        ((TextView) view.findViewById(R.id.irrigationMinutesPlanLabelTextView)).setText(context.getResources().getQuantityString(
                         R.plurals.irrigation_minutes_plan_plurals,
                         quantity));
         return view;
-    }
-
-    private String concatDayEnglishLanguage(int intDay, String day) {
-        switch (intDay) {
-            case 1:
-            case 21:
-            case 31:
-                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_ST);
-
-            case 2:
-            case 22:
-                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_ND);
-
-            case 3:
-            case 23:
-                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_RD);
-
-            default:
-                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_TH);
-        }
     }
 }

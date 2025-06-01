@@ -141,7 +141,7 @@ public class BtConnectionFragment extends Fragment {
 
    private void startAcceptingBtRequest() {
         new BtAcceptingRequestThread(requireContext(), bluetoothAdapter, ((response) -> {
-            Log.i(Common.THIS_LOG, "brAcceptThread response: " + response);
+            Log.i(Common.LOG_NORMAL, "brAcceptThread response: " + response);
            if(response.equals(OnConnectionFinishCallback.BT_ERROR_RESPONSE)) {
                requireActivity().runOnUiThread(this::showErrorDialog);
            }

@@ -175,11 +175,11 @@ public class WiFiConnectionFragment extends Fragment {
                     wifiP2pManager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
                         @Override
                         public void onSuccess() {
-                            Log.i(Common.THIS_LOG, "peers discovery started");
+                            Log.i(Common.LOG_NORMAL, "peers discovery started");
                         }
                         @Override
                         public void onFailure(int i) {
-                            Log.i(Common.THIS_LOG, "peers discovery not started, i: " + i);
+                            Log.i(Common.LOG_NORMAL, "peers discovery not started, i: " + i);
                             showErrorDialog();
                         }
                     });
@@ -249,7 +249,7 @@ public class WiFiConnectionFragment extends Fragment {
         SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
         settingsClient.checkLocationSettings(builder.build())
                 .addOnSuccessListener(locationSettingsResponse -> {
-                    Log.i(Common.THIS_LOG, "GPS already enabled");
+                    Log.i(Common.LOG_NORMAL, "GPS already enabled");
                     callback.getResult(Common.GPS_ENABLED_RESULT);
                 })
                 .addOnFailureListener(e -> {
@@ -290,11 +290,11 @@ public class WiFiConnectionFragment extends Fragment {
                 wifiP2pManager.connect(channel, config, new WifiP2pManager.ActionListener() {
                     @Override
                     public void onSuccess() {
-                        Log.i(Common.THIS_LOG, "connection started");
+                        Log.i(Common.LOG_NORMAL, "connection started");
                     }
                     @Override
                     public void onFailure(int i) {
-                        Log.i(Common.THIS_LOG, "connection not started");
+                        Log.i(Common.LOG_NORMAL, "connection not started");
                     }
                 });
             }

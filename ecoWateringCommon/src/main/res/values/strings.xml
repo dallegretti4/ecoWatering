@@ -7,12 +7,16 @@
     <string name="automate_system_message">We make this irrigation plan for the next 7 days.\nIn order to deliver a personalized and responsive service, we can edit the plan, according to weather forecast changes over the days.\nYour sensors will have an important role to improve your experience.</string>
     <string name="automate_system_title">We are happy to take cure of your system!</string>
     <string name="automate_system_toolbar_title">Automate system</string>
+    <string name="automated_system_label">System automated</string>
+    <string name="automated_system_message_label">Press to disable</string>
     <string name="background_refreshing_label">Background refreshing</string>
     <string name="bluetooth_button">Bluetooth</string>
     <string name="bt_connection_toolbar_title">Bluetooth connection</string>
     <string name="bt_not_supported_dialog_message">Please use WiFi connectivity to be authorized.</string>
     <string name="bt_not_supported_dialog_title">This device not supports Bluetooth connectivity</string>
     <string name="cancel_button">Cancel</string>
+    <string name="cannot_control_irrigation_system_manually_toast">If you want to control manually, turn to manual control system</string>
+    <string name="cannot_disable_background_refreshing_toast">Cannot disable background refreshing in automatic mode</string>
     <string name="changes_not_saved_message">If you go back, changes will be lost.</string>
     <string name="changes_not_saved_title">Changes have not yet been saved</string>
     <string name="close_button">Close</string>
@@ -24,6 +28,7 @@
     <string name="connect_to_hub_toolbar_title">Connect to ecoWatering Hub</string>
     <string name="connection_chooser_fragment_title_device">To connect to your ecoWatering system, you need to receive the request from your EcoWateringHub.\n\nChoose the way you like to receive the request.</string>
     <string name="connection_chooser_fragment_title_hub">Choose the way you like to authorize a remote ecoWatering Device.</string>
+    <string name="control_system_manually_dialog_message">All the functionality will turned in manual mode, Make you sure you have all under your control.</string>
     <string name="date_builder_label">%1$s %2$s, %3$d</string>
     <string name="delete_account_button">Delete account</string>
     <string name="delete_account_message">Your data would be destroyed forever.</string>
@@ -36,6 +41,7 @@
     <string name="eco_watering_hub_app_name">ecoWateringHub</string>
     <string name="edit_user_name_content_description">Press to edit your username</string>
     <string name="go_to_settings_button">Go to Settings</string>
+    <string name="history_label">History</string>
     <string name="http_error_dialog_message">Retry later.</string>
     <string name="http_error_dialog_title">Sorry, something went wrong</string>
     <string name="hub_not_available_message">To solve the problem, try to control hub directly and retry.</string>
@@ -55,6 +61,8 @@
     <string name="manual_ew_configuration_toolbar_title">ecoWatering Configuration</string>
     <string name="name_label">Name</string>
     <string name="next_button">Next</string>
+    <string name="next_starting_label">Next starting</string>
+    <string name="next_stopping_label">Next stopping</string>
     <string name="new_name_label">New name</string>
     <string name="no_sensor_selected_label">No sensor selected</string>
     <string name="notification_data_object_refreshing_disabled">Background refreshing disabled</string>
@@ -74,6 +82,7 @@
     <string name="remove_remote_device_successfully_title">Device removed successfully!</string>
     <string name="remove_remote_device_title_empty_case">No remote device connected</string>
     <string name="retry_button">Retry</string>
+    <string name="precipitation_label">Precipitation</string>
     <string name="precipitation_label_chance_light_precipitation">Slight chance of light rain</string>
     <string name="precipitation_label_heavy_precipitation">Heavy rain expected</string>
     <string name="precipitation_label_intense_precipitation">Intense rainfall expected</string>
@@ -97,13 +106,20 @@
     <string name="sensors_configuration_title">Choose the %s sensor you want to use.</string>
     <string name="sensors_label">Sensors</string>
     <string name="setting_button">Setting</string>
+    <string name="show_automated_irrigation_system_info">show automated irrigation system info</string>
     <string name="state_label">State :</string>
+    <string name="system_automated_label">System automated</string>
     <string name="temperature_celsius">O Celsius</string>
+    <string name="today_label">Today</string>
     <string name="user_must_enable_bt_permission_message">Go to Setting->Privacy->Manage permissions and allow the app to use the Bluetooth connectivity manually.</string>
     <string name="user_must_enable_bt_permission_title">You have to allow the app, to use Bluetooth connectivity</string>
     <string name="user_must_enable_wifi_message">Enable WiFi or go to Setting.</string>
     <string name="user_must_enable_wifi_title">To connect, you need to enable WiFi.</string>
     <string name="user_profile_menu_item_label">Manage profile</string>
+    <string name="watering_minutes_estimated_today_label">estimated watering minutes today: </string>
+    <string name="watering_minutes_executed_label">executed watering minutes: </string>
+    <string name="watering_minutes_saved_label">Saved watering minutes</string>
+    <string name="watering_minutes_saved_total_value_label">Total saved watering minutes: </string>
     <string name="why_use_location_address_dialog_post_never_show_message">Go to Setting->privacy->Manage permissions and allow the app to know your location manually.</string>
     <string name="why_use_location_address_dialog_post_never_show_title">You have to allow the app, to know your location</string>
     <string name="why_use_location_dialog_message">We will use your location just to connect your device with an other one.</string>
@@ -123,7 +139,12 @@
     <plurals name="irrigation_minutes_plan_plurals">
         <item quantity="zero">irrigation minute planned.\nNo irrigation needed</item>
         <item quantity="one">irrigation minute planned</item>
-        <item quantity="other">irrigation minutes planned</item>
+        <item quantity="other">irrigation planned minutes</item>
+    </plurals>
+
+    <plurals name="system_automated_timing_measurement_label">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
     </plurals>
 
     <string-array name="month_names">

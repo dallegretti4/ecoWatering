@@ -35,10 +35,10 @@ public class WiFiConnectionRequestThread extends Thread {
             writer.println(OnConnectionFinishCallback.WIFI_SOCKET_REQUEST_NAME);
             // READ REMOTE DEVICE ID
             String remoteDeviceID = reader.readLine();
-            Log.i(Common.THIS_LOG, "remote device id: " + remoteDeviceID);
+            Log.i(Common.LOG_NORMAL, "remote device id: " + remoteDeviceID);
             // SEND HTTP REQUEST TO UPDATE DATABASE SERVER
             String response = MainActivity.getThisEcoWateringHub().addNewRemoteDevice(this.context, remoteDeviceID);
-            Log.i(Common.THIS_LOG, "remote device response: " + response);
+            Log.i(Common.LOG_NORMAL, "remote device response: " + response);
             writer.println(response);
             callback.getResponse(response);
         }

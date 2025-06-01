@@ -46,12 +46,13 @@ public class SensorsAdapter extends ArrayAdapter<String> {
     @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        if(convertView == null) {
+            convertView = LayoutInflater.from(this.context).inflate(R.layout.card_sensor, parent, false);
+        }
+        // SENSOR INFO RECOVERING
         String sensorID = this.stringList.get(position);
         String name = sensorID.split(SensorsInfo.EW_SENSOR_ID_SEPARATOR)[1];
         String vendor = sensorID.split(SensorsInfo.EW_SENSOR_ID_SEPARATOR)[2];
-        if(convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.card_sensor, parent, false);
-        }
         // SENSOR ICON BACKGROUND
         convertView.findViewById(R.id.sensorIconContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(this.context.getResources(), this.primary_color_50, context.getTheme()));
         ((ImageView)convertView.findViewById(R.id.sensorIconImageView)).setImageResource(this.sensorIcon); // SENSOR ICON

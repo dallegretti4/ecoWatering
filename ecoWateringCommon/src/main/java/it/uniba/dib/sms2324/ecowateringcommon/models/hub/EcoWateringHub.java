@@ -24,9 +24,12 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.Irrigat
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
 
 public class EcoWateringHub implements Parcelable {
+    public interface OnEcoWateringHubGivenCallback {
+        void getEcoWateringHub(@NonNull EcoWateringHub ecoWateringHub);
+    }
     private static final String IS_AUTOMATED_TRUE_VALUE = "1";
     private static final String IS_DATA_OBJECT_REFRESHING_TRUE_VALUE = "1";
-    public static final String SET_IS_AUTOMATED_SUCCESS_RESPONSE = "ecoWateringHubAutomated";
+    public static final String SET_IS_AUTOMATED_SUCCESS_RESPONSE = "ecoWateringHubIsAutomateSet";
     public static final String SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE = "isDataObjectRefreshingSet";
     private static final String BO_IRRIGATION_SYSTEM_COLUMN_NAME = "irrigationSystem";
     public static final String HUB_NAME_CHANGED_RESPONSE = "hubNameSuccessfulChanged";
@@ -117,7 +120,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_HUB_EXISTS + "\"}";
         Thread hubExistsThread = new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "hubExists response: " + response);
+            Log.i(Common.LOG_NORMAL, "hubExists response: " + response);
             callback.getResponse(response);
         });
         hubExistsThread.start();
@@ -144,7 +147,7 @@ public class EcoWateringHub implements Parcelable {
                 IrrigationSystem.TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME + "\":\"" + irrigationSystem.getModel() + "\"}";
         Thread addNewHubThread = new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "addNewHub response: " + response);
+            Log.i(Common.LOG_NORMAL, "addNewHub response: " + response);
             callback.canContinue();
         });
         addNewHubThread.start();
@@ -162,7 +165,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_HUB_OBJ + "\"}";
         Thread getHubObjThread = new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "getEWHubObj response: " + response);
+            Log.i(Common.LOG_NORMAL, "getEWHubObj response: " + response);
             callback.getResponse(response);
         });
         getHubObjThread.start();
@@ -172,7 +175,7 @@ public class EcoWateringHub implements Parcelable {
                 EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_HUB_OBJ + "\"}";
         String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.THIS_LOG, "getEWHubObj No Thread response: " + response);
+        Log.i(Common.LOG_NORMAL, "getEWHubObj No Thread response: " + response);
         return response;
     }
 
@@ -182,7 +185,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_ADD_REMOTE_DEVICE +"\",\"" +
                 HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + remoteDeviceID + "\"}";
         String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.THIS_LOG, "response addRemoteDevice: " + response);
+        Log.i(Common.LOG_NORMAL, "response addRemoteDevice: " + response);
         return response;
     }
 
@@ -200,7 +203,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + remoteDevice.getDeviceID() + "\"}";
         Thread removeRemoteDeviceThread = new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "removeRemoteDevice response: " + response);
+            Log.i(Common.LOG_NORMAL, "removeRemoteDevice response: " + response);
             callback.getResponse(response);
         });
         removeRemoteDeviceThread.start();
@@ -213,7 +216,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.NEW_NAME_PARAMETER + "\":\"" + newName + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "setHubName response: " + response);
+            Log.i(Common.LOG_NORMAL, "setHubName response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -229,7 +232,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.VALUE_PARAMETER + "\":\"" + intValue + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "setIsAutomated response: " + response);
+            Log.i(Common.LOG_NORMAL, "setIsAutomated response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -245,7 +248,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.VALUE_PARAMETER + "\":\"" + valueInt + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "setIsDataObjectRefreshing response: " + response);
+            Log.i(Common.LOG_NORMAL, "setIsDataObjectRefreshing response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -256,7 +259,7 @@ public class EcoWateringHub implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_DELETE_HUB_ACCOUNT + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "deleteHubAccount response: " + response);
+            Log.i(Common.LOG_NORMAL, "deleteHubAccount response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -319,6 +322,10 @@ public class EcoWateringHub implements Parcelable {
         return this.sensorInfo;
     }
 
+    public IrrigationPlan getIrrigationPlan() {
+        return this.irrigationPlan;
+    }
+
     @NonNull
     @Override
     public String toString() { return this.name + " - " + this.deviceID; }
@@ -347,11 +354,11 @@ public class EcoWateringHub implements Parcelable {
         if((this.weatherInfo.getWeatherCode() >= 0) && (this.weatherInfo.getWeatherCode() <= 3) &&
                 (this.sensorInfo != null) && (this.sensorInfo.getLightChosenSensor() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getLightLastUpdate())) && isInRangeTime) {
-            Log.i(Common.THIS_LOG, "index UV from Sensor");
+            Log.i(Common.LOG_NORMAL, "index UV from Sensor");
             return (this.sensorInfo.getLightSensorValue() / 120);
         }
         else {
-            Log.i(Common.THIS_LOG, "index UV from Open-Meteo");
+            Log.i(Common.LOG_NORMAL, "index UV from Open-Meteo");
             return this.weatherInfo.getIndexUV();
         }
     }

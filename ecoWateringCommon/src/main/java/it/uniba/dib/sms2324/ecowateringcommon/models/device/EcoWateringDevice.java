@@ -60,7 +60,7 @@ public class EcoWateringDevice implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_DEVICE_EXISTS + "\"}";
         Thread deviceExistsThread = new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "deviceExists response: " + response);
+            Log.i(Common.LOG_NORMAL, "deviceExists response: " + response);
             callback.getResponse(response);
         });
         deviceExistsThread.start();
@@ -80,7 +80,7 @@ public class EcoWateringDevice implements Parcelable {
                 TABLE_DEVICE_NAME_COLUMN_NAME + "\":\"" + name + "\"}";
         Thread addNewDeviceThread = new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "addNewDevice response: " + response);
+            Log.i(Common.LOG_NORMAL, "addNewDevice response: " + response);
             callback.canContinue();
         });
         addNewDeviceThread.start();
@@ -98,7 +98,7 @@ public class EcoWateringDevice implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_DEVICE_OBJ + "\"}";
         Thread getDeviceObjThread = new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "getEWDeviceObj response: " + response);
+            Log.i(Common.LOG_NORMAL, "getEWDeviceObj response: " + response);
             callback.getResponse(response);
         });
         getDeviceObjThread.start();
@@ -122,7 +122,7 @@ public class EcoWateringDevice implements Parcelable {
                 HttpHelper.NEW_NAME_PARAMETER + "\":\"" + newName + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "setDeviceName response: " + response);
+            Log.i(Common.LOG_NORMAL, "setDeviceName response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -133,7 +133,7 @@ public class EcoWateringDevice implements Parcelable {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_DELETE_DEVICE_ACCOUNT + "\"}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "deleteDeviceAccount response: " + response);
+            Log.i(Common.LOG_NORMAL, "deleteDeviceAccount response: " + response);
             callback.getResponse(response);
         }).start();
     }

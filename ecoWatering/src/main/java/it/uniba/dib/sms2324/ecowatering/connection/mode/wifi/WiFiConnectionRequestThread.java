@@ -37,7 +37,7 @@ public class WiFiConnectionRequestThread extends Thread {
                 writer.println(Common.getThisDeviceID(this.context));
                 // READ RESPONSE FROM ECO WATERING HUB
                 String response = reader.readLine();
-                Log.i(Common.THIS_LOG, "response from reader: " + response);
+                Log.i(Common.LOG_NORMAL, "response from reader: " + response);
                 callback.getResponse(response);
             }
         }

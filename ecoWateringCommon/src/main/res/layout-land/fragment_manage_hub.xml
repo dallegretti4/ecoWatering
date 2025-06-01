@@ -26,7 +26,7 @@
 
     <!-- FRAGMENT -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/manageHubManualControlFragmentContainer"
+        android:id="@+id/manageHubFragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
@@ -46,21 +46,21 @@
                 <!-- WEATHER INFO CARD -->
                 <include
                     android:id="@+id/weatherInfoCard"
-                    layout="@layout/weather_info_card"
+                    layout="@layout/card_weather_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="parent"/>
                 <!-- CONNECTED REMOTE DEVICES CARD -->
                 <include
                     android:id="@+id/connectedRemoteDevicesCard"
-                    layout="@layout/connected_remote_devices_card"
+                    layout="@layout/card_connected_remote_devices"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@+id/weatherInfoCard"/>
                 <!-- IRRIGATION SYSTEM CARD -->
                 <include
                     android:id="@+id/irrigationSystemCard"
-                    layout="@layout/irrigation_system_card"
+                    layout="@layout/card_irrigation_system"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@+id/connectedRemoteDevicesCard"/>
@@ -82,7 +82,7 @@
                 <!-- CONFIGURATION CARD -->
                 <include
                     android:id="@+id/configurationCard"
-                    layout="@layout/eco_watering_configuration_card"
+                    layout="@layout/card_configuration"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="-18dp"
@@ -90,6 +90,14 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- HISTORY CARD -->
+    <include
+        android:id="@+id/historyCard"
+        layout="@layout/card_history"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 
     <!-- LOADING FRAGMENT -->
     <include

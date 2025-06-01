@@ -135,6 +135,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:elevation="8dp"
+                android:divider="@android:color/transparent"
                 app:layout_constraintTop_toBottomOf="@+id/sensorsConfigurationTitleTextView"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"/>

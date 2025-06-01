@@ -12,6 +12,10 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class Common {
@@ -34,12 +38,20 @@ public class Common {
     public static final int REFRESH_FRAGMENT = 1030;
     public static final String REMOVE_REMOTE_DEVICE_RESPONSE = "remoteDeviceRemoved";
 
-    public static final String THIS_LOG = "MY_LOG";
+    public static final String LOG_NORMAL = "NORMAL_LOG";
+
+    public static final String SERVICE_LOG = "SERVICE_LOG";
     private static final String THIS_URL = "https://theall.altervista.org/sms2324";
     private static final UUID THIS_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public static final String VOID_STRING_VALUE = "";
     public static final int WIFI_PERMISSION_REQUEST = 2005;
     private static final String URI_SCHEME_PACKAGE = "package";
+    public static final String LANGUAGE_ENGLISH = "en";
+    public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_ST = "st";
+    public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_ND = "nd";
+    public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_RD = "rd";
+    public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_TH = "th";
+    public static final String DATE_SPLITTER = "-";
 
     // INTERFACES
 
@@ -124,5 +136,44 @@ public class Common {
                 dp,
                 context.getResources().getDisplayMetrics()
         );
+    }
+
+    public static int getDaysAgo(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        LocalDate pastDate = LocalDateTime.parse(dateString, formatter).toLocalDate();  //  PARSE PARAMETER DATE
+        LocalDate today = LocalDate.now();  //  PARSE CURRENT DATE
+        return (int) ChronoUnit.DAYS.between(pastDate, today);
+    }
+
+    public static int getSpecificDay(String date) {   // FOR DATE FORMAT "YYYY-DD-MM"
+        return Integer.parseInt(date.split(Common.DATE_SPLITTER)[2]);
+    }
+
+    public static int getSpecificMonth(String date) {   // FOR DATE FORMAT "YYYY-DD-MM"
+        return Integer.parseInt(date.split(Common.DATE_SPLITTER)[1]);
+    }
+
+    public static int getSpecificYear(String date) {   // FOR DATE FORMAT "YYYY-DD-MM"
+        return Integer.parseInt(date.split(Common.DATE_SPLITTER)[0]);
+    }
+
+    public static String concatDayEnglishLanguage(int intDay, String day) {
+        switch (intDay) {
+            case 1:
+            case 21:
+            case 31:
+                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_ST);
+
+            case 2:
+            case 22:
+                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_ND);
+
+            case 3:
+            case 23:
+                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_RD);
+
+            default:
+                return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_TH);
+        }
     }
 }

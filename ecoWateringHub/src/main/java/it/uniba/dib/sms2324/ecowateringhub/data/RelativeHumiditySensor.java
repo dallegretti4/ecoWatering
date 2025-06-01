@@ -25,7 +25,7 @@ public class RelativeHumiditySensor extends EcoWateringSensor {
                 HttpHelper.VALUE_PARAMETER + "\":" + this.currentValue + "}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "updateSensorRelHumValueOnServerDb response: " + response + " - value: " + this.currentValue);
+            Log.i(Common.LOG_NORMAL, "updateSensorRelHumValueOnServerDb response: " + response + " - value: " + this.currentValue);
         }).start();
     }
 

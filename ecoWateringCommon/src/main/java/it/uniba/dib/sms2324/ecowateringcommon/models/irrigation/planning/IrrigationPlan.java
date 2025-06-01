@@ -1,5 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -13,11 +14,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class IrrigationPlan implements Parcelable {
     protected static final int FORECAST_DAYS = 7; // MAX 16
+    public static final double BASE_DAILY_IRRIGATION_MINUTES = 20.0;
     public static final String BO_IRRIGATION_PLAN_COLUMN_NAME = "irrigationPlan";
     private static final String TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME = "days";
     private static final String TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME = "ambientTemperature";
@@ -71,7 +74,50 @@ public class IrrigationPlan implements Parcelable {
         }
     }
 
-    public void updateIrrigationPlanOnServer(String hubID, String caller) {
+    public String getNextIrrigationActionTime(@NonNull Context context, boolean state) {
+        StringBuilder returnString;
+        int hours = getIrrigationSystemStartingHours();
+        int intMinutes = getIrrigationSystemStartingMinutes();
+        if(state) {
+            returnString = new StringBuilder(context.getString(R.string.next_stopping_label));
+            if(((int) this.irrigationMinutesPlan[0]) >= 60) {
+                hours += ((int) this.irrigationMinutesPlan[0]) / 60;
+                intMinutes = ((int) this.irrigationMinutesPlan[0]) % 60;
+            }
+            else intMinutes = ((int) this.irrigationMinutesPlan[0]);
+        }
+        else returnString = new StringBuilder(context.getString(R.string.next_starting_label));
+
+        String stringMinutes = Integer.toString(intMinutes);
+        if(intMinutes < 10) {
+            stringMinutes = "0" + intMinutes;
+        }
+        return returnString.append(" ").append(hours).append(":").append(stringMinutes).toString();
+    }
+
+    public int getIrrigationSystemStartingHours() {
+        return 17;
+    }
+
+    public int getIrrigationSystemStartingMinutes() {
+        return 0;
+    }
+
+    public int getIrrigationSystemStoppingHours(int indexDay) {
+        int hours = getIrrigationSystemStartingHours();
+        if(this.irrigationMinutesPlan[indexDay] >= 60) {
+            hours += ((int) this.irrigationMinutesPlan[indexDay]) / 60;
+        }
+        return hours;
+    }
+
+    public int getIrrigationSystemStoppingMinutes(int indexDay) {
+        int minutes = getIrrigationSystemStartingMinutes() + ((int) this.irrigationMinutesPlan[indexDay]);
+        if(minutes >= 60) return (minutes % 60);
+        else return minutes;
+    }
+
+    public void updateIrrigationPlanOnServer(@NonNull Context context, String hubID) {
         StringBuilder daysString = new StringBuilder("[");
         StringBuilder ambientTemperatureString = new StringBuilder("[");
         StringBuilder indexUVString = new StringBuilder("[");
@@ -102,7 +148,7 @@ public class IrrigationPlan implements Parcelable {
         String jsonString = "{\"" +
                 EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_IRRIGATION_PLAN + "\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + caller + "\",\"" +
+                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
                 TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME + "\":" + daysString + ",\"" +
                 TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME + "\":" + ambientTemperatureString + ",\"" +
                 TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME + "\":" + indexUVString + ",\"" +
@@ -112,7 +158,7 @@ public class IrrigationPlan implements Parcelable {
                 TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME + "\":" + irrigationMinutesPlanString + "}";
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.THIS_LOG, "updateIrrigationPlan response: " + response);
+            Log.i(Common.LOG_NORMAL, "updateIrrigationPlan response: " + response);
         }).start();
     }
 

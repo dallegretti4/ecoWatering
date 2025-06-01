@@ -91,6 +91,7 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback); // ON BACK PRESSED CALLBACK SETUP
         Common.showLoadingFragment(view, R.id.manageRemoteEWDevicesConnectedFragmentContainer, R.id.includeLoadingFragment);
         toolbarSetup(view);
+        Common.unlockLayout(requireActivity());
 
         if(savedInstanceState == null) {
             EcoWateringHub.getEcoWateringHubJsonString(hubID, (jsonResponse) -> {   // HUB OBJECT RECOVERING
