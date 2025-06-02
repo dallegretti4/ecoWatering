@@ -61,6 +61,7 @@ public class WiFiConnectionFragment extends Fragment {
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel channel;
     private ArrayList<WifiP2pDevice> deviceList;
+    private ArrayAdapter<String> deviceAdapter;
     private WiFiConnectionRequestThread wiFiConnectionRequestThread;
     private OnConnectionFinishCallback onConnectionFinishCallback;
     private final MenuProvider menuProvider = new MenuProvider() {
@@ -75,7 +76,10 @@ public class WiFiConnectionFragment extends Fragment {
                 onConnectionFinishCallback.closeConnection();
             }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
-                onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_WIFI);
+                wifiP2pManager.stopPeerDiscovery(channel, null);
+                deviceList = new ArrayList<>();
+                requireActivity().runOnUiThread(deviceAdapter::notifyDataSetChanged);
+                startWiFiDiscovery();
             }
             return false;
         }
@@ -90,7 +94,7 @@ public class WiFiConnectionFragment extends Fragment {
                     // FILL LIST VIEW
                     wifiP2pManager.requestPeers(channel, ((peerList) -> {
                         deviceList = new ArrayList<>(peerList.getDeviceList());
-                        ArrayAdapter<String> deviceAdapter = new ArrayAdapter<>(
+                        deviceAdapter = new ArrayAdapter<>(
                                 requireContext(),
                                 android.R.layout.simple_list_item_1,
                                 deviceList.stream().map(device -> device.deviceName).collect(Collectors.toList()));
@@ -153,7 +157,6 @@ public class WiFiConnectionFragment extends Fragment {
         onConnectionFinishCallback = null;
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         // SETUP
@@ -169,25 +172,8 @@ public class WiFiConnectionFragment extends Fragment {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) wifiManager.setWifiEnabled(true);
             else showEnableWiFiDialog();
         }
-        else {  // WIFI ENABLED CASE
-            enableGPS((resultCode) -> {
-                if (resultCode == Common.GPS_ENABLED_RESULT) {
-                    wifiP2pManager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
-                        @Override
-                        public void onSuccess() {
-                            Log.i(Common.LOG_NORMAL, "peers discovery started");
-                        }
-                        @Override
-                        public void onFailure(int i) {
-                            Log.i(Common.LOG_NORMAL, "peers discovery not started, i: " + i);
-                            showErrorDialog();
-                        }
-                    });
-                } else {
-                    showWhyUseLocationDialog();
-                }
-            });
-        }
+        else  // WIFI ENABLED CASE
+            startWiFiDiscovery();
     }
 
     @Override
@@ -229,6 +215,27 @@ public class WiFiConnectionFragment extends Fragment {
         peersIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         peersIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         requireActivity().registerReceiver(peersReceiver, peersIntentFilter);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void startWiFiDiscovery() {
+        enableGPS((resultCode) -> {
+            if (resultCode == Common.GPS_ENABLED_RESULT) {
+                wifiP2pManager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        Log.i(Common.LOG_NORMAL, "peers discovery started");
+                    }
+                    @Override
+                    public void onFailure(int i) {
+                        Log.i(Common.LOG_NORMAL, "peers discovery not started, i: " + i);
+                        showErrorDialog();
+                    }
+                });
+            } else {
+                showWhyUseLocationDialog();
+            }
+        });
     }
 
     /**

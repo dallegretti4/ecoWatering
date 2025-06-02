@@ -1,7 +1,9 @@
 package it.uniba.dib.sms2324.ecowateringcommon.helpers;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,27 +19,43 @@ public class SharedPreferencesHelper {
     public static final String IS_USER_RETURNED_FROM_SETTING_VALUE_KEY = "IS_USER_RETURNED_FROM_SETTING_VALUE_KEY";
     public static final String IRR_SYS_START_DELAYED_FILENAME = "IRR_SYS_START_DELAYED_FILENAME";
     public static final String IRR_SYS_START_DELAYED_KEY = "IRR_SYS_START_DELAYED_KEY";
+    public static final String SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME = "SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME";
+    public static final String SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY = "SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY";
+    public static final String BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME = "BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME";
+    public static final String BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY = "BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY";
+    public static final String WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME = "WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME";
+    public static final String WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY = "WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY";
+    public static final String CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME = "CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME";
+    public static final String CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY = "CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY";
+    @SuppressLint("ApplySharedPref")
     public static void writeStringOnSharedPreferences(@NonNull Context context, String fileName, String keyValue, String stringValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(keyValue, stringValue);
-        editor.apply();
+        editor.commit();
+        Log.i(Common.LOG_SHARED_PREFERENCES, "write String on " + fileName + " - VALUE: " + stringValue);
     }
 
+    @SuppressLint("ApplySharedPref")
     public static void writeBooleanOnSharedPreferences(@NonNull Context context, String fileName, String keyValue, boolean booleanValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(keyValue, booleanValue);
-        editor.apply();
+        editor.commit();
+        Log.i(Common.LOG_SHARED_PREFERENCES, "write Boolean on " + fileName + " - VALUE: " + booleanValue);
     }
 
     public static String readStringFromSharedPreferences(@NonNull Context context, String fileName, String keyValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(keyValue, Common.NULL_STRING_VALUE);
+        String returnString = sharedPreferences.getString(keyValue, Common.NULL_STRING_VALUE);
+        Log.i(Common.LOG_SHARED_PREFERENCES, "read String from " + fileName + " - VALUE: " + returnString);
+        return returnString;
     }
 
     public static boolean readBooleanFromSharedPreferences(@NonNull Context context, String fileName, String keyValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(keyValue, false);
+        boolean returnValue = sharedPreferences.getBoolean(keyValue, false);
+        Log.i(Common.LOG_SHARED_PREFERENCES, "read String from " + fileName + " - VALUE: " + returnValue);
+        return returnValue;
     }
 }

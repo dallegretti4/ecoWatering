@@ -2,7 +2,6 @@ package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -23,7 +22,6 @@ public class IrrigationSystemActivityLogInstance implements Parcelable {
                 JSONObject jsonObject = new JSONObject(jsonString);
                 this.date = jsonObject.getString(BO_ACTIVITY_LOG_DATE);
                 this.minutes = jsonObject.getInt(BO_ACTIVITY_LOG_MINUTES);
-                Log.i(Common.LOG_NORMAL, "IrrigationSystemActivityLogInstance ---> date: " + this.date + ", minutes: " + this.minutes);
             }
             catch (JSONException e) { e.printStackTrace(); }
         }

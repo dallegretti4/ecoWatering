@@ -32,6 +32,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment;
 
 public class ConnectToEWHubActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
@@ -132,9 +133,11 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
     public void restartFragment(String connectionMode) {
         fragmentManager.popBackStack();
         if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH)) {
+            SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, true);
             changeFragment(new BtConnectionFragment(), true);
         }
         else if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_WIFI)) {
+            SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, true);
             changeFragment(new WiFiConnectionFragment(), true);
         }
     }
@@ -142,6 +145,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
     @Override
     public void closeConnection() {
         startActivity(new Intent(this, ConnectToEWHubActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -188,6 +192,26 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
      */
     private void changeFragment(@NonNull Fragment fragment, boolean addToBackStackFlag) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        boolean needToBeAnimated = false;
+        if(fragment instanceof BtConnectionFragment) {
+            if(SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY))
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, false);
+            else needToBeAnimated = true;
+        }
+        else if(fragment instanceof WiFiConnectionFragment) {
+            if(SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY))
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, false);
+            else needToBeAnimated = true;
+        }
+        else if(fragment instanceof ConnectionChooserFragment) needToBeAnimated = true;
+        if(needToBeAnimated)
+            fragmentTransaction.setCustomAnimations(
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
+            );
+
         fragmentTransaction.replace(R.id.connectToEcoWateringHubFrameLayout, fragment);
         if(addToBackStackFlag) {
             fragmentTransaction.addToBackStack(null);

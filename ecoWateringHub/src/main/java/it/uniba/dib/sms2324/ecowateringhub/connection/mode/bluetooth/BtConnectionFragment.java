@@ -44,6 +44,7 @@ import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 
 public class BtConnectionFragment extends Fragment {
@@ -64,6 +65,7 @@ public class BtConnectionFragment extends Fragment {
     private final ActivityResultLauncher<Intent> enableBluetoothLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), ((resultCode) -> {
                 if(resultCode.getResultCode() == Activity.RESULT_OK) {
+                    SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, true);
                     onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
                 }
                 else {
@@ -83,7 +85,8 @@ public class BtConnectionFragment extends Fragment {
                 onConnectionFinishCallback.closeConnection();
             }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
-                onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
+                if(getView() != null) fragmentLayoutSetup(getView());
+                startBluetoothDeviceDiscovery();
             }
             return false;
         }
@@ -110,9 +113,7 @@ public class BtConnectionFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         Common.lockLayout(requireActivity());
-        // TOOLBAR SETUP
         toolbarSetup(view);
-        // FRAGMENT LAYOUT SETUP
         fragmentLayoutSetup(view);
         // CHECK DEVICE SUPPORT BLUETOOTH
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -330,9 +331,11 @@ public class BtConnectionFragment extends Fragment {
                 .setMessage(getString(R.string.remote_device_not_available_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> requireActivity().runOnUiThread(() ->
-                                onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH))
-                ).setCancelable(false)
+                        (dialogInterface, i) -> requireActivity().runOnUiThread(() -> {
+                            SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, true);
+                            onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
+                        }))
+                .setCancelable(false)
                 .show();
     }
 }

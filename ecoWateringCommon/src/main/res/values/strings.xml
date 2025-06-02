@@ -116,8 +116,8 @@
     <string name="user_must_enable_wifi_message">Enable WiFi or go to Setting.</string>
     <string name="user_must_enable_wifi_title">To connect, you need to enable WiFi.</string>
     <string name="user_profile_menu_item_label">Manage profile</string>
-    <string name="watering_minutes_estimated_today_label">estimated watering minutes today: </string>
-    <string name="watering_minutes_executed_label">executed watering minutes: </string>
+    <string name="watering_minutes_estimated_today_label">Estimated watering minutes today: </string>
+    <string name="watering_minutes_executed_label">Executed watering minutes: </string>
     <string name="watering_minutes_saved_label">Saved watering minutes</string>
     <string name="watering_minutes_saved_total_value_label">Total saved watering minutes: </string>
     <string name="why_use_location_address_dialog_post_never_show_message">Go to Setting->privacy->Manage permissions and allow the app to know your location manually.</string>

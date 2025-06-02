@@ -27,6 +27,7 @@ import java.util.Objects;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsAdapter;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
@@ -49,7 +50,9 @@ public class SensorConfigurationFragment extends Fragment {
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
         @Override
         public void handleOnBackPressed() {
-            if(onSensorConfigurationActionCallback != null) onSensorConfigurationActionCallback.onSensorConfigurationGoBack();
+            if(onSensorConfigurationActionCallback != null) {
+                onSensorConfigurationActionCallback.onSensorConfigurationGoBack();
+            }
         }
     };
     private final MenuProvider menuProvider = new MenuProvider() {
@@ -60,10 +63,10 @@ public class SensorConfigurationFragment extends Fragment {
         @Override
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemId = menuItem.getItemId();
-            if(itemId == android.R.id.home) {
+            if(itemId == android.R.id.home)
                 onSensorConfigurationActionCallback.onSensorConfigurationGoBack();
-            }
             else if(itemId == R.id.refreshItem) {
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY, true);
                 onSensorConfigurationActionCallback.onSensorConfigurationRefreshFragment(sensorType);
             }
             return false;

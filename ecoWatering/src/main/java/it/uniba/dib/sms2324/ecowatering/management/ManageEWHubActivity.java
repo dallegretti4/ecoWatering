@@ -17,6 +17,7 @@ import java.util.Objects;
 import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
@@ -74,6 +75,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     @Override
     public void onManageHubBackPressed() {
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -81,9 +83,12 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     public void onManageHubRefreshFragment() {
         EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
-            fragmentManager.popBackStack();
-            if(selectedEWHub.isAutomated()) changeFragment(new ManageHubAutomaticControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), true);
-            else changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_DEVICE, selectedEWHub), true);
+            Bundle b = new Bundle();
+            b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
+            Intent refreshIntent = new Intent(this, ManageEWHubActivity.class);
+            refreshIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
+            startActivity(refreshIntent);
+            finish();
         });
     }
 
@@ -164,6 +169,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
         Intent goBackIntent = new Intent(this, ManageEWHubActivity.class);
         goBackIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, bundle);
         startActivity(goBackIntent);
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -185,6 +191,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
         Intent startIntent = new Intent(this, ManageEWHubActivity.class);
         startIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
         startActivity(startIntent);
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
     @Override
@@ -198,6 +205,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     @Override
     public void onSensorConfigurationRestartApp() {
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -209,6 +217,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
         Intent restartIntent = new Intent(this, ManageEWHubActivity.class);
         restartIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
         startActivity(restartIntent);
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -232,10 +241,28 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     private void changeFragment(Fragment fragment, boolean addToBackStack) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.manageEWHubFrameLayout, fragment);
-        if(addToBackStack) {
+        // INSERT SLIDE ANIMATION ON SensorConfigurationFragment
+        if(fragment instanceof SensorConfigurationFragment) { // FOR SensorConfigurationFragment
+            if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY))
+                fragmentTransaction.setCustomAnimations(
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
+                );
+                // SENSOR CONFIGURATION FRAGMENT IS REFRESHING CASE
+            else SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY, false);
+        }   // INSERT SLIDE ANIMATION ON ManageConnectedRemoteEWDevicesFragment
+        else if (fragment instanceof ManageConnectedRemoteEWDevicesFragment)
+            fragmentTransaction.setCustomAnimations(
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
+            );
+        if(addToBackStack)
             fragmentTransaction.addToBackStack(null);
-        }
+        fragmentTransaction.replace(R.id.manageEWHubFrameLayout, fragment);
         fragmentTransaction.commit();
     }
 

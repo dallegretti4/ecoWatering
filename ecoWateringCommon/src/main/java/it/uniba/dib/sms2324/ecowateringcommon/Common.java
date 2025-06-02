@@ -9,6 +9,10 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 
 import androidx.annotation.NonNull;
 
@@ -37,10 +41,9 @@ public class Common {
     public static final String NULL_STRING_VALUE = "null";
     public static final int REFRESH_FRAGMENT = 1030;
     public static final String REMOVE_REMOTE_DEVICE_RESPONSE = "remoteDeviceRemoved";
-
     public static final String LOG_NORMAL = "NORMAL_LOG";
-
-    public static final String SERVICE_LOG = "SERVICE_LOG";
+    public static final String LOG_SERVICE = "SERVICE_LOG";
+    public static final String LOG_SHARED_PREFERENCES = "SHARED_PREFERENCES_LOG";
     private static final String THIS_URL = "https://theall.altervista.org/sms2324";
     private static final UUID THIS_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public static final String VOID_STRING_VALUE = "";
@@ -175,5 +178,59 @@ public class Common {
             default:
                 return day.concat(ENGLISH_SUFFIX_ORDINAL_NUMBER_TH);
         }
+    }
+
+    public static void expandViewGradually(final @NonNull View view, long durationMillis) {
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(((View) view.getParent()).getWidth(), View.MeasureSpec.EXACTLY);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        view.measure(widthSpec, heightSpec);
+        final int targetHeight = view.getMeasuredHeight();
+
+        final int startHeight = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                1,
+                view.getContext().getResources().getDisplayMetrics()
+        );
+
+        view.setVisibility(View.VISIBLE);
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        layoutParams.height = startHeight;
+        view.setLayoutParams(layoutParams);
+
+        Animation expandAnimation = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                layoutParams.height = (interpolatedTime == 1)
+                        ? ViewGroup.LayoutParams.WRAP_CONTENT
+                        : startHeight + (int) ((targetHeight - startHeight) * interpolatedTime);
+                view.setLayoutParams(layoutParams);
+            }
+        };
+        expandAnimation.setDuration(durationMillis); // es. 500ms
+        expandAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        view.startAnimation(expandAnimation);
+    }
+
+    public static void collapseViewGradually(final View view, long durationMillis) {
+        final int initialHeight = view.getHeight(); //
+
+        final int endHeight = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                1,
+                view.getContext().getResources().getDisplayMetrics()
+        );
+        final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        Animation collapseAnimation = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                layoutParams.height = (interpolatedTime == 1)
+                        ? endHeight
+                        : initialHeight - (int) ((initialHeight - endHeight) * interpolatedTime);
+                view.setLayoutParams(layoutParams);
+            }
+        };
+        collapseAnimation.setDuration(durationMillis); // es. 500ms
+        collapseAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        view.startAnimation(collapseAnimation);
     }
 }

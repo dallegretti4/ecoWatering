@@ -66,6 +66,7 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
     @Override
     public void onManageConnectedDevicesGoBack() {
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -122,6 +123,7 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
     @Override
     public void onConnectionChooserBackPressed() {
         startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -169,20 +171,22 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // REQUESTED IN ConnectionChooserFragment IN onViewCreated()
         if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
-            if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                fragmentManager.popBackStack();
+            fragmentManager.popBackStack();
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY, true);
+                changeFragment(new ConnectionChooserFragment(Common.CALLED_FROM_HUB, false), true);
             }
         }
         // REQUESTED IN ManageRemoteEWDevicesConnectedActivity IN onModeSelected()
         else if(requestCode == Common.BT_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                changeFragment(new BtConnectionFragment(), false);
+                changeFragment(new BtConnectionFragment(), true);
             }
         }
         // REQUESTED IN ManageRemoteEWDevicesConnectedActivity IN onModeSelected()
         else if(requestCode == Common.WIFI_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                changeFragment(new WiFiConnectionFragment(), false);
+                changeFragment(new WiFiConnectionFragment(), true);
             }
         }
     }
@@ -206,10 +210,32 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
 
     private void changeFragment(Fragment fragment, boolean addToBackStackFlag) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
-        if(addToBackStackFlag) {
-            fragmentTransaction.addToBackStack(null);
+        boolean needToBeAnimated = false;
+        if(fragment instanceof BtConnectionFragment) {
+            if(SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY))
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, false);
+            else needToBeAnimated = true;
         }
+        else if(fragment instanceof WiFiConnectionFragment) {
+            if(SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY))
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, false);
+            else needToBeAnimated = true;
+        }
+        else if(fragment instanceof ConnectionChooserFragment) {
+            if(SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY))
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY, false);
+            else needToBeAnimated = true;
+        }
+
+        if(needToBeAnimated)
+            fragmentTransaction.setCustomAnimations(
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
+                    it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
+            );
+        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
+        if(addToBackStackFlag) fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
@@ -248,6 +274,7 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                         ((dialogInterface, i) -> {
                             isDeviceConnectedSuccessfullyVisible = false;
                             startActivity(new Intent(this, MainActivity.class));
+                            overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left);
                             finish();
                         })
                 )

@@ -11,6 +11,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -18,7 +19,9 @@ import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 
+import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemActivityLogInstance;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemActivityLogInstanceAdapter;
@@ -36,6 +39,18 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
     public interface OnManageHubAutomaticControlActionCallback extends ManageHubFragment.OnManageHubActionCallback {
         void controlSystemManually();
     }
+
+    // OVERRIDE OF SUPER CLASS
+    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if((historyCard != null) && (historyCard.getVisibility() == View.VISIBLE) && (getView() != null)) {
+                isActivityLogHistoryVisible = false;
+                historyCard.setVisibility(View.GONE);
+            }
+            else if(onManageHubAutomaticControlActionCallback != null) onManageHubAutomaticControlActionCallback.onManageHubBackPressed();
+        }
+    };
 
     public ManageHubAutomaticControlFragment() {
         this(ManageHubFragment.calledFrom, ManageHubFragment.hub);
@@ -59,6 +74,7 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback); // ON BACK PRESSED CALLBACK SETUP
         if(savedInstanceState != null) {
             if(isIrrigationInfoCardVisible) showAutomatedIrrigationSystemInfoCard(view);
             if(isActivityLogHistoryVisible) showIrrigationSystemHistory(view);
@@ -124,7 +140,7 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         expandAutomateIrrigationSystemInfoContainer.setVisibility(View.VISIBLE);
         automatedIrrigationSystemInfoCard = view.findViewById(R.id.automatedIrrigationSystemInfoCard);
         expandAutomateIrrigationSystemInfoContainer.setOnClickListener((v -> {
-            if(automatedIrrigationSystemInfoCard.getVisibility() == View.VISIBLE) hideAutomatedIrrigationSystemInfoCard(view);
+            if(isIrrigationInfoCardVisible) hideAutomatedIrrigationSystemInfoCard(view);
             else showAutomatedIrrigationSystemInfoCard(view);
         }));
     }
@@ -166,7 +182,8 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         isIrrigationInfoCardVisible = true;
         view.findViewById(R.id.openIrrigationSystemInfoButtonImageView).setRotation(90);
         // MAKE INFORMATION VISIBLE
-        automatedIrrigationSystemInfoCard.setVisibility(View.VISIBLE);
+            // automatedIrrigationSystemInfoCard.setVisibility(View.VISIBLE);
+
         // ACTIVATION DAYS AGO SETUP
         if((hub.getIrrigationSystem().getActivityLog() != null) && (!hub.getIrrigationSystem().getActivityLog().isEmpty()) && (hub.getIrrigationSystem().getActivityLog().get(0).getAutomatedSystemDays() > 0)) {
             String daysAgo = requireContext().getResources().getQuantityString(R.plurals.system_automated_timing_measurement_label, hub.getIrrigationSystem().getActivityLog().get(0).getAutomatedSystemDays(), hub.getIrrigationSystem().getActivityLog().get(0).getAutomatedSystemDays());
@@ -180,12 +197,15 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         Button showIrrigationSystemHistoryButton = view.findViewById(R.id.showIrrigationSystemHistoryButton);
         showIrrigationSystemHistoryButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
         showIrrigationSystemHistoryButton.setOnClickListener((v -> showIrrigationSystemHistory(view)));
+
+        Common.expandViewGradually(automatedIrrigationSystemInfoCard, 500);
     }
 
     private void hideAutomatedIrrigationSystemInfoCard(@NonNull View view) {
         isIrrigationInfoCardVisible = false;
         view.findViewById(R.id.openIrrigationSystemInfoButtonImageView).setRotation(270);
-        automatedIrrigationSystemInfoCard.setVisibility(View.GONE);
+        // automatedIrrigationSystemInfoCard.setVisibility(View.GONE);
+        Common.collapseViewGradually(automatedIrrigationSystemInfoCard, 500);
     }
 
     private void showIrrigationSystemHistory(@NonNull View view) {

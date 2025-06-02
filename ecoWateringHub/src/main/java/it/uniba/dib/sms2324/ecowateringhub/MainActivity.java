@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements
             }
             else {
                 if(isWhyGrantLocationPermissionDialogVisible) runOnUiThread(this::showWhyGrantLocationPermissionDialog);
-                else if(isHttpErrorFaultDialogVisible) runOnUiThread(this::showInternetFaultDialog);
+                else if(isHttpErrorFaultDialogVisible) runOnUiThread(this::showHttpErrorFaultDialog);
                 else if(isInternetFaultDialog) runOnUiThread(this::showInternetFaultDialog);
             }
         } else showInternetFaultDialog();
@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void manageConnectedRemoteDevices() {
         startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left);
         finish();
     }
 
@@ -216,9 +217,7 @@ public class MainActivity extends AppCompatActivity implements
                     EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this, thisEcoWateringHub);
                 }));
             }
-            else {
-                runOnUiThread(this::showHttpErrorFaultDialog);
-            }
+            else runOnUiThread(this::showHttpErrorFaultDialog);
         });
     }
 
@@ -245,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSensorConfigurationGoBack() {
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
     @Override
@@ -258,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSensorConfigurationRestartApp() {
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -265,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onAutomateSystemGoBack() {
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 
@@ -291,10 +293,22 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void changeFragment(@NonNull Fragment fragment, boolean addToBackStack) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
-        if(addToBackStack) {
-            fragmentTransaction.addToBackStack(null);
+        // INSERT SLIDE ANIMATION ON SensorConfigurationFragment
+        if((fragment instanceof SensorConfigurationFragment)) { // FOR SensorConfigurationFragment
+            if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY))
+                fragmentTransaction.setCustomAnimations(
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
+                        it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
+                );
+            // SENSOR CONFIGURATION FRAGMENT IS REFRESHING CASE
+            else SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY, false);
         }
+
+        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
+        if(addToBackStack)
+            fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
@@ -379,6 +393,7 @@ public class MainActivity extends AppCompatActivity implements
                         ((dialogInterface, i) -> {
                             isHttpErrorFaultDialogVisible = false;
                             startActivity(new Intent(this, MainActivity.class));
+                            overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
                             finish();
                         })
                 )
@@ -386,6 +401,7 @@ public class MainActivity extends AppCompatActivity implements
                     if(keyCode == KeyEvent.KEYCODE_BACK) {
                         isHttpErrorFaultDialogVisible = false;
                         startActivity(new Intent(this, MainActivity.class));
+                        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
                         finish();
                     }
                     return false;

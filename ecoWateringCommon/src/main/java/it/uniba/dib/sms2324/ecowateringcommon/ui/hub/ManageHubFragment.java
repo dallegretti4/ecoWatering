@@ -31,7 +31,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public abstract class ManageHubFragment extends Fragment {
     public static final long DATA_OBJECT_REFRESHING_DURATION = 1500;
-    public static final long SLEEP_TIME_AFTER_DATA_OBJECT_REFRESHING = 2 * 1000;
     protected static final long STOP_TIME_AFTER_STATE_CHANGE = 3 * 1000;
     protected static final long REFRESH_FRAGMENT_FREQUENCY = 5 * 1000;
     protected static String calledFrom;
