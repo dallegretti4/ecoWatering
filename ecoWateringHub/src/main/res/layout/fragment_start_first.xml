@@ -7,14 +7,16 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nameWidgetLayout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/locationWidgetLayout">
+        app:layout_constraintBottom_toTopOf="@+id/locationWidgetLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:id="@+id/firstStartTitleTextView"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/first_start_title_text_view"
             android:textSize="30sp"
@@ -23,20 +25,20 @@
             android:padding="20dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/firstStartMessageTextView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <TextView
             android:id="@+id/firstStartMessageTextView"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/first_start_message_text_view"
             android:textAlignment="center"
             android:padding="20dp"
             app:layout_constraintTop_toBottomOf="@+id/firstStartTitleTextView"
             app:layout_constraintBottom_toTopOf="@+id/hubNameEditText"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <EditText
             android:id="@+id/hubNameEditText"
@@ -50,17 +52,19 @@
             app:layout_constraintWidth_percent="0.9"
             app:layout_constraintTop_toBottomOf="@+id/firstStartMessageTextView"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/locationWidgetLayout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/nameWidgetLayout"
-        app:layout_constraintBottom_toTopOf="@+id/firstStartFinishButton" >
+        app:layout_constraintBottom_toTopOf="@+id/firstStartFinishButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:id="@+id/locationLabelTextView"
@@ -70,8 +74,8 @@
             android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/locationAddressTextView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <TextView
             android:id="@+id/locationAddressTextView"
@@ -85,8 +89,8 @@
             app:layout_constraintWidth_percent="0.9"
             app:layout_constraintTop_toBottomOf="@+id/locationLabelTextView"
             app:layout_constraintBottom_toTopOf="@+id/updateLocationButton"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <Button
             android:id="@+id/updateLocationButton"
@@ -98,8 +102,8 @@
             android:textColor="@color/white"
             app:layout_constraintTop_toBottomOf="@+id/locationAddressTextView"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -112,7 +116,7 @@
         android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@+id/locationWidgetLayout"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

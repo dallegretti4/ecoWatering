@@ -17,8 +17,8 @@
         android:padding="10dp"
         app:layout_constraintWidth_percent="0.8"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/weatherIconImageViewContainer"
             android:layout_width="wrap_content"
@@ -41,8 +41,8 @@
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/weatherStateTextViewContainer"
@@ -70,7 +70,7 @@
                     android:textStyle="bold"/>
                 <!-- MEASUREMENT UNIT -->
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/temperature_celsius"
                     android:textSize="16sp"
@@ -91,11 +91,13 @@
     <!-- RELATIVE HUMIDITY/LIGHT CARD -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/relativeHumidityLightCard"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:scaleY="0.9"
         android:scaleX="0.9"
-        app:layout_constraintTop_toBottomOf="@+id/weatherStateCard">
+        app:layout_constraintTop_toBottomOf="@+id/weatherStateCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <!-- RELATIVE HUMIDITY CARD -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
@@ -144,8 +146,8 @@
                     android:textAlignment="center"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"/>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
         <!-- LIGHT CARD -->
@@ -197,14 +199,14 @@
                     android:textAlignment="center"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"/>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <!-- PRECIPITATION CARD -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="5sp"
         android:background="@drawable/rounded_square_shape"
@@ -213,8 +215,8 @@
         android:scaleX="0.85"
         app:layout_constraintWidth_percent="0.75"
         app:layout_constraintTop_toBottomOf="@+id/relativeHumidityLightCard"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/precipitationValueContainer"
             android:layout_width="wrap_content"

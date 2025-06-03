@@ -13,12 +13,14 @@
     app:layout_constraintTop_toTopOf="parent">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/titleIrrigationSystemCard"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_square_shape"
         android:elevation="2dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -33,22 +35,24 @@
             app:layout_constraintLeft_toLeftOf="parent"
             android:contentDescription="@string/irrigation_system_label" />
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/irrigation_system_label"
             android:textAlignment="center"
             android:textSize="24sp"
             android:textColor="@color/black_white_100"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/irrigationSystemStateTextViewContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/titleIrrigationSystemCard"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <TextView
             android:id="@+id/irrigationSystemStateTextView"
             android:layout_width="wrap_content"
@@ -77,13 +81,15 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
     <TextView
         android:id="@+id/irrigationSystemNextActionTimeTextView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:textAlignment="center"
         android:gravity="center"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/irrigationSystemStateTextViewContainer"/>
+        app:layout_constraintTop_toBottomOf="@+id/irrigationSystemStateTextViewContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
     <!-- SWITCH COMPAT + FAKE CONSTRAINT LAYOUT FOR CLICK -->
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/irrigationSystemStateSwitchCompat"
@@ -108,10 +114,12 @@
     <!-- AUTOMATED SYSTEM IRRIGATION INFO CARD -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/automatedIrrigationSystemInfoCard"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_margin="10dp"
-        app:layout_constraintTop_toBottomOf="@+id/irrigationSystemStateSwitchCompat">
+        app:layout_constraintTop_toBottomOf="@+id/irrigationSystemStateSwitchCompat"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <TextView
             android:id="@+id/systemAutomatedTimingLabelTextView"
             android:layout_width="wrap_content"
@@ -173,31 +181,35 @@
             android:text="@string/history_label"
             android:textColor="@color/black_white_100"
             app:layout_constraintTop_toBottomOf="@+id/irrigationTimeEstimatedTodayTextView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/expandAutomateIrrigationSystemInfoContainer"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:scaleX="0.9"
         android:scaleY="0.9"
-        app:layout_constraintTop_toBottomOf="@+id/automatedIrrigationSystemInfoCard">
+        app:layout_constraintTop_toBottomOf="@+id/automatedIrrigationSystemInfoCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <View
             android:id="@+id/cardDivisor"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_marginTop="2dp"
             android:background="@color/black_white_90"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
         <ImageView
             android:id="@+id/openIrrigationSystemInfoButtonImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/back_icon"
-            android:backgroundTint="@color/black_white_70"
+            android:backgroundTint="@color/black_white_60"
             android:rotation="270"
             app:layout_constraintTop_toBottomOf="@+id/cardDivisor"
             app:layout_constraintBottom_toBottomOf="parent"
