@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_new_device_button">Aggiungi nuovo device</string>
+    <string name="agree">Accetta</string>
+    <string name="ambient_temperature_label">Temperatura ambientale</string>
+    <string name="are_you_sure_label">Sei sicuro?</string>
+    <string name="automate_system_message">Abbiamo creato questo piano di irrigazione per i prossimi 7 giorni.\nAl fine di garantire un servizio efficiente e personalizzato, modificheremo il piano, in funzione dei cambiamenti delle previsione meteo.\nI vostri sensori svolgeranno un ruolo fondamentale per il miglioramento della vostra esperienza.</string>
+    <string name="automate_system_title">Siamo felici di prenderci cura del tuo sistema!</string>
+    <string name="automate_system_toolbar_title">Automatizza sistema</string>
+    <string name="automated_system_label">Sistema automatizzato</string>
+    <string name="automated_system_message_label">Premi per disabilitare</string>
+    <string name="background_refreshing_label">Aggiorna in background</string>
+    <string name="bluetooth_button">Bluetooth</string>
+    <string name="bt_connection_toolbar_title">Connessione Bluetooth</string>
+    <string name="bt_not_supported_dialog_message">Per favore, usa lo connessione WiFi per ottenere connetterti.</string>
+    <string name="bt_not_supported_dialog_title">Questo dispositivo non supporta la connessione Bluetooth</string>
+    <string name="cancel_button">Annulla</string>
+    <string name="cannot_control_irrigation_system_manually_toast">Per controllare il sistema, passa al controllo manuale</string>
+    <string name="cannot_disable_background_refreshing_toast">L\'aggiornamento in background non può essere disattivato se il sistema è automatizzato</string>
+    <string name="changes_not_saved_message">Tornando indietro, le modifiche non saranno salvate.</string>
+    <string name="changes_not_saved_title">Le modifiche non sono state ancora salvate</string>
+    <string name="close_button">Chiudi</string>
+    <string name="configuration_label">Configurazione</string>
+    <string name="configuration_not_automated">Sistema non automatizzato!</string>
+    <string name="configuration_not_automated_message">Prova il nostro controllo automatizzato</string>
+    <string name="configure_label">Configura</string>
+    <string name="confirm_button">Conferma</string>
+    <string name="connect_to_hub_toolbar_title">Connetti ad un ecoWatering Hub</string>
+    <string name="connection_chooser_fragment_title_device">Per connettere il tuo dispositivo, devi ricevere una richiesta di connessione dal tuo ecoWatering Hub.\n\nScegli il modo che preferisci per ricevere la richiesta.</string>
+    <string name="connection_chooser_fragment_title_hub">Scelgi il modo che preferisci per inviare una richiesta di connessione al tuo dispositivo.</string>
+    <string name="control_system_manually_dialog_message">Tutte i comandi passeranno al controllo manuale, accertati di avere tutto sotto controllo.</string>
+    <string name="date_builder_label">%2$s %1$s %3$d</string>
+    <string name="delete_account_button">Elimina account</string>
+    <string name="delete_account_message">I tuoi dati saranno rimossi per sempre.</string>
+    <string name="delete_account_title">Vuoi davvero eliminare il tuo account?</string>
+    <string name="detach_button">Disconnetti</string>
+    <string name="detach_sensor_dialog_title">Vuoi davvero disconnettere il sensore?</string>
+    <string name="device_account_successful_deleted_title">Account eliminato</string>
+    <string name="device_id_label">DeviceID:</string>
+    <string name="disconnect">Disconnetti</string>
+    <string name="eco_watering_hub_app_name">ecoWateringHub</string>
+    <string name="edit_user_name_content_description">Premi per modificare il tuo username</string>
+    <string name="go_to_settings_button">Vai alle impostazioni</string>
+    <string name="history_label">Cronologia</string>
+    <string name="http_error_dialog_message">Riprova più tardi.</string>
+    <string name="http_error_dialog_title">Ci dispiace, qualcosa è andato storto</string>
+    <string name="internet_connection_fault_msg">Assicurati di essere connesso ad Internet e riprova.</string>
+    <string name="internet_connection_fault_title">Il dispositivo non è connesso a Internet</string>
+    <string name="irrigation_plan_agree_dialog_message">Potrai smettere di seguire il piano e tornare al controllo manuale in qualsiasi momento.</string>
+    <string name="irrigation_plan_agree_dialog_title">Accetti il piano di irrigazione?</string>
+    <string name="irrigation_system_label">Impianto d\'irrigazione</string>
+    <string name="irrigation_system_switch_off_dialog">Vuoi disattivare l\'impianto d'irrigazione?</string>
+    <string name="irrigation_system_switch_on_dialog">Vuoi attivare l\'impianto d'irrigazione?</string>
+    <string name="light_uv_index_max_label">indice UV max</string>
+    <string name="light_uv_index_label">indice UV</string>
+    <string name="manage_remote_device_toolbar_title">Dispositivi connessi</string>
+    <string name="name_label">Nome</string>
+    <string name="next_button">Continua</string>
+    <string name="next_starting_label">Prossimo avvio</string>
+    <string name="next_stopping_label">Prossimo stop</string>
+    <string name="new_name_label">Nuovo nome</string>
+    <string name="no_irrigation_needed">Irrigazione non necessaria</string>
+    <string name="no_sensor_selected_label">Nessun sensore selezionato</string>
+    <string name="notification_data_object_refreshing_disabled">Aggiornamento in background disabiltato</string>
+    <string name="off_value">Off</string>
+    <string name="ok_button">OK</string>
+    <string name="on_value">On</string>
+    <string name="refresh">Aggiorna</string>
+    <string name="relative_humidity_label">Umidità relativa</string>
+    <string name="relative_humidity_percent_label">Percentuale umidità relativa</string>
+    <string name="relative_humidity_mean_percent_label">Percentuale umidità relativa media</string>
+    <string name="remote_devices_connected_case">Seleziona la voce \"+\" nella toolbar per connettere un nuovo dispositivo..</string>
+    <string name="remote_device_connection_toolbar_title">Aggiungi nuovo dispositivo</string>
+    <string name="remove_remote_device_confirm_title">Vuoi rimuovere questo dispositivo?</string>
+    <string name="remove_remote_device_confirm_message">You can never manage the ecoWatering Hub from this device</string>
+    <string name="remove_remote_device_successfully_title">Dispositivo disconnesso!</string>
+    <string name="remove_remote_device_title_empty_case">Nessun dispositivo connesso</string>
+    <string name="retry_button">Riprova</string>
+    <string name="precipitation_label">Precipitazioni</string>
+    <string name="precipitation_label_chance_light_precipitation">Basse probabilità di pioggia</string>
+    <string name="precipitation_label_heavy_precipitation">Prevista pioggia</string>
+    <string name="precipitation_label_intense_precipitation">Pioggia intensa prevista</string>
+    <string name="precipitation_label_light_precipitation">Leggera pioggia prevista</string>
+    <string name="precipitation_label_moderate_precipitation">Pioggia moderata prevista</string>
+    <string name="precipitation_label_no_precipitation">Nessuna probabilità di precipitazioni</string>
+    <string name="precipitation_measurement_unit">mm</string>
+    <string name="selected_sensor_label">Sensore selezionato</string>
+    <string name="sensor_added_successfully">Sensore collegato correttamente</string>
+    <string name="sensor_already_configured">Questo sensore è già configurato.</string>
+    <string name="sensor_ambient_temperature">Sensore di temperatura ambientale</string>
+    <string name="sensor_chosen_title_dialog">Vuoi usare questo sensore?</string>
+    <string name="sensor_detached_title">Sensore disconnesso correttamente</string>
+    <string name="sensor_light">Sensore di luminosità</string>
+    <string name="sensor_list_empty">Nessun sensore trovato.\nAssicurati che il sensore sia correttamente collegato all\'ecoWateringHub e riprova.</string>
+    <string name="sensor_not_configured_info">In assensa di sensori connessi, ecoWatering userà le informazioni Open-Meteo.com . Configura i tuoi sensori per un esperienza migliore.</string>
+    <string name="sensor_relative_humidity">Sensore di umidità relativa</string>
+    <string name="sensors_configuration_title">Scegli il sensore di %s che vuoi utilizzare.</string>
+    <string name="sensors_label">Sensori</string>
+    <string name="setting_button">Impostazioni</string>
+    <string name="show_automated_irrigation_system_info">Mostra informazioni dell\'impianto d'irrigazione</string>
+    <string name="state_label">Stato :</string>
+    <string name="system_automated_label">Sistema automatizzato</string>
+    <string name="temperature_celsius">O Celsius</string>
+    <string name="today_label">Oggi</string>
+    <string name="user_must_enable_wifi_message">Attiva il WiFi o vai alle impostazioni.</string>
+    <string name="user_must_enable_wifi_title">Per connetterti, devi attivare il WiFi.</string>
+    <string name="user_profile_menu_item_label">Gestisci profilo</string>
+    <string name="watering_minutes_estimated_today_label">Minuti di irrigazione stimati oggi: </string>
+    <string name="watering_minutes_executed_label">Minuti di irrigazioni effettuati: </string>
+    <string name="watering_minutes_saved_label">Minuti di irrigazione risparmiati</string>
+    <string name="watering_minutes_saved_total_value_label">Totale minuti di irrigazioni risparmiati: </string>
+    <string name="why_use_location_address_dialog_post_never_show_message">Vai in Impostazioni->Privacy->Gestione autorizzazioni e concedi all\'app i permessi di geolocalizzazione.</string>
+    <string name="why_use_location_address_dialog_post_never_show_title">Abbiamo bisogno di conoscere la tua posizione</string>
+    <string name="why_use_location_dialog_message">Useremo la tua posizione esclusivamente per connettere il tuo dispositivo con un\'altro.</string>
+    <string name="why_use_location_dialog_title">Abbiamo bisogno di accedere alla tua posizione.</string>
+    <string name="wifi_button">WiFi</string>
+    <string name="wifi_connection_toolbar_title">Connessione WiFi</string>
+
+    <plurals name="remote_devices_connected_plurals">
+        <item quantity="one"> ecoWatering Device connesso</item>
+        <item quantity="other">ecoWatering Devices connessi</item>
+    </plurals>
+
+    <plurals name="irrigation_minutes_plan_plurals">
+        <item quantity="one"> minuto di irrigazione pianificato</item>
+        <item quantity="other"> minuti di irrigazione pianificati</item>
+    </plurals>
+
+    <plurals name="system_automated_timing_measurement_label">
+        <item quantity="one">%d giorno fa</item>
+        <item quantity="other">%d giorni fa</item>
+    </plurals>
+
+    <string-array name="month_names">
+        <item>Gennaio</item>
+        <item>Febbraio</item>
+        <item>Marzo</item>
+        <item>Aprile</item>
+        <item>Maggio</item>
+        <item>Giugno</item>
+        <item>Luglio</item>
+        <item>Agosto</item>
+        <item>Settembre</item>
+        <item>Ottobre</item>
+        <item>Novembre</item>
+        <item>Dicembre</item>
+    </string-array>
+</resources>

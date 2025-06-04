@@ -94,9 +94,12 @@ public class IrrigationDailyPlan {
             quantity = 2;
         else
             quantity = (int) this.getIrrigationMinutesPlan();
-        ((TextView) view.findViewById(R.id.irrigationMinutesPlanLabelTextView)).setText(context.getResources().getQuantityString(
-                        R.plurals.irrigation_minutes_plan_plurals,
-                        quantity));
+        if(quantity == 0)
+            ((TextView) view.findViewById(R.id.irrigationMinutesPlanLabelTextView)).setText(context.getString(R.string.no_irrigation_needed));
+        else
+            ((TextView) view.findViewById(R.id.irrigationMinutesPlanLabelTextView)).setText(context.getResources().getQuantityString(
+                            R.plurals.irrigation_minutes_plan_plurals,
+                            quantity));
         return view;
     }
 }
