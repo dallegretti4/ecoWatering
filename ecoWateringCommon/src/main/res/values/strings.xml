@@ -54,6 +54,7 @@
     <string name="irrigation_system_switch_on_dialog">Do you want to switch on the irrigation system?</string>
     <string name="light_uv_index_max_label">max UV index</string>
     <string name="light_uv_index_label">UV index</string>
+    <string name="low_battery_notification">Warning! Low Battery, recharge your device!</string>
     <string name="manage_remote_device_toolbar_title">Connected Devices</string>
     <string name="name_label">Name</string>
     <string name="next_button">Next</string>

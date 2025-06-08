@@ -6,6 +6,8 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -171,6 +173,10 @@ public class EcoWateringForegroundService extends Service {
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.light_uv_index_label) + ": " + hub.getIndexUV() + "\n" +
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.precipitation_label) + ": " + hub.getWeatherInfo().getPrecipitation() + context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.precipitation_measurement_unit);
         else text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.notification_data_object_refreshing_disabled);
+        // OVERRIDE NOTIFICATION FOR BATTERY LOW CASE
+        if((getBatteryPercentage(context) >= 0) && (getBatteryPercentage(context) <= 20))
+            text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.low_battery_notification);
+
 
         return new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle(context.getString(R.string.app_name))
@@ -183,6 +189,19 @@ public class EcoWateringForegroundService extends Service {
     private static void updateNotification(@NonNull Context context, @NonNull EcoWateringHub hub) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, getNotification(context, hub));
+    }
+
+    private static int getBatteryPercentage(@NonNull Context context) {
+        IntentFilter iFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = context.registerReceiver(null, iFilter);
+
+        if (batteryStatus != null) {
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            if (level >= 0 && scale > 0)
+                return Math.round((level * 100f) / scale);
+        }
+        return -1;
     }
 
     public static void checkEcoWateringForegroundServiceNeedToBeStarted(@NonNull Context context, @NonNull EcoWateringHub hub) {

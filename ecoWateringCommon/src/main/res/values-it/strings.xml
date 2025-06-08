@@ -54,6 +54,7 @@
     <string name="irrigation_system_switch_on_dialog">Vuoi attivare l\'impianto d\'irrigazione?</string>
     <string name="light_uv_index_max_label">indice UV max</string>
     <string name="light_uv_index_label">indice UV</string>
+    <string name="low_battery_notification">Attenzione! Batteria scarica, ricarica il dispositivo!</string>
     <string name="manage_remote_device_toolbar_title">Dispositivi connessi</string>
     <string name="name_label">Nome</string>
     <string name="next_button">Continua</string>

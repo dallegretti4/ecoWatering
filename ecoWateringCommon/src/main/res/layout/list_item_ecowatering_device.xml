@@ -5,13 +5,12 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:layout_marginBottom="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="120dp"
-        android:background="@drawable/rounded_square_shape"
+        android:background="@drawable/rounded_square_ripple"
         android:elevation="8dp"
         android:scaleX="0.85"
         android:scaleY="0.85" >

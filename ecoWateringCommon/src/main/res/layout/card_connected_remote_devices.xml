@@ -6,13 +6,12 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="2dp"
     android:layout_marginBottom="2dp"
-    android:background="@drawable/rounded_square_shape"
+    android:background="@drawable/rounded_square_ripple"
     android:scaleX="0.85"
     android:scaleY="0.85"
     android:elevation="8dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground"
     app:layout_constraintTop_toTopOf="parent">
     <TextView
         android:id="@+id/remoteDeviceConnectedNumberTextView"

@@ -131,8 +131,8 @@ public abstract class ManageHubFragment extends Fragment {
         this.refreshManageHubFragmentHandler.post(this.refreshManageHubFragmentRunnable);
     }
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroyView() {
+        super.onDestroyView();
         isRefreshManageHubFragmentRunning = false;
         this.refreshManageHubFragmentHandler.removeCallbacks(this.refreshManageHubFragmentRunnable);
     }
