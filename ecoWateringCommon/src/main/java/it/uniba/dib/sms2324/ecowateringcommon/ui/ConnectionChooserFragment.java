@@ -54,9 +54,8 @@ public class ConnectionChooserFragment extends Fragment {
    @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if(context instanceof OnConnectionChooserActionCallback) {
+        if(context instanceof OnConnectionChooserActionCallback)
             this.onConnectionChooserActionCallback = (OnConnectionChooserActionCallback) context;
-        }
    }
 
    @Override
@@ -73,12 +72,10 @@ public class ConnectionChooserFragment extends Fragment {
         super(R.layout.fragment_connection_chooser);
         calledFrom = calledFromString;
         isFirstActivity = isFirstActivityValue;
-        if(calledFrom.equals(Common.CALLED_FROM_HUB)) {
+        if(calledFrom.equals(Common.CALLED_FROM_HUB))
             this.primaryColor = R.color.ew_primary_color_from_hub;
-        }
-        else {
+        else
             this.primaryColor = R.color.ew_primary_color_from_device;
-        }
     }
 
     @Override
@@ -93,9 +90,9 @@ public class ConnectionChooserFragment extends Fragment {
                 showUserMustGivePermissionManuallyDialog();
             }
             // APP CAN REQUEST PERMISSION CASE
-            else  if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(requireContext(), SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY))
+            else {
                 showWhyAppUseLocationPermissionDialog();
-            else ActivityCompat.requestPermissions(requireActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, Common.LOCATION_PERMISSION_REQUEST);
+            }
         }
         else {
             if(savedInstanceState == null) {    // NORMAL START CASE

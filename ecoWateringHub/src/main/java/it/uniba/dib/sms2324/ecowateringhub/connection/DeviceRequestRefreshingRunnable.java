@@ -1,6 +1,7 @@
 package it.uniba.dib.sms2324.ecowateringhub.connection;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -57,6 +58,7 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                     break;
                 // STOP BACKGROUND REFRESHING CASE
                 case DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING:
+                    Log.i(Common.LOG_NORMAL, "------------> caseeeee");
                     this.hub.setIsDataObjectRefreshing(this.context, false, (response) -> {
                         if ((response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) &&
                                 ((this.hub.getRemoteDeviceList() == null) || this.hub.getRemoteDeviceList().isEmpty()))
@@ -77,7 +79,7 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                         }
                     }));
                     break;
-
+                //  DISABLE AUTOMATE SYSTEM CASE
                 case DeviceRequest.REQUEST_DISABLE_AUTOMATE_SYSTEM:
                     this.hub.setIsAutomated(false, (response -> {}));
                     break;

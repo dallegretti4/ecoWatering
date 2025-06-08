@@ -238,6 +238,7 @@ public class EcoWateringHub implements Parcelable {
     }
 
     public void setIsDataObjectRefreshing(@NonNull Context context, boolean value, Common.OnStringResponseGivenCallback callback) {// CONVERT STATE
+        Log.i(Common.LOG_NORMAL, "----------------> set Is DOR: ");
         int valueInt = 0;
         if(value) {
             valueInt = 1;
@@ -336,6 +337,7 @@ public class EcoWateringHub implements Parcelable {
      */
     public double getAmbientTemperature() {
         if((this.sensorInfo != null) && (this.sensorInfo.getAmbientTemperatureChosenSensor() != null) &&
+                (this.sensorInfo.getAmbientTemperatureLastUpdate() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getAmbientTemperatureLastUpdate()))) {
             return this.sensorInfo.getAmbientTemperatureSensorValue();
         }
@@ -350,9 +352,10 @@ public class EcoWateringHub implements Parcelable {
      */
     public double getIndexUV() {
         int hourFromTimestamp = Integer.parseInt(this.weatherInfo.getTime().split("T")[1].split(":")[0]);
-        boolean isInRangeTime = (hourFromTimestamp >= 7 && hourFromTimestamp < 16);
+        boolean isInRangeTime = (hourFromTimestamp >= 7 && hourFromTimestamp < 20);
         if((this.weatherInfo.getWeatherCode() >= 0) && (this.weatherInfo.getWeatherCode() <= 3) &&
                 (this.sensorInfo != null) && (this.sensorInfo.getLightChosenSensor() != null) &&
+                (this.sensorInfo.getLightLastUpdate() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getLightLastUpdate())) && isInRangeTime) {
             Log.i(Common.LOG_NORMAL, "index UV from Sensor");
             return (this.sensorInfo.getLightSensorValue() / 120);
@@ -369,6 +372,7 @@ public class EcoWateringHub implements Parcelable {
      */
     public double getRelativeHumidity() {
         if((this.sensorInfo != null) && (this.sensorInfo.getRelativeHumidityChosenSensor() != null) &&
+                (this.sensorInfo.getRelativeHumidityLastUpdate() != null) &&
                 (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getRelativeHumidityLastUpdate()))) {
             return this.sensorInfo.getRelativeHumiditySensorValue();
         }

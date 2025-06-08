@@ -221,11 +221,10 @@ public class SensorConfigurationFragment extends Fragment {
                 .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.confirm_button), ((dialogInterface, i) -> {
                     isDetachSensorDialogVisible = false;
                     hub.getSensorInfo().detachSelectedSensor(requireContext(), hub.getDeviceID(), sensorType, (response) -> {
-                        if (response.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
+                        if (response.equals(HttpHelper.HTTP_RESPONSE_ERROR))
                             requireActivity().runOnUiThread(this::showHttpErrorFaultDialog);
-                        } else {
+                        else
                             requireActivity().runOnUiThread(this::showSensorDetachedDialog);
-                        }
                     });
                 }))
                 .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
@@ -241,7 +240,7 @@ public class SensorConfigurationFragment extends Fragment {
                 .setTitle(getString(R.string.sensor_detached_title))
                 .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
                     isSensorDetachedDialogVisible = false;
-                    if(this.onSensorConfigurationActionCallback != null) this.onSensorConfigurationActionCallback.onSensorConfigurationRestartApp();
+                    if(this.onSensorConfigurationActionCallback != null) this.onSensorConfigurationActionCallback.onSensorConfigurationGoBack();
                 }).setCancelable(false)
                 .show();
     }
@@ -306,7 +305,7 @@ public class SensorConfigurationFragment extends Fragment {
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.sensor_added_successfully))
                 .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), ((dialogInterface, i) -> {
                     isSensorConfiguredDialogVisible = false;
-                    if(this.onSensorConfigurationActionCallback != null) this.onSensorConfigurationActionCallback.onSensorConfigurationRestartApp();
+                    if(this.onSensorConfigurationActionCallback != null) this.onSensorConfigurationActionCallback.onSensorConfigurationGoBack();
                 }))
                 .setCancelable(false)
                 .create()

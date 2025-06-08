@@ -55,12 +55,12 @@ public class MainActivity extends AppCompatActivity implements
     private static boolean isInternetFaultDialog;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle activitySavedInstanceState) {
+        super.onCreate(activitySavedInstanceState);
         setContentView(R.layout.activity_main);
         fragmentManager = getSupportFragmentManager();
         if(HttpHelper.isDeviceConnectedToInternet(this)) {
-            if(savedInstanceState == null) {
+            if(activitySavedInstanceState == null) {
                 Common.lockLayout(this); // CHECK IS NOT CONFIGURATION CHANGED
                 changeFragment(new LoadingFragment(), false);    // SHOW LOADING FRAGMENT
                 EcoWateringHub.exists(Common.getThisDeviceID(this), ((existsResponse) -> {  // CHECK DEVICE IS REGISTERED
@@ -350,7 +350,8 @@ public class MainActivity extends AppCompatActivity implements
         boolean firstStartDialogFlag = SharedPreferencesHelper.readStringFromSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY).equals(Common.NULL_STRING_VALUE);
         // USER MUST GRANT LOCATION PERMISSION MANUALLY CASE
         if((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) &&
-                (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) && (!firstStartDialogFlag)) {
+                (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) &&
+                (!firstStartDialogFlag)) {
             dialog.setMessage(getString(R.string.why_grant_location_permission_dialog_message))
                     .setPositiveButton(
                             getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.setting_button),

@@ -48,12 +48,10 @@ public class UserProfileFragment extends Fragment {
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
         @Override
         public void handleOnBackPressed() {
-            if(editUserNameButtonsContainer.getVisibility() == View.VISIBLE) {
+            if(editUserNameButtonsContainer.getVisibility() == View.VISIBLE)
                 showChangesWillBeLostDialog();
-            }
-            else {
+            else
                 onUserProfileActionCallback.onUserProfileGoBack();
-            }
         }
     };
     private final MenuProvider menuProvider = new MenuProvider() {
@@ -65,12 +63,10 @@ public class UserProfileFragment extends Fragment {
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemId = menuItem.getItemId();
             if(itemId == android.R.id.home) {
-                if(editUserNameButtonsContainer.getVisibility() == View.VISIBLE) {
+                if(editUserNameButtonsContainer.getVisibility() == View.VISIBLE)
                     showChangesWillBeLostDialog();
-                }
-                else {
+                else
                     onUserProfileActionCallback.onUserProfileGoBack();
-                }
             }
             else if(itemId == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 onUserProfileActionCallback.onUserProfileRefresh();
@@ -103,9 +99,8 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if(context instanceof OnUserProfileActionCallback) {
+        if(context instanceof OnUserProfileActionCallback)
             onUserProfileActionCallback = (OnUserProfileActionCallback) context;
-        }
     }
 
     @Override
@@ -136,9 +131,12 @@ public class UserProfileFragment extends Fragment {
             Common.unlockLayout(requireActivity());
             // EDITED USER NAME RECOVERING FROM CONFIGURATION CHANGES
             if(savedInstanceState.getString(EDITED_USER_NAME) != null) {
+                Log.i(Common.LOG_NORMAL, "---------------------- onsave is true");
                 unlockUserNameEdit();
                 this.userNameEditText.setText(savedInstanceState.getString(EDITED_USER_NAME));
             }
+            else
+                lockUserNameEdit();
             // DIALOG RECOVERING FROM CONFIGURATION CHANGES
             dialogRecovering();
         }
@@ -148,6 +146,7 @@ public class UserProfileFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if(editUserNameButtonsContainer.getVisibility() == View.VISIBLE) {
+            Log.i(Common.LOG_NORMAL, "---------------------- onsave visible");
             outState.putString(EDITED_USER_NAME, userNameEditText.getText().toString());
         }
     }
@@ -224,6 +223,7 @@ public class UserProfileFragment extends Fragment {
     }
 
     private void unlockUserNameEdit() {
+        Log.i(Common.LOG_NORMAL, "---------------------> visible");
         this.enableEditUserNameButton.setEnabled(false);
         this.enableEditUserNameButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.color.ew_secondary_color_90, requireContext().getTheme()));
         this.enableEditUserNameButton.setElevation(Common.dpToPx(requireContext(), 1));

@@ -50,7 +50,7 @@ public class EcoWateringForegroundService extends Service {
     private static final String SIMPLE_DATE_FORMAT = "HH:mm";
     private static final long DEVICE_REQUESTS_REFRESHING_FREQUENCY = 3 * 1000; // MILLISECONDS
     private static final long DATA_OBJECT_REFRESHING_FREQUENCY = 60 * 1000;
-    private static final long HUB_REFRESHING_FREQUENCY = 45 * 1000;
+    private static final long HUB_REFRESHING_FREQUENCY = 20 * 1000;
     private EcoWateringHub hub;
     private PowerManager.WakeLock wakeLock;
     private Thread deviceRequestRefreshingThread;

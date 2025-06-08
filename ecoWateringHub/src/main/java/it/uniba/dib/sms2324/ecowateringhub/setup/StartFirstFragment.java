@@ -75,6 +75,7 @@ public class StartFirstFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         // SETUP
+        Common.unlockLayout(requireActivity());
         nextButtonSetup(view);
         hubNameEditTextSetup(view);
         locationFoundTextViewSetup(view);
@@ -89,18 +90,16 @@ public class StartFirstFragment extends Fragment {
         });
 
         if(savedInstanceState != null) {    // CONFIGURATION CHANGED CASE
-            if(savedInstanceState.getString(CHOSEN_HUB_NAME_OUT_STATE) != null ) {
+            if(savedInstanceState.getString(CHOSEN_HUB_NAME_OUT_STATE) != null )
                 this.hubNameEditText.setText(savedInstanceState.getString(CHOSEN_HUB_NAME_OUT_STATE));
-            }
-            if(isDialogShowed) {
+            if(isDialogShowed)
                 showHubNameConfirmDialog();
-            }
         }
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        if(!this.hubNameEditText.getText().toString().equals(Common.VOID_STRING_VALUE)) {
+        if((this.hubNameEditText != null) && (!this.hubNameEditText.getText().toString().equals(Common.VOID_STRING_VALUE))) {
             outState.putString(CHOSEN_HUB_NAME_OUT_STATE, this.hubNameEditText.getText().toString());
         }
     }

@@ -30,6 +30,7 @@ public class DeviceRequest {
     public static final String REQUEST_DISABLE_AUTOMATE_SYSTEM = "DISABLE_AUTOMATE_SYSTEM";
     public static final String REQUEST_START_DATA_OBJECT_REFRESHING = "START_DATA_OBJECT_REFRESHING";
     public static final String REQUEST_STOP_DATA_OBJECT_REFRESHING = "STOP_DATA_OBJECT_REFRESHING";
+    private static final String REQUEST_DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm";
     private final String id;
     private final String caller;
     private final String request;
@@ -109,7 +110,10 @@ public class DeviceRequest {
     public boolean isValidDeviceRequest() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Common.DATE_FORMAT_STRING); // DATE PARSER SETUP
         LocalDateTime inputDateTime = LocalDateTime.parse(this.date, formatter);
+        Log.i(Common.LOG_NORMAL, "-_--------> input: " + inputDateTime.toString());
         LocalDateTime currentDate = LocalDateTime.now(ZoneId.systemDefault());
-        return ((Duration.between(inputDateTime, currentDate).getSeconds() >= 0) && (Duration.between(inputDateTime, currentDate).getSeconds() <= 30));
+        Log.i(Common.LOG_NORMAL, "-_--------> current: " + currentDate.toString());
+        Log.i(Common.LOG_NORMAL, "--------------> " + (Duration.between(currentDate, inputDateTime).getSeconds()));
+        return ((Duration.between(currentDate, inputDateTime).getSeconds() >= 0) && (Duration.between(currentDate, inputDateTime).getSeconds() <= 30));
     }
 }

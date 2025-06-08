@@ -28,12 +28,10 @@ public class StartFirstFragment extends Fragment {
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
         @Override
         public void afterTextChanged(Editable editable) {
-            if(!deviceNameEditText.getText().toString().equals("")) {
+            if(!deviceNameEditText.getText().toString().equals(""))
                 finishButton.setEnabled(true);
-            }
-            else {
-                if(finishButton.isEnabled()) finishButton.setEnabled(false);
-            }
+            else if(finishButton.isEnabled())
+                finishButton.setEnabled(false);
         }
     };
     private static boolean isDeviceNameConfirmDialogVisible;
@@ -45,9 +43,8 @@ public class StartFirstFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if(context instanceof OnFirstStartFinishCallback) {
+        if(context instanceof OnFirstStartFinishCallback)
             onFirstStartFinishCallback = (OnFirstStartFinishCallback) context;
-        }
     }
 
     @Override
@@ -78,9 +75,8 @@ public class StartFirstFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(!deviceNameEditText.getText().toString().equals(Common.VOID_STRING_VALUE)) {
+        if(!deviceNameEditText.getText().toString().equals(Common.VOID_STRING_VALUE))
             outState.putString(USERNAME_OUT_STATE, deviceNameEditText.getText().toString());
-        }
     }
 
     private void showDeviceNameConfirmDialog() {

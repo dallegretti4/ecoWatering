@@ -37,6 +37,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment;
 public class ConnectToEWHubActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
         OnConnectionFinishCallback {
+    private static final String MUST_SHOW_MESSAGE_INTENT_KEY = "MUST_SHOW_MESSAGE";
     private static FragmentManager fragmentManager;
     private static boolean isFirstActivity = false;
     private static boolean isWhyUseLocationFirstDialogVisible;
@@ -56,15 +57,16 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
                 isFirstActivity = true;
                 if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_FILE_NAME, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_VALUE_KEY)) {
                     SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_FILE_NAME, SharedPreferencesHelper.LOCATION_PERMISSION_FIRST_DIALOG_VALUE_KEY, true);
-                    showWhyUseLocationFirstDialog();
+                    if(getIntent().getBooleanExtra(MUST_SHOW_MESSAGE_INTENT_KEY, false))
+                        showWhyUseLocationFirstDialog();
+                    else
+                        changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
                 }
-                else {
+                else
                     changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
-                }
             }
-            else {
+            else
                 changeFragment(new it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment(Common.CALLED_FROM_DEVICE, isFirstActivity), false);
-            }
         }
         else {
             if(isWhyUseLocationFirstDialogVisible) runOnUiThread(this::showWhyUseLocationFirstDialog);
@@ -155,7 +157,9 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         // CALLED IN ConnectionChooserFragment IN onViewCreated()
         if(requestCode == Common.LOCATION_PERMISSION_REQUEST) {
             if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                startActivity(new Intent(this, MainActivity.class));
+                Intent restartIntent = new Intent(this, MainActivity.class);
+                restartIntent.putExtra(MUST_SHOW_MESSAGE_INTENT_KEY, true);
+                startActivity(restartIntent);
                 finish();
             }
         }

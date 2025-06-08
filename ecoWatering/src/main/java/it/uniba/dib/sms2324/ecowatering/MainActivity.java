@@ -46,15 +46,11 @@ public class MainActivity extends AppCompatActivity implements
                         startActivity(firstStartIntent);
                         finish();
                     }
-                    else {
-                        // ALREADY CONNECTED TO ONE HUB AT LEAST CASE
+                    else    // ALREADY CONNECTED TO ONE HUB AT LEAST CASE
                         changeFragment(new MainFragment(), false);
-                    }
                 }
-                else {
-                    // DEVICE NEED TO BE REGISTERED CASE
+                else    // DEVICE NEED TO BE REGISTERED CASE
                     changeFragment(new StartFirstFragment(), false);
-                }
             });
         }
     }

@@ -3,6 +3,7 @@ package it.uniba.dib.sms2324.ecowateringcommon.ui.hub;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -49,7 +50,7 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if(savedInstanceState != null)  {  // CONFIGURATION CHANGED CASE
-            if(isSwitchIrrigationSystemDialogVisible) showSwitchIrrigationSystemDialog(!hub.getIrrigationSystem().getState());
+            if(isSwitchIrrigationSystemDialogVisible) showSwitchIrrigationSystemDialog(view, !hub.getIrrigationSystem().getState());
             else if(isHttpErrorFaultDialogVisible) showHttpErrorFaultDialog();
         }
     }
@@ -107,7 +108,9 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
             view.findViewById(R.id.loadingCard).setVisibility(View.GONE);
         }
         irrigationSystemStateSwitchCompat.setOnCheckedChangeListener(
-                (buttonView, isChecked) -> requireActivity().runOnUiThread(() -> showSwitchIrrigationSystemDialog(isChecked))
+                (buttonView, isChecked) -> requireActivity().runOnUiThread(() ->
+                        showSwitchIrrigationSystemDialog(view, isChecked)
+                )
         );
     }
 
@@ -131,12 +134,11 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
 
         backgroundRefreshSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             new Thread(this::stopAndStartFragmentRefreshing).start();
-            if(isChecked && !hub.isDataObjectRefreshing() && (onHubManualActionChosenCallback != null)) {
+            view.findViewById(R.id.loadingCard).setVisibility(View.VISIBLE);
+            if(isChecked && !hub.isDataObjectRefreshing() && (onHubManualActionChosenCallback != null))
                 onHubManualActionChosenCallback.setDataObjectRefreshing(true);
-            }
-            else if (!isChecked && hub.isDataObjectRefreshing() && (onHubManualActionChosenCallback != null)) {
+            else if (!isChecked && hub.isDataObjectRefreshing() && (onHubManualActionChosenCallback != null))
                 onHubManualActionChosenCallback.setDataObjectRefreshing(false);
-            }
         });
     }
 
@@ -149,14 +151,17 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         refreshManageHubFragmentHandler.post(refreshManageHubFragmentRunnable);
     }
 
-    private void showSwitchIrrigationSystemDialog(boolean isChecked) {
+    private void showSwitchIrrigationSystemDialog(@NonNull View view, boolean isChecked) {
         isSwitchIrrigationSystemDialogVisible = true;
         String title = getString(R.string.irrigation_system_switch_off_dialog);
-        if(isChecked) { title = getString(R.string.irrigation_system_switch_on_dialog); }
+        if(isChecked)
+            title = getString(R.string.irrigation_system_switch_on_dialog);
         new AlertDialog.Builder(requireContext())
                 .setTitle(title)
                 .setPositiveButton(getString(R.string.confirm_button), (dialogInterface, i) -> {
                     isSwitchIrrigationSystemDialogVisible = false;
+                    new Thread(this::stopAndStartFragmentRefreshing).start();
+                    view.findViewById(R.id.loadingCard).setVisibility(View.VISIBLE);
                     onHubManualActionChosenCallback.setIrrigationSystemState(isChecked);
                 }).setNegativeButton(getString(R.string.close_button), (dialogInterface, i) -> {
                         isSwitchIrrigationSystemDialogVisible = false;
