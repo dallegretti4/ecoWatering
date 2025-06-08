@@ -305,6 +305,13 @@ public class MainActivity extends AppCompatActivity implements
             // SENSOR CONFIGURATION FRAGMENT IS REFRESHING CASE
             else SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY, false);
         }
+        else if((fragment instanceof StartFirstFragment) || (fragment instanceof StartSecondFragment))
+            fragmentTransaction.setCustomAnimations(
+                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
+                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
+                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
+                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
+            );
 
         fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
         if(addToBackStack)
@@ -377,7 +384,6 @@ public class MainActivity extends AppCompatActivity implements
                 getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                 (dialogInterface, i) -> {
                     isWhyGrantLocationPermissionDialogVisible = false;
-                    SharedPreferencesHelper.writeStringOnSharedPreferences(this, SharedPreferencesHelper.FIRST_START_FLAG_FILE_NAME, SharedPreferencesHelper.FIRST_START_FLAG_VALUE_KEY, SharedPreferencesHelper.FIRST_START_VALUE_FLAG);
                     finish();
                 }
         ).setCancelable(false);

@@ -59,9 +59,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         // NO INTERNET CONNECTION CASE
-        if(!HttpHelper.isDeviceConnectedToInternet(this)) {
+        if(!HttpHelper.isDeviceConnectedToInternet(this))
             showInternetFaultDialog();
-        }
     }
 
     // FROM StartFirstFragment
@@ -95,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onUserProfileGoBack() {
         startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left, it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right);
         finish();
     }
 

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -49,7 +50,7 @@ public class BtConnectionFragment extends Fragment {
     private final ActivityResultLauncher<Intent> enableBtLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             ((result) -> {
-                if(result.getResultCode() != Activity.RESULT_OK)
+                if(result.getResultCode() == Activity.RESULT_CANCELED)
                     onConnectionFinishCallback.closeConnection();
                 else
                     onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
@@ -104,7 +105,12 @@ public class BtConnectionFragment extends Fragment {
    public void onPause() {
         super.onPause();
         Common.unlockLayout(requireActivity());
-        this.makeBtDiscoverableLauncher.unregister();
+   }
+
+   @Override
+   public void onStop() {
+        super.onStop();
+       this.makeBtDiscoverableLauncher.unregister();
    }
 
    private void toolbarSetup(@NonNull View view) {
