@@ -351,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements
         // USER MUST GRANT LOCATION PERMISSION MANUALLY CASE
         if((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) &&
                 (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) && (!firstStartDialogFlag)) {
-            dialog.setMessage(getString(R.string.why_grant_location_permission_manually_dialog_message))
+            dialog.setMessage(getString(R.string.why_grant_location_permission_dialog_message))
                     .setPositiveButton(
                             getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.setting_button),
                             (dialogInterface, i) -> {

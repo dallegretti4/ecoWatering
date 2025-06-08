@@ -1,9 +1,7 @@
 <resources>
     <string name="app_name">ecoWatering</string>
-
-    <string name="add_remote_device_menu_button">Add new ecoWatering Hub</string>
+    <string name="add_remote_device_menu_button">Add new Hub</string>
     <string name="bt_connection_title_textview">Waiting ecoWatering Hub request…</string>
-    <string name="change_irrigation_system_button">Change irrigation system</string>
     <string name="disconnect_from_ewh_confirm_message">You won\'t be able to manage this ecoWatering Hub.</string>
     <string name="disconnect_from_ewh_confirm_title">Are you sure?</string>
     <string name="disconnected_from_ewh_success_title">You are successfully disconnected from this ecoWatering Hub.</string>
@@ -12,9 +10,7 @@
     <string name="insert_device_name_hint">Insert your device name</string>
     <string name="remote_device_added_success_message">Now you can manage your ecoWatering Hub.</string>
     <string name="remote_device_added_success_title">Device authorized</string>
-    <string name="remote_device_already_added_message">Try with another ecoWatering Hub, or continue to manage that.</string>
+    <string name="remote_device_already_added_message">Try with another ecoWatering Hub.</string>
     <string name="remote_device_already_added_title">This device is already connected with this ecoWatering Hub</string>
-    <string name="turn_to_manual_control_item">Turn to manual control</string>
-    <string name="why_use_bt_dialog_message">We will use your Bluetooth to allow you, to be paired with the ecoWatering Hub only</string>
     <string name="wifi_connection_title">Waiting for an ecoWatering Hub WiFi connection request…</string>
 </resources>

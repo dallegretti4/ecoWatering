@@ -22,14 +22,13 @@ public class BtDiscoveryThread extends Thread {
             String action = intent.getAction();
             if(action != null && action.equals(BluetoothDevice.ACTION_FOUND)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if(device != null) {
-                    if(!BtConnectionFragment.getBtDeviceList().contains(device)) {
-                        @SuppressLint("MissingPermission") String deviceName = device.getName();
-                        if(deviceName != null) {
-                            Log.i(Common.LOG_NORMAL, "device founded");
-                            BtConnectionFragment.addToBtDeviceList(device);
-                            BtConnectionFragment.addToDeviceListAdapter(deviceName);
-                        }
+                if((device != null) && (!BtConnectionFragment.getBtDeviceList().contains(device))) {
+                    @SuppressLint("MissingPermission")
+                    String deviceName = device.getName();
+                    if(deviceName != null) {
+                        Log.i(Common.LOG_NORMAL, "device founded");
+                        BtConnectionFragment.addToBtDeviceList(device);
+                        BtConnectionFragment.addToDeviceListAdapter(deviceName);
                     }
                 }
             }
@@ -50,5 +49,10 @@ public class BtDiscoveryThread extends Thread {
         bluetoothAdapter.startDiscovery();
         IntentFilter btFoundIntentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         this.context.registerReceiver(deviceReceiver, btFoundIntentFilter);
+    }
+
+    @SuppressLint("MissingPermission")
+    protected void cancelDiscovery() {
+        if(this.bluetoothAdapter.isDiscovering()) this.bluetoothAdapter.cancelDiscovery();
     }
 }

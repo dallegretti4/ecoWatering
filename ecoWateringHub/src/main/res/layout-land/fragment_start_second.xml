@@ -68,7 +68,7 @@
         android:scaleY="1.5"
         android:scaleX="1.5"
         android:text="@string/next_button"
-        android:textColor="@color/white"
+        android:textColor="@color/black_white_100"
         android:backgroundTint="@color/ew_primary_color"
         app:layout_constraintTop_toBottomOf="@+id/modelTextViewContainer"
         app:layout_constraintBottom_toBottomOf="parent"

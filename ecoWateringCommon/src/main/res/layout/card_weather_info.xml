@@ -93,13 +93,14 @@
         android:id="@+id/relativeHumidityLightCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:scaleY="0.9"
-        android:scaleX="0.9"
+        android:scaleY="0.95"
+        android:scaleX="0.95"
         app:layout_constraintTop_toBottomOf="@+id/weatherStateCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
         <!-- RELATIVE HUMIDITY CARD -->
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeHumidityCard"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_square_shape"
@@ -137,15 +138,16 @@
                 app:layout_constraintRight_toRightOf="parent">
                 <TextView
                     android:id="@+id/relativeHumidityLabelTextView"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/relative_humidity_percent_label"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:textSize="18sp"
                     android:textAlignment="center"
+                    android:breakStrategy="simple"
+                    android:hyphenationFrequency="none"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -160,7 +162,7 @@
             android:elevation="1dp"
             app:layout_constraintWidth_percent="0.5"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/relativeHumidityCard"
             app:layout_constraintRight_toRightOf="parent">
             <TextView
                 android:id="@+id/lightIndexTextView"
@@ -211,9 +213,9 @@
         android:layout_marginTop="5sp"
         android:background="@drawable/rounded_square_shape"
         android:elevation="1dp"
-        android:scaleY="0.85"
-        android:scaleX="0.85"
-        app:layout_constraintWidth_percent="0.75"
+        android:scaleY="0.9"
+        android:scaleX="0.9"
+        app:layout_constraintWidth_percent="0.95"
         app:layout_constraintTop_toBottomOf="@+id/relativeHumidityLightCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -231,6 +233,7 @@
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent">
             <TextView
                 android:id="@+id/precipitationValueTextView"

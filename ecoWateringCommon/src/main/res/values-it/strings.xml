@@ -16,12 +16,12 @@
     <string name="bt_not_supported_dialog_title">Questo dispositivo non supporta la connessione Bluetooth</string>
     <string name="cancel_button">Annulla</string>
     <string name="cannot_control_irrigation_system_manually_toast">Per controllare il sistema, passa al controllo manuale</string>
-    <string name="cannot_disable_background_refreshing_toast">L\'aggiornamento in background non può essere disattivato se il sistema è automatizzato</string>
+    <string name="cannot_disable_background_refreshing_toast">L\' aggiornamento in background non può essere disattivato se il sistema è automatizzato</string>
     <string name="changes_not_saved_message">Tornando indietro, le modifiche non saranno salvate.</string>
     <string name="changes_not_saved_title">Le modifiche non sono state ancora salvate</string>
     <string name="close_button">Chiudi</string>
     <string name="configuration_label">Configurazione</string>
-    <string name="configuration_not_automated">Sistema non automatizzato!</string>
+    <string name="configuration_not_automated">Automatizza sistema</string>
     <string name="configuration_not_automated_message">Prova il nostro controllo automatizzato</string>
     <string name="configure_label">Configura</string>
     <string name="confirm_button">Conferma</string>
@@ -40,6 +40,7 @@
     <string name="disconnect">Disconnetti</string>
     <string name="eco_watering_hub_app_name">ecoWateringHub</string>
     <string name="edit_user_name_content_description">Premi per modificare il tuo username</string>
+    <string name="empty_history">Cronologia vuota</string>
     <string name="go_to_settings_button">Vai alle impostazioni</string>
     <string name="history_label">Cronologia</string>
     <string name="http_error_dialog_message">Riprova più tardi.</string>
@@ -49,8 +50,8 @@
     <string name="irrigation_plan_agree_dialog_message">Potrai smettere di seguire il piano e tornare al controllo manuale in qualsiasi momento.</string>
     <string name="irrigation_plan_agree_dialog_title">Accetti il piano di irrigazione?</string>
     <string name="irrigation_system_label">Impianto d\'irrigazione</string>
-    <string name="irrigation_system_switch_off_dialog">Vuoi disattivare l\'impianto d'irrigazione?</string>
-    <string name="irrigation_system_switch_on_dialog">Vuoi attivare l\'impianto d'irrigazione?</string>
+    <string name="irrigation_system_switch_off_dialog">Vuoi disattivare l\'impianto d\'irrigazione?</string>
+    <string name="irrigation_system_switch_on_dialog">Vuoi attivare l\'impianto d\'irrigazione?</string>
     <string name="light_uv_index_max_label">indice UV max</string>
     <string name="light_uv_index_label">indice UV</string>
     <string name="manage_remote_device_toolbar_title">Dispositivi connessi</string>
@@ -67,8 +68,8 @@
     <string name="on_value">On</string>
     <string name="refresh">Aggiorna</string>
     <string name="relative_humidity_label">Umidità relativa</string>
-    <string name="relative_humidity_percent_label">Percentuale umidità relativa</string>
-    <string name="relative_humidity_mean_percent_label">Percentuale umidità relativa media</string>
+    <string name="relative_humidity_percent_label">Umidità relativa (%)</string>
+    <string name="relative_humidity_mean_percent_label">Umidità relativa media (%)</string>
     <string name="remote_devices_connected_case">Seleziona la voce \"+\" nella toolbar per connettere un nuovo dispositivo..</string>
     <string name="remote_device_connection_toolbar_title">Aggiungi nuovo dispositivo</string>
     <string name="remove_remote_device_confirm_title">Vuoi rimuovere questo dispositivo?</string>
@@ -97,7 +98,7 @@
     <string name="sensors_configuration_title">Scegli il sensore di %s che vuoi utilizzare.</string>
     <string name="sensors_label">Sensori</string>
     <string name="setting_button">Impostazioni</string>
-    <string name="show_automated_irrigation_system_info">Mostra informazioni dell\'impianto d'irrigazione</string>
+    <string name="show_automated_irrigation_system_info">Mostra informazioni dell\'impianto d\'irrigazione</string>
     <string name="state_label">Stato :</string>
     <string name="system_automated_label">Sistema automatizzato</string>
     <string name="temperature_celsius">O Celsius</string>
@@ -117,8 +118,8 @@
     <string name="wifi_connection_toolbar_title">Connessione WiFi</string>
 
     <plurals name="remote_devices_connected_plurals">
-        <item quantity="one"> ecoWatering Device connesso</item>
-        <item quantity="other">ecoWatering Devices connessi</item>
+        <item quantity="one"> Dispositivo connesso</item>
+        <item quantity="other"> Dispositivi connessi</item>
     </plurals>
 
     <plurals name="irrigation_minutes_plan_plurals">

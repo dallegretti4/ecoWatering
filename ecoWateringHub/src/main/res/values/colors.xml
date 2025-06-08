@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
     <!-- PRIMARY -->
     <color name="ew_primary_color">#1F3ECC</color>
-    <color name="ew_primary_color_10">#00105B</color>
-    <color name="ew_primary_color_20">#001F90</color>
     <color name="ew_primary_color_30">#0B32C3</color>
-    <color name="ew_primary_color_40">#324EDA</color>
-    <color name="ew_primary_color_50">#4F69F4</color>
-    <color name="ew_primary_color_60">#7287FF</color>
-    <color name="ew_primary_color_70">#96A5FF</color>
     <color name="ew_primary_color_80">#BAC3FF</color>
-    <color name="ew_primary_color_90">#DEE0FF</color>
-    <color name="ew_primary_color_95">#F0EFFF</color>
-    <color name="ew_primary_color_96">#F4F2FF</color>
-    <color name="ew_primary_color_97">#F7F5FF</color>
-    <color name="ew_primary_color_98">#FBF8FF</color>
-    <color name="ew_primary_color_99">#FEFBFF</color>
 </resources>

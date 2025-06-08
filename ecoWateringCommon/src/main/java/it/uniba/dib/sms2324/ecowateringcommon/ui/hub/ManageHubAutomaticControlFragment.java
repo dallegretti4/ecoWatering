@@ -21,7 +21,6 @@ import java.util.ArrayList;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
-import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemActivityLogInstance;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemActivityLogInstanceAdapter;
@@ -29,6 +28,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem
 public class ManageHubAutomaticControlFragment extends ManageHubFragment {
     private Toast irrigationSystemToast;
     private Toast backgroundRefreshingToast;
+    private Toast emptyHistoryToast;
     private ConstraintLayout automatedIrrigationSystemInfoCard;
     private ConstraintLayout historyCard;
     private static boolean isIrrigationInfoCardVisible;
@@ -143,6 +143,20 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
             if(isIrrigationInfoCardVisible) hideAutomatedIrrigationSystemInfoCard(view);
             else showAutomatedIrrigationSystemInfoCard(view);
         }));
+        //  IRRIGATION HISTORY BUTTON SETUP
+        Button showIrrigationSystemHistoryButton = view.findViewById(R.id.showIrrigationSystemHistoryButton);
+        showIrrigationSystemHistoryButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        showIrrigationSystemHistoryButton.setOnClickListener((v -> {
+            if((hub.getIrrigationSystem() != null) && (hub.getIrrigationSystem().getActivityLog() != null) && (!hub.getIrrigationSystem().getActivityLog().isEmpty()))
+                showIrrigationSystemHistory(view);
+            else {
+                this.emptyHistoryToast = Toast.makeText(requireContext(), getString(R.string.empty_history), Toast.LENGTH_LONG);
+                if((this.emptyHistoryToast.getView() == null) || ((this.emptyHistoryToast.getView() != null) && (!this.emptyHistoryToast.getView().isShown()))) {
+                    requireActivity().runOnUiThread(() -> this.emptyHistoryToast.show());
+                    v.setOnClickListener(null);
+                }
+            }
+        }));
     }
 
     private void automateEcoWateringSystemCardSetup(@NonNull View view) {
@@ -193,10 +207,6 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         //  IRRIGATION MINUTES SAVED SETUP
         ((TextView) view.findViewById(R.id.irrigationTimeSavedTextView)).setText(String.valueOf(hub.getIrrigationSystem().getIrrigationSavedMinutes()));
         ((TextView) view.findViewById(R.id.irrigationTimeEstimatedTodayTextView)).setText(String.valueOf(((int) hub.getIrrigationPlan().getIrrigationDailyPlanList().get(0).getIrrigationMinutesPlan())));
-        //  IRRIGATION HISTORY BUTTON SETUP
-        Button showIrrigationSystemHistoryButton = view.findViewById(R.id.showIrrigationSystemHistoryButton);
-        showIrrigationSystemHistoryButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
-        showIrrigationSystemHistoryButton.setOnClickListener((v -> showIrrigationSystemHistory(view)));
 
         Common.expandViewGradually(automatedIrrigationSystemInfoCard, 500);
     }
@@ -216,11 +226,10 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         ArrayList<IrrigationSystemActivityLogInstance> activityLogArrayList = new ArrayList<>();
         IrrigationSystemActivityLogInstanceAdapter adapter = new IrrigationSystemActivityLogInstanceAdapter(requireContext(), activityLogArrayList, calledFrom);
         historyListView.setAdapter(adapter);
-        if((hub.getIrrigationSystem() != null) && (hub.getIrrigationSystem().getActivityLog() != null) && (!hub.getIrrigationSystem().getActivityLog().isEmpty())) {
-            for(IrrigationSystemActivityLogInstance instance : hub.getIrrigationSystem().getActivityLog()) {
-                activityLogArrayList.add(instance);
-                requireActivity().runOnUiThread(adapter::notifyDataSetChanged);
-            }
+        // FILL LIST
+        for(IrrigationSystemActivityLogInstance instance : hub.getIrrigationSystem().getActivityLog()) {
+            activityLogArrayList.add(instance);
+            requireActivity().runOnUiThread(adapter::notifyDataSetChanged);
         }
         // HIDE BUTTON SETUP
         ImageView hideHistoryImageViewButton = view.findViewById(R.id.hideHistoryImageViewButton);

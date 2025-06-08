@@ -21,7 +21,7 @@
     <string name="changes_not_saved_title">Changes have not yet been saved</string>
     <string name="close_button">Close</string>
     <string name="configuration_label">Configuration</string>
-    <string name="configuration_not_automated">System not automated!</string>
+    <string name="configuration_not_automated">Automate system</string>
     <string name="configuration_not_automated_message">Try our automatic control</string>
     <string name="configure_label">Configure</string>
     <string name="confirm_button">Confirm</string>
@@ -40,6 +40,7 @@
     <string name="disconnect">Disconnect</string>
     <string name="eco_watering_hub_app_name">ecoWateringHub</string>
     <string name="edit_user_name_content_description">Press to edit your username</string>
+    <string name="empty_history">Empty history</string>
     <string name="go_to_settings_button">Go to Settings</string>
     <string name="history_label">History</string>
     <string name="http_error_dialog_message">Retry later.</string>
@@ -117,8 +118,8 @@
     <string name="wifi_connection_toolbar_title">WiFi connection</string>
 
     <plurals name="remote_devices_connected_plurals">
-        <item quantity="one">remote ecoWatering Device connected</item>
-        <item quantity="other">remote ecoWatering Devices connected</item>
+        <item quantity="one"> Connected device</item>
+        <item quantity="other"> Connected devices</item>
     </plurals>
 
     <plurals name="irrigation_minutes_plan_plurals">

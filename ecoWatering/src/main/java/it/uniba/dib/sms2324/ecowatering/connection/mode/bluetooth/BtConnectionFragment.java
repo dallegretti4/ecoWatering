@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -40,35 +39,29 @@ public class BtConnectionFragment extends Fragment {
         @Override
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
-            if(itemID == android.R.id.home) {
+            if(itemID == android.R.id.home)
                 onConnectionFinishCallback.closeConnection();
-            }
-            else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
+            else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem)
                 onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
-            }
             return false;
         }
     };
     private final ActivityResultLauncher<Intent> enableBtLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             ((result) -> {
-                if(result.getResultCode() != Activity.RESULT_OK) {
+                if(result.getResultCode() != Activity.RESULT_OK)
                     onConnectionFinishCallback.closeConnection();
-                }
-                else {
+                else
                     onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
-                }
             }));
 
     private final ActivityResultLauncher<Intent> makeBtDiscoverableLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             ((result) -> {
-                if(result.getResultCode() == Activity.RESULT_CANCELED) {
+                if(result.getResultCode() == Activity.RESULT_CANCELED)
                     onConnectionFinishCallback.closeConnection();
-                }
-                else {
+                else
                     startAcceptingBtRequest();
-                }
             })
     );
 
@@ -93,23 +86,18 @@ public class BtConnectionFragment extends Fragment {
    @Override
    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
        Common.lockLayout(requireActivity());
-        // TOOLBAR SETUP
        toolbarSetup(view);
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(bluetoothAdapter == null) {
-            // BLUETOOTH NOT SUPPORTED CASE
+        if(bluetoothAdapter == null)    // BLUETOOTH NOT SUPPORTED CASE
             showBtNotSupportedDialog();
-        }
-        else {
-            // ENABLE BLUETOOTH
+        else  // ENABLE BLUETOOTH
             enableBluetooth(() -> {
                 // MAKE DEVICE DISCOVERABLE
                 Intent makeDiscoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                 makeDiscoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, BT_DISCOVERABLE_DURATION);
                 makeBtDiscoverableLauncher.launch(makeDiscoverableIntent);
             });
-        }
    }
 
    @Override
@@ -140,17 +128,13 @@ public class BtConnectionFragment extends Fragment {
    }
 
    private void startAcceptingBtRequest() {
-        new BtAcceptingRequestThread(requireContext(), bluetoothAdapter, ((response) -> {
-            Log.i(Common.LOG_NORMAL, "brAcceptThread response: " + response);
-           if(response.equals(OnConnectionFinishCallback.BT_ERROR_RESPONSE)) {
+        new BtAcceptingRequestThread(requireContext(), this.bluetoothAdapter, ((response) -> {
+           if(response.equals(OnConnectionFinishCallback.BT_ERROR_RESPONSE))
                requireActivity().runOnUiThread(this::showErrorDialog);
-           }
-           else if(response.equals(OnConnectionFinishCallback.BT_ALREADY_CONNECTED_DEVICE_RESPONSE)) {
+           else if(response.equals(OnConnectionFinishCallback.BT_ALREADY_CONNECTED_DEVICE_RESPONSE))
                onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT);
-           }
-           else {
+           else
                onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_CONNECTED_DEVICE_RESULT);
-           }
         })).start();
    }
 

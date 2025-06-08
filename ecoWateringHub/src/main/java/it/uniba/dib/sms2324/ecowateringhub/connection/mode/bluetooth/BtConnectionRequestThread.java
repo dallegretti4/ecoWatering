@@ -39,8 +39,7 @@ public class BtConnectionRequestThread extends Thread {
             String remoteDeviceID = new String(buffer, 0, byteRead);
             // SEND HTTP REQUEST TO UPDATE DATABASE SERVER
             String response = MainActivity.getThisEcoWateringHub().addNewRemoteDevice(this.context, remoteDeviceID);
-            // RESPONSE SENDING
-            try {
+            try {   // RESPONSE SENDING
                 OutputStream outputStream = this.bluetoothSocket.getOutputStream();
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -57,9 +56,10 @@ public class BtConnectionRequestThread extends Thread {
         }
     }
 
-    public void cancel() {
+    public void closeSocket() {
         try {
-            if(this.bluetoothSocket != null) this.bluetoothSocket.close();
+            if(this.bluetoothSocket != null)
+                this.bluetoothSocket.close();
         }
         catch (IOException e) {
             e.printStackTrace();

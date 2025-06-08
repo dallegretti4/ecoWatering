@@ -62,7 +62,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/next_button"
-        android:textColor="@color/white"
+        android:textColor="@color/black_white_100"
         android:scaleY="1.5"
         android:scaleX="1.5"
         android:backgroundTint="@color/ewd_primary_color"

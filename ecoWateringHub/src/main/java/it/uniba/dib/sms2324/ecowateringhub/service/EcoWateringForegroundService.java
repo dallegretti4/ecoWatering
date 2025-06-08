@@ -173,7 +173,7 @@ public class EcoWateringForegroundService extends Service {
         else text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.notification_data_object_refreshing_disabled);
 
         return new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle(context.getString(R.string.sensors_notification_title))
+                .setContentTitle(context.getString(R.string.app_name))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .setOngoing(true)
                 .setSmallIcon(it.uniba.dib.sms2324.ecowateringcommon.R.drawable.small_simple_logo)

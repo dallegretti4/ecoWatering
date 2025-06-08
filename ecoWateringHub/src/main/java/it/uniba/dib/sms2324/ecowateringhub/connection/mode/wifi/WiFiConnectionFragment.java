@@ -61,6 +61,7 @@ public class WiFiConnectionFragment extends Fragment {
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel channel;
     private ArrayList<WifiP2pDevice> deviceList;
+    private ArrayList<String> deviceStringList;
     private ArrayAdapter<String> deviceAdapter;
     private WiFiConnectionRequestThread wiFiConnectionRequestThread;
     private OnConnectionFinishCallback onConnectionFinishCallback;
@@ -72,12 +73,12 @@ public class WiFiConnectionFragment extends Fragment {
         @Override
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
-            if(itemID == android.R.id.home) {
+            if(itemID == android.R.id.home)
                 onConnectionFinishCallback.closeConnection();
-            }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
                 wifiP2pManager.stopPeerDiscovery(channel, null);
-                deviceList = new ArrayList<>();
+                deviceList.clear();
+                deviceStringList.clear();
                 requireActivity().runOnUiThread(deviceAdapter::notifyDataSetChanged);
                 startWiFiDiscovery();
             }
@@ -90,23 +91,23 @@ public class WiFiConnectionFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action != null) {
-                if (action.equals(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)) {
+                if (action.equals(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION))
                     // FILL LIST VIEW
                     wifiP2pManager.requestPeers(channel, ((peerList) -> {
-                        deviceList = new ArrayList<>(peerList.getDeviceList());
-                        deviceAdapter = new ArrayAdapter<>(
-                                requireContext(),
-                                android.R.layout.simple_list_item_1,
-                                deviceList.stream().map(device -> device.deviceName).collect(Collectors.toList()));
-                        wifiConnectionListView.setAdapter(deviceAdapter);
-                        deviceAdapter.notifyDataSetChanged();
+                        ArrayList<WifiP2pDevice> tmpDeviceList = new ArrayList<>(peerList.getDeviceList());
+                        ArrayList<String> tmpDeviceStringList = tmpDeviceList.stream().map(device -> device.deviceName).collect(Collectors.toCollection(ArrayList::new));
+                        for(int i=0; i<tmpDeviceStringList.size(); i++) {
+                            if(!deviceStringList.contains(tmpDeviceStringList.get(i))) {
+                                deviceList.add(tmpDeviceList.get(i));
+                                deviceStringList.add(tmpDeviceStringList.get(i));
+                                requireActivity().runOnUiThread(deviceAdapter::notifyDataSetChanged);
+                            }
+                        }
                     }));
-                }
                 else if(action.equals(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)) {
                     NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-                    if(networkInfo != null && networkInfo.isConnectedOrConnecting()) {
+                    if(networkInfo != null && networkInfo.isConnectedOrConnecting())
                         wifiP2pManager.requestConnectionInfo(channel, connectionInfoListener);
-                    }
                 }
             }
         }
@@ -146,9 +147,8 @@ public class WiFiConnectionFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof OnConnectionFinishCallback) {
+        if (context instanceof OnConnectionFinishCallback)
             onConnectionFinishCallback = (OnConnectionFinishCallback) context;
-        }
     }
 
     @Override
@@ -159,15 +159,15 @@ public class WiFiConnectionFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        // SETUP
         Common.lockLayout(requireActivity());
         toolbarSetup(view);
         fragmentLayoutSetup(view);
+
         wifiP2pManager = (WifiP2pManager) requireActivity().getSystemService(Context.WIFI_P2P_SERVICE);
         channel = wifiP2pManager.initialize(requireContext(), requireContext().getMainLooper(), null);
         peersReceiverSetup();
         WifiManager wifiManager = (WifiManager) requireContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        // LOGIC
+
         if (!wifiManager.isWifiEnabled()) { // WIFI NOT ENABLED CASE
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) wifiManager.setWifiEnabled(true);
             else showEnableWiFiDialog();
@@ -206,6 +206,14 @@ public class WiFiConnectionFragment extends Fragment {
         initialConstraintSet = new ConstraintSet();
         initialConstraintSet.clone(constraintLayout);
         wifiConnectionListView.setOnItemClickListener((adapterView, v, position, l) -> showConnectPopUpMenu(v, position));
+        deviceList = new ArrayList<>();
+        deviceStringList = new ArrayList<>();
+        deviceAdapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_list_item_1,
+                deviceStringList
+        );
+        wifiConnectionListView.setAdapter(deviceAdapter);
     }
 
     private void peersReceiverSetup() {
@@ -340,7 +348,7 @@ public class WiFiConnectionFragment extends Fragment {
     private void showWhyUseLocationDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.why_use_location_dialog_title))
-                .setMessage(getString(R.string.why_use_location_dialog_message))
+                .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.why_use_location_dialog_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> onConnectionFinishCallback.closeConnection())

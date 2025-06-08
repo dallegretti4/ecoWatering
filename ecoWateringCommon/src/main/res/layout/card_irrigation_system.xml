@@ -191,6 +191,7 @@
         android:layout_marginTop="20dp"
         android:scaleX="0.9"
         android:scaleY="0.9"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/automatedIrrigationSystemInfoCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">

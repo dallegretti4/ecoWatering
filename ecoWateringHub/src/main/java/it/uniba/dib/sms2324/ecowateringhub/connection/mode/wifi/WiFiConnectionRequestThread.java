@@ -16,6 +16,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 
 public class WiFiConnectionRequestThread extends Thread {
+    private  static final int WIFI_DIRECT_PORT = 8898;
     private final Context context;
     private final String peerAddress;
     private final Common.OnStringResponseGivenCallback callback;
@@ -28,7 +29,7 @@ public class WiFiConnectionRequestThread extends Thread {
 
     @Override
     public void run() {
-        try (Socket socket = new Socket(this.peerAddress, 8898)) {
+        try (Socket socket = new Socket(this.peerAddress, WIFI_DIRECT_PORT)) {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // SEND REQUEST NAME

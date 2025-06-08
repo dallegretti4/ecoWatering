@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ecoWateringHub</string>
+    <string name="address_not_found">Localizzazione non trovata\nSe hai già concesso i permessi di localizzazione, prova a riavviare il dispositivo.</string>
+    <string name="bt_connection_title">Seleziona il tuo dispositivo</string>
+    <string name="connect">Connetti</string>
+    <string name="connecting">Connessione…</string>
+    <string name="first_start_message_text_view">Il nome scelto sarà utilizzato per identificare il tuo Hub.</string>
+    <string name="first_start_title_text_view">Scegli il nome del tuo Hub</string>
+    <string name="hub_name_confirm_dialog_title">Sei sicuro?</string>
+    <string name="insert_hub_name_hint">Inserisci nome</string>
+    <string name="irrigation_system_founded_case">Prosegui per utilizzare questo impianto d\'irrigazione.\n\nSe non riesci a trovare il tuo impianto d\'irrigazione, assicurati che sia correttamente collegato e riprova.</string>
+    <string name="irrigation_system_not_founded_case">Nessun impianto d\'irrigazione trovato.\n\nSe non riesci a trovare il tuo impianto d\'irrigazione, assicurati che sia correttamente collegato e riprova.</string>
+    <string name="location_label">Posizione:</string>
+    <string name="remote_device_added_message">Adesso puoi utillizare il dispositivo per gestire il tuo Hub.</string>
+    <string name="remote_device_added_title">Dispositivo aggiunto</string>
+    <string name="remote_device_already_exists_message">Prova con un altro dispositivo.</string>
+    <string name="remote_device_already_exists_title">Dispositivo già connesso</string>
+    <string name="remote_device_not_available_title">Dispositivo non disponibile</string>
+    <string name="sensors_notification_text">Ultimo aggiornamento: </string>
+    <string name="try_to_connect_title">Attendi. Stiamo cercando di connetterti…</string>
+    <string name="update_Location_button">Aggiorna posizione</string>
+    <string name="why_grant_location_permission_dialog_title">Abbiamo bisogno di conoscere la tua posizione</string>
+    <string name="why_grant_location_permission_dialog_message">Per piacere concedi i permessi.\nUseremo la tua posizione, per generare un piano efficiente per il tuo Hub, basato sul meteo.</string>
+    <string name="why_use_location_dialog_title">Abbiamo bisogno di conoscere la tua posizione</string>
+    <string name="wifi_connection_title">Seleziona il dispositivo</string>
+</resources>

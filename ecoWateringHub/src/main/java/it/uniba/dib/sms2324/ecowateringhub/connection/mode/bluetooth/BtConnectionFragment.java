@@ -68,9 +68,8 @@ public class BtConnectionFragment extends Fragment {
                     SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, true);
                     onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
                 }
-                else {
+                else
                     onConnectionFinishCallback.closeConnection();
-                }
             }));
 
     private final MenuProvider menuProvider = new MenuProvider() {
@@ -81,12 +80,13 @@ public class BtConnectionFragment extends Fragment {
         @Override
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
             int itemID = menuItem.getItemId();
-            if(itemID == android.R.id.home) {
+            if(itemID == android.R.id.home)
                 onConnectionFinishCallback.closeConnection();
-            }
             else if(itemID == it.uniba.dib.sms2324.ecowateringcommon.R.id.refreshItem) {
-                if(getView() != null) fragmentLayoutSetup(getView());
-                startBluetoothDeviceDiscovery();
+                if(getView() != null) {
+                    fragmentLayoutSetup(getView());
+                    startBluetoothDeviceDiscovery();
+                }
             }
             return false;
         }
@@ -117,31 +117,24 @@ public class BtConnectionFragment extends Fragment {
         fragmentLayoutSetup(view);
         // CHECK DEVICE SUPPORT BLUETOOTH
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter != null) {
-            // ENABLE GPS
+        if (bluetoothAdapter != null)
             enableGPS((result) -> {
-                if(result == Common.GPS_ENABLED_RESULT) {
+                if(result == Common.GPS_ENABLED_RESULT)
                     startBluetoothDeviceDiscovery();
-                }
             });
-        }
-        // DEVICE NOT SUPPORTS BLUETOOTH CASE
-        else {
+        else    // DEVICE NOT SUPPORTS BLUETOOTH CASE
             showDeviceNotSupportsBluetoothDialog();
-        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        bluetoothAdapter = null;
-        if(btDiscoveryThread != null && btDiscoveryThread.isAlive()) {
-            btDiscoveryThread.interrupt();
-        }
-        if(btConnectionRequestThread != null && btConnectionRequestThread.isAlive()) {
-            btConnectionRequestThread.interrupt();
-        }
         Common.unlockLayout(requireActivity());
+        bluetoothAdapter = null;
+        if(btDiscoveryThread != null && btDiscoveryThread.isAlive())
+            btDiscoveryThread.cancelDiscovery();
+        if(btConnectionRequestThread != null)
+            btConnectionRequestThread.closeSocket();
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -214,10 +207,8 @@ public class BtConnectionFragment extends Fragment {
                 btDiscoveryThread = new BtDiscoveryThread(requireContext(), bluetoothAdapter);
                 requireActivity().runOnUiThread(btDiscoveryThread);
             }
-            // BLUETOOTH ENABLING REQUEST REJECTED CASE
-            else {
+            else    // BLUETOOTH ENABLING REQUEST REJECTED CASE
                 onConnectionFinishCallback.closeConnection();
-            }
         });
     }
 
@@ -227,12 +218,10 @@ public class BtConnectionFragment extends Fragment {
      * To check and enable the bluetooth.
      */
     private void enableBluetooth(Common.OnIntegerResultGivenCallback callback) {
-        if(!bluetoothAdapter.isEnabled()) {
+        if(!bluetoothAdapter.isEnabled())
             enableBluetoothLauncher.launch(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
-        }
-        else {
+        else
             callback.getResult(BT_ENABLED_RESULT);
-        }
     }
 
     /**
@@ -264,6 +253,7 @@ public class BtConnectionFragment extends Fragment {
         requireActivity().runOnUiThread(connectPopUpMenu::show);
     }
 
+    @SuppressLint("MissingPermission")
     private void sendBtConnectionRequest(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
         titleTextView.setVisibility(View.GONE);
         deviceListView.setVisibility(View.GONE);
@@ -271,10 +261,12 @@ public class BtConnectionFragment extends Fragment {
         btConnectionRequestProgressBar.setVisibility(View.VISIBLE);
         btConnectionRequestThread = new BtConnectionRequestThread(context, deviceToAdd, callback);
         btConnectionRequestThread.start();
+        if(bluetoothAdapter.isDiscovering())
+            bluetoothAdapter.cancelDiscovery();
         // SET TIME LIMIT TO CONNECTION THREAD
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if(btConnectionRequestThread.isAlive()) {
-                btConnectionRequestThread.cancel();
+                btConnectionRequestThread.closeSocket();
                 requireActivity().runOnUiThread(this::showDeviceNotAvailableDialog);
             }
         }, MAX_TIME_CONNECTION);
@@ -328,7 +320,6 @@ public class BtConnectionFragment extends Fragment {
     private void showDeviceNotAvailableDialog() {
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.remote_device_not_available_title))
-                .setMessage(getString(R.string.remote_device_not_available_message))
                 .setPositiveButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         (dialogInterface, i) -> requireActivity().runOnUiThread(() -> {

@@ -16,7 +16,7 @@
         android:id="@+id/userProfileItem"
         android:icon="@drawable/user_icon"
         android:title="@string/user_profile_menu_item_label"
-        android:iconTint="@color/white"
+        android:iconTint="@color/black_white_100"
         app:showAsAction="always"/>
 
 </menu>
