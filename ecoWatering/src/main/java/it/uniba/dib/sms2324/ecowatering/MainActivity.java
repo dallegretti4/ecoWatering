@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // FROM MainFragment
+    // FROM MainFragment.OnMainFragmentActionCallback
     @Override
     public void onMainFragmentUserProfileChosen() {
         changeFragment(new UserProfileFragment(Common.CALLED_FROM_DEVICE), true);
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements
         changeFragment(new UserProfileFragment(Common.CALLED_FROM_DEVICE), true);
     }
 
-    @Override
+    @Override   // CALLED FROM MainFragment.OnMainFragmentActionCallback TO
     public void restartApp() {
         startActivity(new Intent(this, MainActivity.class));
         finish();

@@ -39,7 +39,7 @@
             app:layout_constraintEnd_toEndOf="parent"/>
         <!-- REMOTE DEVICES CONNECTED LIST -->
         <ListView
-            android:id="@+id/remoteDevicesConnectedListView"
+            android:id="@+id/remoteDevicesConnectedAbsView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:divider="@android:color/transparent"

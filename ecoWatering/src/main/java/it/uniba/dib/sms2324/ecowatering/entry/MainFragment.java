@@ -8,6 +8,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -42,6 +44,7 @@ public class MainFragment extends Fragment {
     private ArrayAdapter<EcoWateringHub> ecoWateringHubAdapter;
     private OnMainFragmentActionCallback onMainFragmentActionCallback;
     public interface OnMainFragmentActionCallback {
+        void restartApp();
         void onMainFragmentUserProfileChosen();
     }
     private final MenuProvider menuProvider = new MenuProvider() {
@@ -56,13 +59,10 @@ public class MainFragment extends Fragment {
                 startActivity(new Intent(requireContext(), ConnectToEWHubActivity.class));
                 requireActivity().finish();
             }
-            else if(itemId == R.id.refreshMainFragmentItem) {
-                startActivity(new Intent(requireContext(), MainActivity.class));
-                requireActivity().finish();
-            }
-            else if(itemId == R.id.userProfileItem) {
+            else if(itemId == R.id.refreshMainFragmentItem)
+                onMainFragmentActionCallback.restartApp();
+            else if(itemId == R.id.userProfileItem)
                 onMainFragmentActionCallback.onMainFragmentUserProfileChosen();
-            }
             return false;
         }
     };
@@ -128,26 +128,14 @@ public class MainFragment extends Fragment {
         this.ecoWateringHubList = new ArrayList<>();
         this.ecoWateringHubAdapter = new EcoWateringHubAdapter(requireContext(), this.ecoWateringHubList);
         // SET ADAPTER
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {   // PORTRAIT LAYOUT CASE
-            ListView ecoWateringHubListView = view.findViewById(R.id.hubListListView);
-            ecoWateringHubListView.setAdapter(this.ecoWateringHubAdapter);
-            ecoWateringHubListView.setOnItemClickListener((adapterView, v, position, l) -> manageEWHub(position));
-            ecoWateringHubListView.setOnItemLongClickListener(
-                    (adapterView, v, position, l) -> {
-                        showDisconnectPopUpMenu(v, position);
-                        return true;
-                    });
-        }
-        else if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) { // LANDSCAPE LAYOUT CASE
-            GridView ecoWateringHubGridView = view.findViewById(R.id.hubListGridView);
-            ecoWateringHubGridView.setAdapter(this.ecoWateringHubAdapter);
-            ecoWateringHubGridView.setOnItemClickListener((adapterView, v, position, l) -> manageEWHub(position));
-            ecoWateringHubGridView.setOnItemLongClickListener(
-                    (adapterView, v, position, l) -> {
-                        showDisconnectPopUpMenu(v, position);
-                        return true;
-                    });
-        }
+        AbsListView absListView = view.findViewById(R.id.hubAbsView);
+        absListView.setAdapter(this.ecoWateringHubAdapter);
+        absListView.setOnItemClickListener((adapterView, v, position, l) -> manageEWHub(position));
+        absListView.setOnItemLongClickListener(
+                (adapterView, v, position, l) -> {
+                    showDisconnectPopUpMenu(v, position);
+                    return true;
+                });
     }
 
     private void refillEcoWateringHubList(ArrayList<EcoWateringHub> helpEcoWateringHubList) {

@@ -50,7 +50,6 @@ import it.uniba.dib.sms2324.ecowateringhub.R;
 public class BtConnectionFragment extends Fragment {
     private static final String BT_CONNECTED_RESPONSE = "remoteDeviceAdded";
     private static final int BT_ENABLED_RESULT = 1009;
-    private static final int MAX_TIME_CONNECTION = 30 * 1000;
     private TextView titleTextView;
     private TextView titleConnectingTextView;
     private ListView deviceListView;
@@ -267,9 +266,9 @@ public class BtConnectionFragment extends Fragment {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if(btConnectionRequestThread.isAlive()) {
                 btConnectionRequestThread.closeSocket();
-                requireActivity().runOnUiThread(this::showDeviceNotAvailableDialog);
+                requireActivity().runOnUiThread(() -> this.onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT));
             }
-        }, MAX_TIME_CONNECTION);
+        }, OnConnectionFinishCallback.MAX_TIME_CONNECTION);
     }
 
     private void manageResponse(String response) {
@@ -315,18 +314,5 @@ public class BtConnectionFragment extends Fragment {
                 )
                 .setCancelable(false);
         dialog.show();
-    }
-
-    private void showDeviceNotAvailableDialog() {
-        new android.app.AlertDialog.Builder(requireContext())
-                .setTitle(getString(R.string.remote_device_not_available_title))
-                .setPositiveButton(
-                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
-                        (dialogInterface, i) -> requireActivity().runOnUiThread(() -> {
-                            SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.BT_CONNECTION_FRAGMENT_IS_REFRESHING_KEY, true);
-                            onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH);
-                        }))
-                .setCancelable(false)
-                .show();
     }
 }

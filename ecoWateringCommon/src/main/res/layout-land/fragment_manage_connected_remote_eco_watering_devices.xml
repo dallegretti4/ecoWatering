@@ -38,7 +38,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
         <GridView
-            android:id="@+id/remoteDevicesConnectedGridView"
+            android:id="@+id/remoteDevicesConnectedAbsView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:numColumns="2"

@@ -104,6 +104,7 @@ public class WiFiConnectionFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Common.unlockLayout(requireActivity());
+        wifiP2pManager.removeGroup(channel, null);
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -122,11 +123,10 @@ public class WiFiConnectionFragment extends Fragment {
         WifiManager wifiManager = (WifiManager) requireContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         // WIFI NOT ENABLED CASE
         if (!wifiManager.isWifiEnabled()) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
                 wifiManager.setWifiEnabled(true);
-            } else {
+            else
                 showEnableWiFiDialog();
-            }
         }
         // WIFI ENABLED CASE
         else {

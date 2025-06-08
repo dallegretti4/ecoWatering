@@ -1,6 +1,8 @@
 package it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -44,6 +46,7 @@ public class WiFiConnectionRequestThread extends Thread {
             callback.getResponse(response);
         }
         catch(IOException e) {
+            callback.getResponse(OnConnectionFinishCallback.WIFI_ERROR_RESPONSE);
             e.printStackTrace();
         }
     }

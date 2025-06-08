@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -44,8 +45,11 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
         setContentView(R.layout.activity_manage_connected_remote_ew_devices);
         fragmentManager = getSupportFragmentManager();
 
-        if(savedInstanceState == null) {    // NOT CONFIGURATION CHANGED CASE
-            changeFragment(new ManageConnectedRemoteEWDevicesFragment(Common.getThisDeviceID(this), Common.CALLED_FROM_HUB), false);
+        if(savedInstanceState == null) {   // NOT CONFIGURATION CHANGED CASE
+            if (getIntent().getBooleanExtra(START_TO_CONNECTION_CHOOSER, false))
+                changeFragment(new ConnectionChooserFragment(Common.CALLED_FROM_HUB, false), false);
+            else
+                changeFragment(new ManageConnectedRemoteEWDevicesFragment(Common.getThisDeviceID(this), Common.CALLED_FROM_HUB), false);
         }
         else {  // CONFIGURATION CHANGED CASE
             if(isInternetFaultDialog) runOnUiThread(this::showInternetFaultDialog);
@@ -85,7 +89,10 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
 
     @Override
     public void addNewRemoteDevice() {
-        changeFragment(new ConnectionChooserFragment(Common.CALLED_FROM_HUB, false), true);
+        Intent connectionIntent = new Intent(this, ManageEcoWateringDevicesConnectionActivity.class);
+        connectionIntent.putExtra(START_TO_CONNECTION_CHOOSER, true);
+        startActivity(connectionIntent);
+        finish();
     }
 
     @Override
@@ -130,16 +137,13 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
     @Override
     public void onConnectionFinish(int resultCode) {
         switch (resultCode) {
-            case Common.ACTION_BACK_PRESSED:
-                fragmentManager.popBackStack();
+            case CONNECTION_ERROR_RESULT:
+                runOnUiThread(this::showDeviceNotAvailableDialog);
                 break;
-            case OnConnectionFinishCallback.CONNECTION_ERROR_RESULT:
-                runOnUiThread(this::showErrorDialog);
-                break;
-            case OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT:
+            case CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT:
                 runOnUiThread(this::showDeviceAlreadyConnectedDialog);
                 break;
-            case OnConnectionFinishCallback.CONNECTION_CONNECTED_DEVICE_RESULT:
+            case CONNECTION_CONNECTED_DEVICE_RESULT:
                 runOnUiThread(this::showDeviceConnectedSuccessfully);
                 break;
             default:
@@ -150,15 +154,12 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
     @Override
     public void restartFragment(String connectionMode) {
         fragmentManager.popBackStack();
-        if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH)) {
+        if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH))
             changeFragment(new BtConnectionFragment(), true);
-        }
-        else if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_WIFI)) {
+        else if(connectionMode.equals(OnConnectionFinishCallback.CONNECTION_MODE_WIFI))
             changeFragment(new WiFiConnectionFragment(), true);
-        }
-        else {
+        else
             runOnUiThread(this::showErrorDialog);
-        }
     }
 
     @Override
@@ -174,7 +175,10 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
             fragmentManager.popBackStack();
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY, true);
-                changeFragment(new ConnectionChooserFragment(Common.CALLED_FROM_HUB, false), true);
+                Intent connectionIntent = new Intent(this, ManageEcoWateringDevicesConnectionActivity.class);
+                connectionIntent.putExtra(START_TO_CONNECTION_CHOOSER, true);
+                startActivity(connectionIntent);
+                finish();
             }
         }
         // REQUESTED IN ManageRemoteEWDevicesConnectedActivity IN onModeSelected()
@@ -237,6 +241,16 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
         fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
         if(addToBackStackFlag) fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
+    }
+
+    private void showDeviceNotAvailableDialog() {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(getString(R.string.remote_device_not_available_title))
+                .setPositiveButton(
+                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
+                        (dialogInterface, i) -> runOnUiThread(() -> fragmentManager.popBackStack()))
+                .setCancelable(false)
+                .show();
     }
 
     /**

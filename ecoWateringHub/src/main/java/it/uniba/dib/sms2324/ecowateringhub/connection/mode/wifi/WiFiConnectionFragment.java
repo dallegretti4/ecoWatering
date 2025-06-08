@@ -14,6 +14,8 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -116,7 +118,7 @@ public class WiFiConnectionFragment extends Fragment {
         if(info.groupFormed && !info.isGroupOwner && info.groupOwnerAddress.getHostAddress() != null) {
             String peerAddress = info.groupOwnerAddress.getHostAddress();
             wiFiConnectionRequestThread = new WiFiConnectionRequestThread(requireContext(), peerAddress, ((response) -> {
-                requireActivity().runOnUiThread(()->{
+                requireActivity().runOnUiThread(() -> {
                     titleTextView.setText(R.string.wifi_connection_title);
                     wifiConnectionListView.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
@@ -137,6 +139,7 @@ public class WiFiConnectionFragment extends Fragment {
                 }
             }));
             wiFiConnectionRequestThread.start();
+            wifiP2pManager.stopPeerDiscovery(channel, null);
         }
     };
 
@@ -180,9 +183,9 @@ public class WiFiConnectionFragment extends Fragment {
     public void onPause() {
         super.onPause();
         requireActivity().unregisterReceiver(peersReceiver);
-        if(wiFiConnectionRequestThread != null && wiFiConnectionRequestThread.isAlive()) {
+        if(wiFiConnectionRequestThread != null && wiFiConnectionRequestThread.isAlive())
             wiFiConnectionRequestThread.interrupt();
-        }
+        wifiP2pManager.stopPeerDiscovery(channel, null);
         Common.unlockLayout(requireActivity());
     }
 
@@ -306,6 +309,11 @@ public class WiFiConnectionFragment extends Fragment {
                     @Override
                     public void onSuccess() {
                         Log.i(Common.LOG_NORMAL, "connection started");
+                        // SET TIME LIMIT TO CONNECTION THREAD
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            if(progressBar.getVisibility() == View.VISIBLE)
+                                onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT);
+                        }, OnConnectionFinishCallback.MAX_TIME_CONNECTION);
                     }
                     @Override
                     public void onFailure(int i) {

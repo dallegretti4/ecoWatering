@@ -103,7 +103,8 @@ public class BtConnectionFragment extends Fragment {
    @Override
    public void onPause() {
         super.onPause();
-       Common.unlockLayout(requireActivity());
+        Common.unlockLayout(requireActivity());
+        this.makeBtDiscoverableLauncher.unregister();
    }
 
    private void toolbarSetup(@NonNull View view) {

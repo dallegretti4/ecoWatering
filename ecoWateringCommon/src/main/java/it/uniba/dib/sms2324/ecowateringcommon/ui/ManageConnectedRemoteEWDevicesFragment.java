@@ -1,14 +1,12 @@
 package it.uniba.dib.sms2324.ecowateringcommon.ui;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.GridView;
-import android.widget.ListView;
+import android.widget.AbsListView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -158,12 +156,10 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) requireActivity()).setSupportActionBar(toolbar);
         if(toolbar != null) {
-            if(calledFrom.equals(Common.CALLED_FROM_HUB)) {
+            if(calledFrom.equals(Common.CALLED_FROM_HUB))
                 toolbar.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.ew_primary_color_from_hub, requireActivity().getTheme()));
-            }
-            else {
+            else
                 toolbar.setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.ew_primary_color_from_device, requireActivity().getTheme()));
-            }
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.manage_remote_device_toolbar_title));
             toolbar.setTitleTextAppearance(requireContext(), it.uniba.dib.sms2324.ecowateringcommon.R.style.toolBarTitleStyle);
             Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -199,16 +195,10 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
     private void listSetup(@NonNull View view) {
         this.ecoWateringDeviceAdapter = new EcoWateringDeviceAdapter(requireContext(), this.remoteEWDeviceList, calledFrom);
         // LIST SETUP
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            ListView listView = view.findViewById(R.id.remoteDevicesConnectedListView);
-            listView.setAdapter(this.ecoWateringDeviceAdapter);
-            listView.setOnItemClickListener((adapterView, v, position, l) -> showDisconnectDeviceCard(view, position));
-        }
-        else {
-            GridView gridView = view.findViewById(R.id.remoteDevicesConnectedGridView);
-            gridView.setAdapter(this.ecoWateringDeviceAdapter);
-            gridView.setOnItemClickListener((adapterView, v, position, l) -> showDisconnectDeviceCard(view, position));
-        }
+        AbsListView absListView = view.findViewById(R.id.remoteDevicesConnectedAbsView);
+        absListView.setAdapter(this.ecoWateringDeviceAdapter);
+        absListView.setAdapter(this.ecoWateringDeviceAdapter);
+        absListView.setOnItemClickListener((adapterView, v, position, l) -> showDisconnectDeviceCard(view, position));
     }
 
     private void fillEWDList(Common.OnMethodFinishCallback callback) {
@@ -245,12 +235,7 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
 
     private void noConnectedRemoteDeviceCaseSetup(@NonNull View view) {
         view.findViewById(R.id.noRemoteDevicesConnectedCaseTextView).setVisibility(View.VISIBLE);
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            view.findViewById(R.id.remoteDevicesConnectedListView).setVisibility(View.GONE);
-        }
-        else {
-            view.findViewById(R.id.remoteDevicesConnectedGridView).setVisibility(View.GONE);
-        }
+        view.findViewById(R.id.remoteDevicesConnectedAbsView).setVisibility(View.GONE);
     }
 
     private void showRemoveRemoteDeviceConfirmDialog(@NonNull View view, int position) {
