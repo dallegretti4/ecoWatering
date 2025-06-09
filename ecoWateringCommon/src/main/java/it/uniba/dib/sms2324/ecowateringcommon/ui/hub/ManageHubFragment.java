@@ -38,6 +38,7 @@ public abstract class ManageHubFragment extends Fragment {
     protected static boolean isRefreshManageHubFragmentRunning;
     protected final int primary_color;
     protected final int primary_color_50;
+    protected final int primary_color_70;
     private OnManageHubActionCallback onManageHubActionCallback;
     public interface OnManageHubActionCallback {
         void onManageHubBackPressed();
@@ -84,10 +85,12 @@ public abstract class ManageHubFragment extends Fragment {
         if(calledFromString.equals(Common.CALLED_FROM_HUB)) {
             this.primary_color = R.color.ew_primary_color_from_hub;
             this.primary_color_50 = R.color.ew_primary_color_50_from_hub;
+            this.primary_color_70 = R.color.ew_primary_color_70_from_hub;
         }
         else {
             this.primary_color = R.color.ew_primary_color_from_device;
             this.primary_color_50 = R.color.ew_primary_color_50_from_device;
+            this.primary_color_70 = R.color.ew_primary_color_70_from_device;
         }
     }
 
@@ -205,23 +208,38 @@ public abstract class ManageHubFragment extends Fragment {
 
     private void configurationCardSetup(@NonNull View view) {
         view.findViewById(R.id.titleConfigurationCards).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme())); // TITLE CARD COLOR
+        
         // AMBIENT TEMPERATURE SENSOR CARD SETUP
-        if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getAmbientTemperatureChosenSensor() == null)) view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.VISIBLE);
-        else view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.GONE);
-
-        view.findViewById(R.id.ambientTemperatureSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getAmbientTemperatureChosenSensor() == null)) {
+            view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.ambientTemperatureSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_70, requireContext().getTheme())); // TITLE CARD COLOR
+        }
+        else {
+            view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.GONE);
+            view.findViewById(R.id.ambientTemperatureSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme())); // TITLE CARD COLOR
+        }
         view.findViewById(R.id.ambientTemperatureSensorCard).setOnClickListener((v) -> this.onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE));
+
         // LIGHT SENSOR CARD SETUP
-        if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getLightChosenSensor() == null)) view.findViewById(R.id.lightSensorNotConfiguredNotification).setVisibility(View.VISIBLE);
-        else view.findViewById(R.id.lightSensorNotConfiguredNotification).setVisibility(View.GONE);
-
-        view.findViewById(R.id.lightSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getLightChosenSensor() == null)) {
+            view.findViewById(R.id.lightSensorNotConfiguredNotification).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.lightSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_70, requireActivity().getTheme()));
+        }
+        else {
+            view.findViewById(R.id.lightSensorNotConfiguredNotification).setVisibility(View.GONE);
+            view.findViewById(R.id.lightSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireActivity().getTheme()));
+        }
         view.findViewById(R.id.lightSensorCard).setOnClickListener((v) -> this.onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_LIGHT));
-        // RELATIVE HUMIDITY SENSOR CARD SETUP
-        if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getRelativeHumidityChosenSensor() == null)) view.findViewById(R.id.relativeHumiditySensorNotConfiguredNotification).setVisibility(View.VISIBLE);
-        else view.findViewById(R.id.relativeHumiditySensorNotConfiguredNotification).setVisibility(View.GONE);
 
-        view.findViewById(R.id.relativeHumiditySensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        // RELATIVE HUMIDITY SENSOR CARD SETUP
+        if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getRelativeHumidityChosenSensor() == null)) {
+            view.findViewById(R.id.relativeHumiditySensorNotConfiguredNotification).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.relativeHumiditySensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_70, requireContext().getTheme()));
+        }
+        else {
+            view.findViewById(R.id.relativeHumiditySensorNotConfiguredNotification).setVisibility(View.GONE);
+            view.findViewById(R.id.relativeHumiditySensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        }
         view.findViewById(R.id.relativeHumiditySensorCard).setOnClickListener((v) -> this.onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY));
     }
     protected abstract void specializedViewSetup();
