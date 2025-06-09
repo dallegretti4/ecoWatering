@@ -23,7 +23,7 @@ public class IrrigationSystemStartingWorker extends Worker {
     @Override
     public Result doWork() {
         if(HttpHelper.isDeviceConnectedToInternet(this.context))
-            EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this.context), (jsonResponse -> {
+            EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this.context), (jsonResponse -> {
                 EcoWateringHub hub = new EcoWateringHub(jsonResponse);
                 if(hub.isAutomated() && !hub.getIrrigationSystem().getState()) {
                     hub.getIrrigationSystem().setState(

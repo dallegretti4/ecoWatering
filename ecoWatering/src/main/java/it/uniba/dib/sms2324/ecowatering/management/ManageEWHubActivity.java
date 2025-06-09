@@ -81,7 +81,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void onManageHubRefreshFragment() {
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(selectedEWHub.getDeviceID(), (jsonResponse -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
             Bundle b = new Bundle();
             b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);
@@ -89,7 +89,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
             refreshIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
             startActivity(refreshIntent);
             finish();
-        });
+        }));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void refreshDataObject(EcoWateringHub.OnEcoWateringHubGivenCallback callback) {
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse -> {
+        EcoWateringHub.getEcoWateringHub(selectedEWHub.getDeviceID(), (jsonResponse -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
             callback.getEcoWateringHub(selectedEWHub);
         }));
@@ -114,11 +114,11 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void configureSensor(String sensorType) {
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(selectedEWHub.getDeviceID(), (jsonResponse -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
             fragmentManager.popBackStack();
             changeFragment(new SensorConfigurationFragment(selectedEWHub, Common.CALLED_FROM_DEVICE, sensorType), true);
-        });
+        }));
     }
 
     @Override   // CALLED FROM AutomateSystemFragment.OnAutomateSystemActionCallback TOO
@@ -131,11 +131,11 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void automateEcoWateringSystem() {
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(selectedEWHub.getDeviceID(), (jsonResponse -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
             fragmentManager.popBackStack();
             changeFragment(new AutomateSystemFragment(selectedEWHub, Common.CALLED_FROM_DEVICE), true);
-        });
+        }));
     }
 
     @Override
@@ -153,7 +153,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     //  CALLED FROM ManageHubAutomaticControlFragment.OnManageHubAutomaticControlActionCallback
     @Override
     public void controlSystemManually() {
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse -> {
+        EcoWateringHub.getEcoWateringHub(selectedEWHub.getDeviceID(), (jsonResponse -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
             DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_DISABLE_AUTOMATE_SYSTEM);
         }));
@@ -196,11 +196,11 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     }
     @Override
     public void onSensorConfigurationRefreshFragment(String sensorType) {
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(selectedEWHub.getDeviceID(), (jsonResponse -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
             fragmentManager.popBackStack();
             changeFragment(new SensorConfigurationFragment(selectedEWHub, Common.CALLED_FROM_DEVICE, sensorType), true);
-        });
+        }));
     }
     @Override
     public void onSensorConfigurationRestartApp() {
@@ -228,7 +228,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
         changeFragment(new LoadingFragment(), false);
         try { Thread.sleep(WAITING_TIME_AFTER_AUTOMATE_SYSTEM_DEVICE_REQUEST); }
         catch (InterruptedException ignored) {}
-        EcoWateringHub.getEcoWateringHubJsonString(selectedEWHub.getDeviceID(), (jsonResponse -> {
+        EcoWateringHub.getEcoWateringHub(selectedEWHub.getDeviceID(), (jsonResponse -> {
             selectedEWHub = new EcoWateringHub(jsonResponse);
             Bundle b = new Bundle();
             b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, selectedEWHub);

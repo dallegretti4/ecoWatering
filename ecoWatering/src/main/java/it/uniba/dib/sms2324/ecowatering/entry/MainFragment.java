@@ -152,7 +152,7 @@ public class MainFragment extends Fragment {
             }
             else {  // AT LEAN ONE HUB CONNECTED CASE
                 for(String hubID : MainActivity.getThisEcoWateringDevice().getEcoWateringHubList()) {
-                    EcoWateringHub.getEcoWateringHubJsonString(hubID, (jsonHubResponse) -> {
+                    EcoWateringHub.getEcoWateringHub(hubID, (jsonHubResponse -> {
                         hubListHelper.add(new EcoWateringHub(jsonHubResponse));
                         if(hubListHelper.size() == MainActivity.getThisEcoWateringDevice().getEcoWateringHubList().size()) {
                             // LAST HUB CASE
@@ -163,7 +163,7 @@ public class MainFragment extends Fragment {
                             }
                             callback.canContinue();
                         }
-                    });
+                    }));
                 }
             }
         });

@@ -119,10 +119,11 @@ public class EcoWateringForegroundHubService extends Service {
                     this.hub.setBatteryPercent(this, getBatteryPercentage(this), (response -> {
                         if(response.equals(SET_BATTERY_PERCENT_SUCCESS_RESPONSE)) {
                             // REFRESH HUB AND UPDATE NOTIFICATION
-                            String jsonResponse = EcoWateringHub.getEcoWateringHubJsonStringNoThread(Common.getThisDeviceID(this));
-                            this.hub = new EcoWateringHub(jsonResponse);
-                            MainActivity.setThisEcoWateringHub(this.hub);
-                            updateNotification(this, this.hub);
+                            EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), (jsonResponse -> {
+                                this.hub = new EcoWateringHub(jsonResponse);
+                                MainActivity.setThisEcoWateringHub(this.hub);
+                                updateNotification(this, this.hub);
+                            }));
                         }
                     }));
                 }

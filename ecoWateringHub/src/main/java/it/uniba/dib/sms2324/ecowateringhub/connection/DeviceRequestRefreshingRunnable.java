@@ -71,7 +71,7 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                         if(response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
                             if(this.hub.getIrrigationPlan() != null) EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this.context, this.hub);
                             else {
-                                EcoWateringHub.getEcoWateringHubJsonString(this.hub.getDeviceID(), (jsonResponse -> {
+                                EcoWateringHub.getEcoWateringHub(this.hub.getDeviceID(), (jsonResponse -> {
                                     EcoWateringHub tmpHub = new EcoWateringHub(jsonResponse);
                                     EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this.context, tmpHub);
                                 }));

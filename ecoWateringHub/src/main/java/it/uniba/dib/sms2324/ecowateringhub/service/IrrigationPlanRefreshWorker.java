@@ -22,7 +22,7 @@ public class IrrigationPlanRefreshWorker extends Worker {
     @Override
     public Result doWork() {
         if(HttpHelper.isDeviceConnectedToInternet(this.context)) {
-            EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this.context), (jsonHub -> {
+            EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this.context), (jsonHub -> {
                 EcoWateringHub hub = new EcoWateringHub(jsonHub);
                 if(hub.isAutomated()) {
                     IrrigationPlanPreview.getIrrigationPlanPreviewJsonString(hub, Common.getThisDeviceID(this.context), (jsonResponse -> {

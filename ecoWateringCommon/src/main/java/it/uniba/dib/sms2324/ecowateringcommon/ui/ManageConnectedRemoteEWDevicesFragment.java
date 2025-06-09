@@ -92,7 +92,7 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
         Common.unlockLayout(requireActivity());
 
         if(savedInstanceState == null) {
-            EcoWateringHub.getEcoWateringHubJsonString(hubID, (jsonResponse) -> {   // HUB OBJECT RECOVERING
+            EcoWateringHub.getEcoWateringHub(hubID, (jsonResponse -> {   // HUB OBJECT RECOVERING
                 EcoWateringHub hub = new EcoWateringHub(jsonResponse);
                 this.remoteDeviceStringList = (ArrayList<String>) hub.getRemoteDeviceList();
                 if(this.remoteDeviceStringList != null && !this.remoteDeviceStringList.isEmpty()) { // THERE IS AT LEAST ONE CONNECTED REMOTE DEVICE CASE
@@ -112,7 +112,7 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
                     noConnectedRemoteDeviceCaseSetup(view); // NO CONNECTED REMOTE DEVICES CASE
                     requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.manageRemoteEWDevicesConnectedFragmentContainer, R.id.includeLoadingFragment));
                 }
-            });
+            }));
         }
         // CONFIGURATION CHANGED CASE
         else {

@@ -76,14 +76,14 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
     @Override
     public void onManageConnectedDevicesRefresh() {
         // CALLED ALSO AFTER LAST DEVICE HAS BEEN REMOVED
-        EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), (jsonResponse -> {
             MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
             // CHECK ECO WATERING FOREGROUND SERVICE NEED TO BE STOPPED
             EcoWateringForegroundHubService.checkEcoWateringForegroundServiceNeedToBeStarted(this, MainActivity.getThisEcoWateringHub());
             // REFRESH FRAGMENT
             startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
             finish();
-        });
+        }));
     }
 
     @Override
@@ -308,12 +308,12 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> {
                             isErrorDialogVisible = false;
-                            EcoWateringHub.getEcoWateringHubJsonString(
+                            EcoWateringHub.getEcoWateringHub(
                                     Common.getThisDeviceID(this),
-                                    (jsonResponse) -> {
+                                    (jsonResponse -> {
                                         Common.restartApp(this);
                                         finish();
-                                    });
+                                    }));
                         })
                 )
                 .setCancelable(false)

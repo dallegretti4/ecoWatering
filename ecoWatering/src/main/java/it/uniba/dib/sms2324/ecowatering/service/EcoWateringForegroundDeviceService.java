@@ -62,7 +62,7 @@ public class EcoWateringForegroundDeviceService extends Service {
                     if((this.thisDevice.getEcoWateringHubList() != null) && (!this.thisDevice.getEcoWateringHubList().isEmpty())) {
                         this.hubList = new ArrayList<>();
                         for(String hubID : this.thisDevice.getEcoWateringHubList()) {
-                            EcoWateringHub.getEcoWateringHubJsonString(hubID, (jsonHubResponse -> this.hubList.add(new EcoWateringHub(jsonHubResponse))));
+                            EcoWateringHub.getEcoWateringHub(hubID, (jsonHubResponse -> this.hubList.add(new EcoWateringHub(jsonHubResponse))));
                         }
                         try { Thread.sleep(10000); }
                         catch (InterruptedException ignored) {}

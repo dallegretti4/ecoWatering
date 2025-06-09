@@ -1,5 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models.hub;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.location.Address;
 import android.os.Parcel;
@@ -18,6 +19,7 @@ import java.util.List;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
@@ -83,203 +85,98 @@ public class EcoWateringHub implements Parcelable {
                     this.remoteDeviceList.add(jsonRemoteDeviceList.getString(i));
                 }
             }
-            // IS AUTOMATED RECOVERING
             this.isAutomated = jsonOBJ.getString(TABLE_HUB_IS_AUTOMATED_COLUMN_NAME).equals(IS_AUTOMATED_TRUE_VALUE);
-            // IS BACKGROUND REFRESHING RECOVERING
             this.isDataObjectRefreshing = jsonOBJ.getString(TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME).equals(IS_DATA_OBJECT_REFRESHING_TRUE_VALUE);
-            // BATTERY PERCENT RECOVERY
             this.batteryPercent = jsonOBJ.getInt(TABLE_HUB_BATTERY_PERCENT_COLUMN_NAME);
             // IRRIGATION SYSTEM RECOVERING
-            if(!jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
+            if(!jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME).equals(Common.NULL_STRING_VALUE))
                 this.irrigationSystem = new IrrigationSystem(jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME));
-            }
             // WEATHER INFO RECOVERING
-            if(!jsonOBJ.getString(WeatherInfo.BO_WEATHER_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE)) {
+            if(!jsonOBJ.getString(WeatherInfo.BO_WEATHER_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE))
                 this.weatherInfo = new WeatherInfo(jsonOBJ.getString(WeatherInfo.BO_WEATHER_INFO_OBJ_NAME));
-            }
             // SENSORS INFO RECOVERING
-            if(!jsonOBJ.getString(SensorsInfo.BO_SENSORS_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE)) {
+            if(!jsonOBJ.getString(SensorsInfo.BO_SENSORS_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE))
                 this.sensorInfo = new SensorsInfo(jsonOBJ.getString(SensorsInfo.BO_SENSORS_INFO_OBJ_NAME));
-            }
             // IRRIGATION PLAN RECOVERING
-            if(!jsonOBJ.getString(IrrigationPlan.BO_IRRIGATION_PLAN_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
+            if(!jsonOBJ.getString(IrrigationPlan.BO_IRRIGATION_PLAN_COLUMN_NAME).equals(Common.NULL_STRING_VALUE))
                 this.irrigationPlan = new IrrigationPlan(jsonOBJ.getString(IrrigationPlan.BO_IRRIGATION_PLAN_COLUMN_NAME));
-            }
         }
         catch(JSONException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} String deviceID;
-     *  HubExistsCallback callback -> to avoid the caller to manage the response.
-     * Get string response from database server about specific EcoWateringDevice instance existence.
-     * 0 -> true;
-     * 1 -> false (and any other character)
-     */
-    public static void exists(String deviceID, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + deviceID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_HUB_EXISTS + "\"}";
-        Thread hubExistsThread = new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "hubExists response: " + response);
-            callback.getResponse(response);
-        });
-        hubExistsThread.start();
-    }
-
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} String deviceID;
-     *  {@code @NonNull} String hubName;
-     *  {@code @NonNull} Address address;
-     *  AddNewEcoWateringHubCallback callback -> to notify the caller, who can restart the app.
-     * To add new EcoWateringHub into the database server
-     */
     public static void addNewEcoWateringHub(@NonNull Context context, @NonNull String hubName, @NonNull Address address, @NonNull IrrigationSystem irrigationSystem, Common.OnMethodFinishCallback callback) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                EcoWateringHub.TABLE_HUB_NAME_COLUMN_NAME + "\":\"" + hubName + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_ADD_NEW_HUB + "\",\"" +
-                EcoWateringHub.TABLE_HUB_ADDRESS_COLUMN_NAME + "\":\"" + address.getThoroughfare() + "\",\"" +
-                EcoWateringHub.TABLE_HUB_CITY_COLUMN_NAME + "\":\"" + address.getLocality() + "\",\"" +
-                EcoWateringHub.TABLE_HUB_COUNTRY_COLUMN_NAME + "\":\"" + address.getCountryName() + "\",\"" +
-                EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + address.getLatitude() + ",\"" +
-                EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + address.getLongitude() + ",\"" +
-                IrrigationSystem.TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME + "\":\"" + irrigationSystem.getModel() + "\"}";
-        Thread addNewHubThread = new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "addNewHub response: " + response);
-            callback.canContinue();
-        });
-        addNewHubThread.start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        contentValues.put(SqlDbHelper.TABLE_HUB_NAME_COLUMN_NAME, hubName);
+        contentValues.put(SqlDbHelper.TABLE_HUB_ADDRESS_COLUMN_NAME, address.getThoroughfare());
+        contentValues.put(SqlDbHelper.TABLE_HUB_CITY_COLUMN_NAME, address.getLocality());
+        contentValues.put(SqlDbHelper.TABLE_HUB_COUNTRY_COLUMN_NAME, address.getCountryName());
+        contentValues.put(SqlDbHelper.TABLE_HUB_LATITUDE_COLUMN_NAME, address.getLatitude());
+        contentValues.put(SqlDbHelper.TABLE_HUB_LONGITUDE_COLUMN_NAME, address.getLongitude());
+        contentValues.put(IrrigationSystem.TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME, irrigationSystem.getModel());
+        SqlDbHelper.addNewEcoWateringHub(contentValues, (callback));
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} String hubID;
-     *  EcoWateringHubFromJsonStringCallback callback -> to avoid the caller to manage the response.
-     * Get the json response from database server about specific EcoWateringHub instance.
-     */
-    public static void getEcoWateringHubJsonString(String hubID, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_HUB_OBJ + "\"}";
-        Thread getHubObjThread = new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "getEWHubObj response: " + response);
-            callback.getResponse(response);
-        });
-        getHubObjThread.start();
-    }
-    public static String getEcoWateringHubJsonStringNoThread(String hubID) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_HUB_OBJ + "\"}";
-        String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.LOG_NORMAL, "getEWHubObj No Thread response: " + response);
-        return response;
+    public static void getEcoWateringHub(String hubID, Common.OnStringResponseGivenCallback callback) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, hubID);
+        SqlDbHelper.getEcoWateringHub(contentValues, (callback));
     }
 
     public String addNewRemoteDevice(@NonNull Context context, @NonNull String remoteDeviceID) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_ADD_REMOTE_DEVICE +"\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + remoteDeviceID + "\"}";
-        String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.LOG_NORMAL, "response addRemoteDevice: " + response);
-        return response;
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, remoteDeviceID);
+        return SqlDbHelper.addNewRemoteDevice(contentValues);
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} String deviceID;
-     *  {@code @NonNull} EcoWateringDevice remoteDevice -> to remove;
-     *  RemoveRemoteDeviceCallback callback -> to avoid the caller to manage the response.
-     * To remove a remote device from a specific EcoWateringHub instance, on database server.
-     */
     public static void removeRemoteDevice(@NonNull String deviceID, @NonNull EcoWateringDevice remoteDevice, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + deviceID + "\",\"" +
-                HttpHelper.MODE_PARAMETER +"\":\"" + HttpHelper.MODE_REMOVE_REMOTE_DEVICE + "\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + remoteDevice.getDeviceID() + "\"}";
-        Thread removeRemoteDeviceThread = new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "removeRemoteDevice response: " + response);
-            callback.getResponse(response);
-        });
-        removeRemoteDeviceThread.start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, deviceID);
+        contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, remoteDevice.getDeviceID());
+        SqlDbHelper.removeRemoteDevice(contentValues, (callback));
     }
 
     public static void setName(@NonNull Context context, String newName, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_HUB_NAME + "\",\"" +
-                HttpHelper.NEW_NAME_PARAMETER + "\":\"" + newName + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "setHubName response: " + response);
-            callback.getResponse(response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.NEW_NAME_PARAMETER, newName);
+        SqlDbHelper.setName(contentValues, (callback));
     }
 
     public void setIsAutomated(boolean value, Common.OnStringResponseGivenCallback callback) {
         int intValue = 0;
-        if(value) {
+        if(value)
             intValue = 1;
-        }
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + this.deviceID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_IS_AUTOMATED + "\",\"" +
-                HttpHelper.VALUE_PARAMETER + "\":\"" + intValue + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "setIsAutomated response: " + response);
-            callback.getResponse(response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, this.deviceID);
+        contentValues.put(HttpHelper.VALUE_PARAMETER, intValue);
+        SqlDbHelper.setIsAutomated(contentValues, (callback));
     }
 
     public void setIsDataObjectRefreshing(@NonNull Context context, boolean value, Common.OnStringResponseGivenCallback callback) {
-        // CONVERT STATE
         int valueInt = 0;
-        if(value) {
+        if(value)
             valueInt = 1;
-        }
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_IS_DATA_OBJECT_REFRESHING + "\",\"" +
-                HttpHelper.VALUE_PARAMETER + "\":\"" + valueInt + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "setIsDataObjectRefreshing response: " + response);
-            callback.getResponse(response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.VALUE_PARAMETER, valueInt);
+        SqlDbHelper.setIsDataObjectRefreshing(contentValues, (callback));
     }
 
     public void setBatteryPercent(@NonNull Context context, int batteryPercent, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_BATTERY_PERCENT + "\",\"" +
-                HttpHelper.VALUE_PARAMETER + "\":" + batteryPercent + "}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "setBatteryPercent response: " + response);
-            callback.getResponse(response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.VALUE_PARAMETER, batteryPercent);
+        SqlDbHelper.setBatteryPercent(contentValues, (callback));
     }
 
     public static void deleteAccount(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_DELETE_HUB_ACCOUNT + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "deleteHubAccount response: " + response);
-            callback.getResponse(response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        SqlDbHelper.deleteAccount(contentValues, (callback));
     }
 
     /**

@@ -15,6 +15,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class HttpHelper {
+    private static final String SCHEMA_HTTP = "https";
+    private static final String SERVER_PORT = "theall.altervista.org";
+    private static final String PATH_ID = "sms2324";
     public static final String HTTP_RESPONSE_ERROR = "error";
     private static final String REQUEST_MODE_GET = "GET";
     private static final String REQUEST_MODE_POST = "POST";
@@ -125,6 +128,45 @@ public class HttpHelper {
         }
         return HTTP_RESPONSE_ERROR;
     }
+    public static String sendHttpPostRequest(@NonNull String jsonRequest) {
+        HttpURLConnection connection = null;
+        try {
+            //CONNECTION & REQUEST SETUP
+            URL url = new URL(getThisUrl());
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod(REQUEST_MODE_POST);
+            connection.setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE_LABEL, REQUEST_PROPERTY_CONTENT_TYPE_VALUE);
+            connection.setRequestProperty(REQUEST_PROPERTY_ACCEPT_LABEL, REQUEST_PROPERTY_ACCEPT_VALUE);
+            connection.setDoOutput(true);
+            // REQUEST SENDING
+            OutputStream outputStream = connection.getOutputStream();
+            byte[] input = jsonRequest.getBytes(StandardCharsets.UTF_8);
+            outputStream.write(input, 0, input.length);
+            int responseCode = connection.getResponseCode();
+            // GET RESPONSE FROM SERVER
+            InputStream inputStream;
+            if((responseCode >= 200) && (responseCode < 300)) {
+                inputStream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while((line = reader.readLine()) != null) {
+                    response.append(line.trim());
+                }
+                return response.toString();
+            }
+            else {
+                return HTTP_RESPONSE_ERROR;
+            }
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            if(connection != null) connection.disconnect();
+        }
+        return HTTP_RESPONSE_ERROR;
+    }
 
     public static String sendHttpGetRequest(@NonNull String urlString) {
         HttpURLConnection connection = null;
@@ -149,5 +191,13 @@ public class HttpHelper {
             if(connection != null) connection.disconnect();
         }
         return HTTP_RESPONSE_ERROR;
+    }
+
+    private static String getThisUrl() {
+        return SCHEMA_HTTP +
+                "://" +
+                SERVER_PORT +
+                "/" +
+                PATH_ID;
     }
 }

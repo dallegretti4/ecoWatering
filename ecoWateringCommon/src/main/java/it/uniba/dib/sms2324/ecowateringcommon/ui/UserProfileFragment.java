@@ -188,7 +188,7 @@ public class UserProfileFragment extends Fragment {
             EcoWateringDevice.getEcoWateringDeviceJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> callback.getResponse((new EcoWateringDevice(jsonResponse)).getName()));
         }
         else if(calledFrom.equals(Common.CALLED_FROM_HUB)) {
-            EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(requireContext()), (jsonResponse) -> callback.getResponse((new EcoWateringHub(jsonResponse)).getName()));
+            EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(requireContext()), (jsonResponse -> callback.getResponse((new EcoWateringHub(jsonResponse)).getName())));
         }
     }
 

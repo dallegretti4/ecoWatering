@@ -113,12 +113,12 @@ public abstract class ManageHubFragment extends Fragment {
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback); // ON BACK PRESSED CALLBACK SETUP
         toolbarSetup(view);
         if(savedInstanceState == null) {
-            EcoWateringHub.getEcoWateringHubJsonString(hub.getDeviceID(), (jsonResponse) -> {
+            EcoWateringHub.getEcoWateringHub(hub.getDeviceID(), (jsonResponse -> {
                 hub = new EcoWateringHub(jsonResponse);
                 requireActivity().runOnUiThread(() -> manageHubViewSetup(view));
                 requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.manageHubFragmentContainer, R.id.includeLoadingFragment));
                 Common.unlockLayout(requireActivity());
-            });
+            }));
         }
         else {
             requireActivity().runOnUiThread(() -> manageHubViewSetup(view));
@@ -208,7 +208,7 @@ public abstract class ManageHubFragment extends Fragment {
 
     private void configurationCardSetup(@NonNull View view) {
         view.findViewById(R.id.titleConfigurationCards).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme())); // TITLE CARD COLOR
-        
+
         // AMBIENT TEMPERATURE SENSOR CARD SETUP
         if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getAmbientTemperatureChosenSensor() == null)) {
             view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.VISIBLE);

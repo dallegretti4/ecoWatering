@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements
             if(activitySavedInstanceState == null) {
                 Common.lockLayout(this); // CHECK IS NOT CONFIGURATION CHANGED
                 changeFragment(new LoadingFragment(), false);    // SHOW LOADING FRAGMENT
-                EcoWateringHub.exists(Common.getThisDeviceID(this), ((existsResponse) -> {  // CHECK DEVICE IS REGISTERED
+                EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), ((existsResponse) -> {  // CHECK DEVICE IS REGISTERED
                     // NOT FIRST START CASE
                     if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
                         thisEcoWateringHub = new EcoWateringHub(existsResponse);    // INSTANCE OF THIS HUB
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void refreshDataObject(EcoWateringHub.OnEcoWateringHubGivenCallback callback) {
         new Thread(new DataObjectRefreshingRunnable(this, thisEcoWateringHub, ManageHubFragment.DATA_OBJECT_REFRESHING_DURATION)).start();
-        EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
+        EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), (jsonResponse -> {
             thisEcoWateringHub = new EcoWateringHub(jsonResponse);
             callback.getEcoWateringHub(thisEcoWateringHub);
         }));
@@ -177,10 +177,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void configureSensor(String sensorType) {
         SensorsInfo.updateSensorList(this, Common.getThisDeviceID(this), sensorType, EcoWateringSensor.getConnectedSensorList(this, sensorType));
-        EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), (jsonResponse -> {
             thisEcoWateringHub = new EcoWateringHub(jsonResponse);
             changeFragment(new SensorConfigurationFragment(thisEcoWateringHub, Common.CALLED_FROM_HUB, sensorType), true);
-        });
+        }));
     }
 
     // FROM ManageHubAutomaticControlFragment.OnHubAutomaticActionChosenCallback
@@ -196,11 +196,11 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void automateEcoWateringSystem() {
-        EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), (jsonResponse -> {
             thisEcoWateringHub = new EcoWateringHub(jsonResponse);
             fragmentManager.popBackStack();
             changeFragment(new AutomateSystemFragment(thisEcoWateringHub, Common.CALLED_FROM_HUB), true);
-        });
+        }));
     }
 
     @Override
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements
     public void setDataObjectRefreshing(boolean value) {
         thisEcoWateringHub.setIsDataObjectRefreshing(this, value, (response) -> {
             if(response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) {
-                EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
+                EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), (jsonResponse -> {
                     thisEcoWateringHub = new EcoWateringHub(jsonResponse);
                     EcoWateringForegroundHubService.checkEcoWateringForegroundServiceNeedToBeStarted(this, thisEcoWateringHub);
                 }));
@@ -249,11 +249,11 @@ public class MainActivity extends AppCompatActivity implements
     }
     @Override
     public void onSensorConfigurationRefreshFragment(String sensorType) {
-        EcoWateringHub.getEcoWateringHubJsonString(thisEcoWateringHub.getDeviceID(), (jsonResponse) -> {
+        EcoWateringHub.getEcoWateringHub(thisEcoWateringHub.getDeviceID(), (jsonResponse -> {
             thisEcoWateringHub = new EcoWateringHub(jsonResponse);
             fragmentManager.popBackStack();
             changeFragment(new SensorConfigurationFragment(thisEcoWateringHub, Common.CALLED_FROM_HUB, sensorType), true);
-        });
+        }));
     }
     @Override
     public void onSensorConfigurationRestartApp() {
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements
         irrigationPlanPreview.updateIrrigationPlanOnServer(this, Common.getThisDeviceID(this)); // UPDATE IRRIGATION PLAN ON SERVER
         thisEcoWateringHub.setIsAutomated(true, (response) -> {
             if(response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
-                EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
+                EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), (jsonResponse -> {
                     thisEcoWateringHub = new EcoWateringHub(jsonResponse);
                     EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this, thisEcoWateringHub);
                     startActivity(new Intent(this, MainActivity.class));
@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements
             // SENSOR CONFIGURATION FRAGMENT IS REFRESHING CASE
             else SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY, false);
         }
-        else if((fragment instanceof StartFirstFragment) || (fragment instanceof StartSecondFragment))
+        else if(fragment instanceof StartSecondFragment)
             fragmentTransaction.setCustomAnimations(
                 it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
                 it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
