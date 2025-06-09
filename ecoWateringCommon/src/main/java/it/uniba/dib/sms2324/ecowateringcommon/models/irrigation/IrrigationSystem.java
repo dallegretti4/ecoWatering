@@ -1,8 +1,8 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -13,8 +13,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
-import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlan;
 
 public class IrrigationSystem implements Parcelable {
@@ -22,10 +21,6 @@ public class IrrigationSystem implements Parcelable {
     private static final String IRRIGATION_SYSTEM_STATE_ON_RESPONSE = "irrigationSystemSwitchedOn";
     private static final String IRRIGATION_SYSTEM_STATE_OFF_RESPONSE = "irrigationSystemSwitchedOff";
     private static final String STATE_TRUE_VALUE = "1";
-    private static final String TABLE_IRRIGATION_SYSTEM_ID_COLUMN_NAME = "id";
-    public static final String TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME = "model";
-    private static final String TABLE_IRRIGATION_SYSTEM_STATE_COLUMN_NAME = "state";
-    private static final String TABLE_IRRIGATION_SYSTEM_ACTIVITY_LOG_COLUMN_NAME = "activityLog";
     private String model;
     private boolean state;
     private ArrayList<IrrigationSystemActivityLogInstance> activityLog;
@@ -35,14 +30,14 @@ public class IrrigationSystem implements Parcelable {
         try {
             JSONObject jsonOBJ = new JSONObject(jsonString);
             // MODEL RECOVERING
-            this.model = jsonOBJ.getString(TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME);
+            this.model = jsonOBJ.getString(SqlDbHelper.TABLE_IRR_SYS_MODEL_COLUMN_NAME);
             // STATE RECOVERING
-            if(!jsonOBJ.isNull(TABLE_IRRIGATION_SYSTEM_STATE_COLUMN_NAME)) this.state = jsonOBJ.getString(TABLE_IRRIGATION_SYSTEM_STATE_COLUMN_NAME).equals(STATE_TRUE_VALUE);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_IRR_SYS_STATE_COLUMN_NAME)) this.state = jsonOBJ.getString(SqlDbHelper.TABLE_IRR_SYS_STATE_COLUMN_NAME).equals(STATE_TRUE_VALUE);
             else this.state = false;
             // ACTIVITY LOG RECOVERING
             this.activityLog = new ArrayList<>();
-            if(!jsonOBJ.isNull(TABLE_IRRIGATION_SYSTEM_ACTIVITY_LOG_COLUMN_NAME)) {
-                String tmpString = jsonOBJ.getString(TABLE_IRRIGATION_SYSTEM_ACTIVITY_LOG_COLUMN_NAME);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_IRR_SYS_ACTIVITY_LOG_COLUMN_NAME)) {
+                String tmpString = jsonOBJ.getString(SqlDbHelper.TABLE_IRR_SYS_ACTIVITY_LOG_COLUMN_NAME);
                 JSONArray jsonArray = new JSONArray(tmpString);
                 for(int i=0; i<jsonArray.length(); i++) {
                     this.activityLog.add(new IrrigationSystemActivityLogInstance(jsonArray.getString(i)));
@@ -97,28 +92,24 @@ public class IrrigationSystem implements Parcelable {
     public void setState(String deviceID, String irrigationSystemID, boolean state) {
         // CONVERT STATE
         int stateInt = 0;
-        if(state) {
+        if(state)
             stateInt = 1;
-        }
-        String jsonString = "{\"" +
-                EcoWateringDevice.TABLE_DEVICE_DEVICE_ID_COLUMN_NAME + "\":\"" + deviceID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_IRRIGATION_SYSTEM_STATE + "\",\"" +
-                TABLE_IRRIGATION_SYSTEM_ID_COLUMN_NAME + "\":\"" + irrigationSystemID + "\",\"" +
-                TABLE_IRRIGATION_SYSTEM_STATE_COLUMN_NAME + "\":" + stateInt + "}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "irrSysChangeState response: " + response);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, deviceID);
+        contentValues.put(SqlDbHelper.TABLE_IRR_SYS_ID_COLUMN_NAME, irrigationSystemID);
+        contentValues.put(SqlDbHelper.TABLE_IRR_SYS_STATE_COLUMN_NAME, stateInt);
+        SqlDbHelper.setState(contentValues, (response -> {
             if(response != null) {
                 if(state && response.equals(IRRIGATION_SYSTEM_STATE_ON_RESPONSE)) this.state = true;
                 else if(!state && response.equals(IRRIGATION_SYSTEM_STATE_OFF_RESPONSE)) this.state = false;
             }
-        }).start();
+        }));
     }
 
     @NonNull
     @Override
     public String toString() {
-        return TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME + ": " + this.model + ", " + TABLE_IRRIGATION_SYSTEM_STATE_COLUMN_NAME  + ": " + this.state;
+        return SqlDbHelper.TABLE_IRR_SYS_MODEL_COLUMN_NAME + ": " + this.model + ", " + SqlDbHelper.TABLE_IRR_SYS_STATE_COLUMN_NAME + ": " + this.state;
     }
 
     // PARCELABLE IMPLEMENTATION

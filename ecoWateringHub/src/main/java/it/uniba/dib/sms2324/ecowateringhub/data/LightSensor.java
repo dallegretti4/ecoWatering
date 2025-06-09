@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
 
 public class LightSensor extends EcoWateringSensor {
@@ -20,7 +21,7 @@ public class LightSensor extends EcoWateringSensor {
     @Override
     protected void updateSensorValueOnServerDb(@NonNull Context context) {
         String jsonString = "{\"" +
-                SensorsInfo.TABLE_SENSORS_INFO_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
+                SqlDbHelper.TABLE_SENSORS_INFO_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_LIGHT_SENSOR + "\",\"" +
                 HttpHelper.VALUE_PARAMETER + "\":" + this.currentValue + "}";
         new Thread(() -> {

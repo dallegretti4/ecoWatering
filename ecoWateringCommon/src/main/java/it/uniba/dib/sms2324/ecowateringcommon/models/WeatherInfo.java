@@ -1,9 +1,9 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
-import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class WeatherInfo implements Parcelable {
@@ -101,12 +101,11 @@ public class WeatherInfo implements Parcelable {
 
     // BLOCKER
     public static void updateWeatherInfo(@NonNull Context context, @NonNull EcoWateringHub hub) {
-        String jsonString = "{\"" + EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_WEATHER_INFO + "\",\"" +
-                EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + hub.getLatitude() + ",\"" +
-                EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + "}";
-        String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.LOG_NORMAL, "updateWeatherInfo response: " + response);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        contentValues.put(SqlDbHelper.TABLE_HUB_LATITUDE_COLUMN_NAME, hub.getLatitude());
+        contentValues.put(SqlDbHelper.TABLE_HUB_LONGITUDE_COLUMN_NAME, hub.getLongitude());
+        SqlDbHelper.updateWeatherInfo(contentValues);
     }
 
     public String getTime() {

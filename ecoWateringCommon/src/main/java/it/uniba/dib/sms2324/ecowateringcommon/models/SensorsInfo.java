@@ -1,5 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.os.Parcel;
@@ -21,23 +22,10 @@ import java.util.concurrent.TimeUnit;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 
 public class SensorsInfo implements Parcelable {
     public static final String BO_SENSORS_INFO_OBJ_NAME = "sensorsInfo";
-    public static final String TABLE_SENSORS_INFO_ID_COLUMN_NAME = "id";
-    private static final String TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_LIST_COLUMN_NAME = "ambientTemperatureSensorList";
-    private static final String TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_CHOSEN_SENSOR_COLUMN_NAME = "ambientTemperatureChosenSensor";
-    private static final String TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_VALUE_COLUMN_NAME = "ambientTemperatureSensorValue";
-    private static final String TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_LAST_UPDATE_COLUMN_NAME = "ambientTemperatureLastUpdate";
-    private static final String TABLE_SENSORS_INFO_LIGHT_SENSOR_LIST_COLUMN_NAME = "lightSensorList";
-    private static final String TABLE_SENSORS_INFO_LIGHT_CHOSEN_SENSOR_COLUMN_NAME = "lightChosenSensor";
-    private static final String TABLE_SENSORS_INFO_LIGHT_SENSOR_VALUE_COLUMN_NAME = "lightSensorValue";
-    private static final String TABLE_SENSORS_INFO_LIGHT_LAST_UPDATE_COLUMN_NAME = "lightLastUpdate";
-    private static final String TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_LIST_COLUMN_NAME = "relativeHumiditySensorList";
-    private static final String TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_CHOSEN_SENSOR_COLUMN_NAME = "relativeHumidityChosenSensor";
-    private static final String TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_VALUE_COLUMN_NAME = "relativeHumiditySensorValue";
-    private static final String TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_LAST_UPDATE_COLUMN_NAME = "relativeHumidityLastUpdate";
     public static final String CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE = "ambient temperature sensor";
     public static final String CONFIGURE_SENSOR_TYPE_LIGHT = "light sensor";
     public static final String CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY = "relative humidity sensor";
@@ -61,55 +49,46 @@ public class SensorsInfo implements Parcelable {
             JSONObject jsonOBJ = new JSONObject(jsonString);
             //AMBIENT TEMPERATURE SENSOR
             this.ambientTemperatureSensorList = new ArrayList<>();
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_LIST_COLUMN_NAME)) {
-                JSONArray jsonArray = new JSONArray(jsonOBJ.getString(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_LIST_COLUMN_NAME));
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_LIST_COLUMN_NAME)) {
+                JSONArray jsonArray = new JSONArray(jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_LIST_COLUMN_NAME));
                 for(int i=0; i<jsonArray.length(); i++) {
                     this.ambientTemperatureSensorList.add(jsonArray.getString(i));
                 }
             }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_CHOSEN_SENSOR_COLUMN_NAME)) {
-                this.ambientTemperatureChosenSensor = jsonOBJ.getString(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_CHOSEN_SENSOR_COLUMN_NAME);
-            }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_VALUE_COLUMN_NAME)) {
-                this.ambientTemperatureSensorValue = jsonOBJ.getDouble(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_VALUE_COLUMN_NAME);
-            }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_LAST_UPDATE_COLUMN_NAME)) {
-                this.ambientTemperatureLastUpdate = jsonOBJ.getString(TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_LAST_UPDATE_COLUMN_NAME);
-            }
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_CHOSEN_SENSOR_COLUMN_NAME))
+                this.ambientTemperatureChosenSensor = jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_CHOSEN_SENSOR_COLUMN_NAME);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_VALUE_COLUMN_NAME))
+                this.ambientTemperatureSensorValue = jsonOBJ.getDouble(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_SENSOR_VALUE_COLUMN_NAME);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_LAST_UPDATE_COLUMN_NAME))
+                this.ambientTemperatureLastUpdate = jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_AMBIENT_TEMPERATURE_LAST_UPDATE_COLUMN_NAME);
             // LIGHT SENSOR
             this.lightSensorList = new ArrayList<>();
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_LIGHT_SENSOR_LIST_COLUMN_NAME)) {
-                JSONArray jsonArray = new JSONArray(jsonOBJ.getString(TABLE_SENSORS_INFO_LIGHT_SENSOR_LIST_COLUMN_NAME));
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_SENSOR_LIST_COLUMN_NAME)) {
+                JSONArray jsonArray = new JSONArray(jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_SENSOR_LIST_COLUMN_NAME));
                 for(int i=0; i<jsonArray.length(); i++) {
                     this.lightSensorList.add(jsonArray.getString(i));
                 }
             }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_LIGHT_CHOSEN_SENSOR_COLUMN_NAME)) {
-                this.lightChosenSensor = jsonOBJ.getString(TABLE_SENSORS_INFO_LIGHT_CHOSEN_SENSOR_COLUMN_NAME);
-            }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_LIGHT_SENSOR_VALUE_COLUMN_NAME)) {
-                this.lightSensorValue = jsonOBJ.getDouble(TABLE_SENSORS_INFO_LIGHT_SENSOR_VALUE_COLUMN_NAME);
-            }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_LIGHT_LAST_UPDATE_COLUMN_NAME)) {
-                this.lightLastUpdate = jsonOBJ.getString(TABLE_SENSORS_INFO_LIGHT_LAST_UPDATE_COLUMN_NAME);
-            }
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_CHOSEN_SENSOR_COLUMN_NAME))
+                this.lightChosenSensor = jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_CHOSEN_SENSOR_COLUMN_NAME);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_SENSOR_VALUE_COLUMN_NAME))
+                this.lightSensorValue = jsonOBJ.getDouble(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_SENSOR_VALUE_COLUMN_NAME);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_LAST_UPDATE_COLUMN_NAME))
+                this.lightLastUpdate = jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_LIGHT_LAST_UPDATE_COLUMN_NAME);
             // RELATIVE HUMIDITY SENSOR
             this.relativeHumiditySensorList = new ArrayList<>();
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_LIST_COLUMN_NAME)) {
-                JSONArray jsonArray = new JSONArray(jsonOBJ.getJSONArray(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_LIST_COLUMN_NAME));
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_LIST_COLUMN_NAME)) {
+                JSONArray jsonArray = new JSONArray(jsonOBJ.getJSONArray(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_LIST_COLUMN_NAME));
                 for(int i=0; i<jsonArray.length(); i++) {
                     this.relativeHumiditySensorList.add(jsonArray.getString(i));
                 }
             }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_CHOSEN_SENSOR_COLUMN_NAME)) {
-                this.relativeHumidityChosenSensor = jsonOBJ.getString(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_CHOSEN_SENSOR_COLUMN_NAME);
-            }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_VALUE_COLUMN_NAME)) {
-                this.relativeHumiditySensorValue = jsonOBJ.getDouble(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_VALUE_COLUMN_NAME);
-            }
-            if(!jsonOBJ.isNull(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_LAST_UPDATE_COLUMN_NAME)) {
-                this.relativeHumidityLastUpdate = jsonOBJ.getString(TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_LAST_UPDATE_COLUMN_NAME);
-            }
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_CHOSEN_SENSOR_COLUMN_NAME))
+                this.relativeHumidityChosenSensor = jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_CHOSEN_SENSOR_COLUMN_NAME);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_VALUE_COLUMN_NAME))
+                this.relativeHumiditySensorValue = jsonOBJ.getDouble(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_SENSOR_VALUE_COLUMN_NAME);
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_LAST_UPDATE_COLUMN_NAME))
+                this.relativeHumidityLastUpdate = jsonOBJ.getString(SqlDbHelper.TABLE_SENSORS_INFO_RELATIVE_HUMIDITY_LAST_UPDATE_COLUMN_NAME);
             Log.i(Common.LOG_NORMAL, "SensorsInfo -> ambTemp:" + this.ambientTemperatureSensorValue + ", light:" + this.lightSensorValue + ", relHum: " + this.relativeHumiditySensorValue);
         }
         catch(JSONException e) {
@@ -191,50 +170,40 @@ public class SensorsInfo implements Parcelable {
     }
 
     public static void addNewSensor(@NonNull Context context, String hubID, String sensorID, String sensorType, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                TABLE_SENSORS_INFO_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_ADD_NEW_SENSOR + "\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.SENSOR_TYPE_PARAMETER + "\":\"" + sensorType + "\",\"" +
-                HttpHelper.SENSOR_ID_PARAMETER + "\":\"" + sensorID + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "addNewSensor response: " + response);
-            callback.getResponse(response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_SENSORS_INFO_ID_COLUMN_NAME, hubID);
+        contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.SENSOR_TYPE_PARAMETER, sensorType);
+        contentValues.put(HttpHelper.SENSOR_ID_PARAMETER, sensorID);
+        SqlDbHelper.addNewSensor(contentValues, (callback));
     }
 
     public static void updateSensorList(@NonNull Context context, String hubID, String sensorType, ArrayList<Sensor> sensorArrayList) {
+        StringBuilder jsonSensorArrayList;
         if((sensorArrayList != null) && (!sensorArrayList.isEmpty())) {
-            StringBuilder jsonSensorArrayList = new StringBuilder("[");
+            jsonSensorArrayList = new StringBuilder("[");
             for(int i=0; i<sensorArrayList.size(); i++) {
                 if(i != (sensorArrayList.size()-1)) jsonSensorArrayList.append("\\\"").append(getSensorId(sensorArrayList.get(i))).append("\\\",");
                 else jsonSensorArrayList.append("\\\"").append(getSensorId(sensorArrayList.get(i))).append("\\\"]");
             }
-            String jsonString = "{\"" +
-                    TABLE_SENSORS_INFO_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                    HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_SENSOR_LIST + "\",\"" +
-                    HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                    HttpHelper.SENSOR_TYPE_PARAMETER + "\":\"" + sensorType + "\",\"" +
-                    HttpHelper.VALUE_PARAMETER + "\":\"" + jsonSensorArrayList + "\"}";
-            new Thread(() -> {
-                String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-                Log.i(Common.LOG_NORMAL, "updateSensorList response: " + response);
-            }).start();
         }
+        else
+            jsonSensorArrayList = new StringBuilder(Common.NULL_STRING_VALUE);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_SENSORS_INFO_ID_COLUMN_NAME, hubID);
+        contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.SENSOR_TYPE_PARAMETER, sensorType);
+        contentValues.put(HttpHelper.VALUE_PARAMETER, jsonSensorArrayList.toString());
+        SqlDbHelper.updateSensorList(contentValues);
     }
 
     public void detachSelectedSensor(@NonNull Context context, String hubID, String sensorType, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_DETACH_SENSOR + "\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.SENSOR_TYPE_PARAMETER + "\":\"" + sensorType + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "detach sensor response: " + response);
-            callback.getResponse(response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, hubID);
+        contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.SENSOR_TYPE_PARAMETER, sensorType);
+        SqlDbHelper.detachSelectedSensor(contentValues, (callback));
     }
 
 

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class IrrigationPlan implements Parcelable {
@@ -146,7 +147,7 @@ public class IrrigationPlan implements Parcelable {
             }
         }
         String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
+                SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_IRRIGATION_PLAN + "\",\"" +
                 HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
                 TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME + "\":" + daysString + ",\"" +

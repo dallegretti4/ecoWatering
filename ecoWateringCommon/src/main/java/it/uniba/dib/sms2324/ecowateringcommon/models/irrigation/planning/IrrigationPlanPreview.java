@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
@@ -48,11 +49,11 @@ public class IrrigationPlanPreview extends IrrigationPlan {
 
     public static void getIrrigationPlanPreviewJsonString(@NonNull EcoWateringHub hub, String caller, Common.OnStringResponseGivenCallback callback) {
         String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hub.getDeviceID() + "\",\"" +
+                SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hub.getDeviceID() + "\",\"" +
                 HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + caller + "\",\"" +
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_IRRIGATION_PLAN_PREVIEW + "\",\"" +
-                EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + hub.getLatitude() + ",\"" +
-                EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + ",\"" +
+                SqlDbHelper.TABLE_HUB_LATITUDE_COLUMN_NAME + "\":" + hub.getLatitude() + ",\"" +
+                SqlDbHelper.TABLE_HUB_LONGITUDE_COLUMN_NAME + "\":" + hub.getLongitude() + ",\"" +
                 BO_FORECAST_DAYS_COLUMN_NAME + "\":" + FORECAST_DAYS + "}";
         Log.i(Common.LOG_NORMAL, "------------------------>QUERY: " + jsonString);
         new Thread(() -> {

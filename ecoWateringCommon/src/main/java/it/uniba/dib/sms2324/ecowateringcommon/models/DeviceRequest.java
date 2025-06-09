@@ -1,7 +1,7 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models;
 
+import android.content.ContentValues;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,20 +17,15 @@ import java.util.ArrayList;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 
 public class DeviceRequest {
-    public static final String TABLE_DEVICE_REQUEST_ID_COLUMN_NAME = "id";
-    public static final String TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME = "caller";
-    public static final String TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME = "request";
-    public static final String TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME = "date";
     public static final String REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM = "SWITCH_OFF_IRRIGATION_SYSTEM";
     public static final String REQUEST_SWITCH_ON_IRRIGATION_SYSTEM = "SWITCH_ON_IRRIGATION_SYSTEM";
     public static final String REQUEST_ENABLE_AUTOMATE_SYSTEM = "ENABLE_AUTOMATE_SYSTEM";
     public static final String REQUEST_DISABLE_AUTOMATE_SYSTEM = "DISABLE_AUTOMATE_SYSTEM";
     public static final String REQUEST_START_DATA_OBJECT_REFRESHING = "START_DATA_OBJECT_REFRESHING";
     public static final String REQUEST_STOP_DATA_OBJECT_REFRESHING = "STOP_DATA_OBJECT_REFRESHING";
-    private static final String REQUEST_DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm";
     private final String id;
     private final String caller;
     private final String request;
@@ -50,10 +45,10 @@ public class DeviceRequest {
                 for(int i=0; i<jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     returnArray.add(new DeviceRequest(
-                            jsonObject.getString(TABLE_DEVICE_REQUEST_ID_COLUMN_NAME),
-                            jsonObject.getString(TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME),
-                            jsonObject.getString(TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME),
-                            jsonObject.getString(TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME)
+                            jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_ID_COLUMN_NAME),
+                            jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME),
+                            jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME),
+                            jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME)
                     ));
                 }
                 return returnArray;
@@ -65,39 +60,27 @@ public class DeviceRequest {
         return null;
     }
 
-    public static void getDeviceRequestFromServer(String hubID, Common.OnStringResponseGivenCallback callback) {
-        String jsonString = "{\"" + EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_GET_DEVICE_REQUEST + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "getDeviceRequest response: " + response);
-            callback.getResponse(response);
-        }).start();
+    public static void getDeviceRequestFromServer(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
+        SqlDbHelper.getDeviceRequestFromServer(contentValues, (callback));
     }
 
     public static void sendRequest(@NonNull Context context, String hubID, String request) {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SEND_REQUEST + "\",\"" +
-                HttpHelper.REQUEST_PARAMETER + "\":\"" + request + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "sendRequest response: " + response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, hubID);
+        contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, Common.getThisDeviceID(context));
+        contentValues.put(HttpHelper.REQUEST_PARAMETER, request);
+        SqlDbHelper.sendRequest(contentValues);
     }
 
     public void delete() {
-        String jsonString = "{\"" +
-                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + this.id + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_DELETE_DEVICE_REQUEST + "\",\"" +
-                TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME + "\":\"" + this.caller + "\",\"" +
-                TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME + "\":\"" + this.request + "\",\"" +
-                TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME + "\":\"" + this.date + "\"}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "deleteDeviceRequest response: " + response);
-        }).start();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, this.id);
+        contentValues.put(SqlDbHelper.TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME, this.caller);
+        contentValues.put(SqlDbHelper.TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME, this.request);
+        contentValues.put(SqlDbHelper.TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME, this.date);
+        SqlDbHelper.deleteDeviceRequest(contentValues);
     }
 
     public String getCaller() {
@@ -110,10 +93,7 @@ public class DeviceRequest {
     public boolean isValidDeviceRequest() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Common.DATE_FORMAT_STRING); // DATE PARSER SETUP
         LocalDateTime inputDateTime = LocalDateTime.parse(this.date, formatter);
-        Log.i(Common.LOG_NORMAL, "-_--------> input: " + inputDateTime.toString());
         LocalDateTime currentDate = LocalDateTime.now(ZoneId.systemDefault());
-        Log.i(Common.LOG_NORMAL, "-_--------> current: " + currentDate.toString());
-        Log.i(Common.LOG_NORMAL, "--------------> " + (Duration.between(currentDate, inputDateTime).getSeconds()));
         return ((Duration.between(currentDate, inputDateTime).getSeconds() >= 0) && (Duration.between(currentDate, inputDateTime).getSeconds() <= 30));
     }
 }

@@ -23,7 +23,7 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
 
     @Override
     public void run() {
-        DeviceRequest.getDeviceRequestFromServer(Common.getThisDeviceID(this.context), (jsonResponse) -> {
+        DeviceRequest.getDeviceRequestFromServer(this.context, (jsonResponse) -> {
             if(jsonResponse != null) {
                 ArrayList<DeviceRequest> deviceRequestList = DeviceRequest.getDeviceRequestList(jsonResponse);
                 if((deviceRequestList != null) && (!deviceRequestList.isEmpty())) {

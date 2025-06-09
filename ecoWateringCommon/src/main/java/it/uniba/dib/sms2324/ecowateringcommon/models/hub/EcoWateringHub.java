@@ -37,17 +37,6 @@ public class EcoWateringHub implements Parcelable {
     private static final String BO_IRRIGATION_SYSTEM_COLUMN_NAME = "irrigationSystem";
     public static final String HUB_NAME_CHANGED_RESPONSE = "hubNameSuccessfulChanged";
     public static final String DEVICE_HUB_ACCOUNT_RESPONSE = "hubAccountSuccessfulDeleted";
-    public static final String TABLE_HUB_DEVICE_ID_COLUMN_NAME = "deviceID";
-    private static final String TABLE_HUB_NAME_COLUMN_NAME = "name";
-    private static final String TABLE_HUB_ADDRESS_COLUMN_NAME = "address";
-    private static final String TABLE_HUB_CITY_COLUMN_NAME = "city";
-    private static final String TABLE_HUB_COUNTRY_COLUMN_NAME = "country";
-    public static final String TABLE_HUB_LATITUDE_COLUMN_NAME = "latitude";
-    public static final String TABLE_HUB_LONGITUDE_COLUMN_NAME = "longitude";
-    private static final String TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME = "remoteDeviceList";
-    public static final String TABLE_HUB_IS_AUTOMATED_COLUMN_NAME = "isAutomated";
-    public static final String TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME = "isDataObjectRefreshing";
-    public static final String TABLE_HUB_BATTERY_PERCENT_COLUMN_NAME = "batteryPercent";
     private String deviceID;
     private String name;
     private String address;
@@ -70,24 +59,24 @@ public class EcoWateringHub implements Parcelable {
     public EcoWateringHub(String jsonString) {
         try{
             JSONObject jsonOBJ = new JSONObject(jsonString);
-            this.deviceID = jsonOBJ.getString(EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME);
-            this.name = jsonOBJ.getString(EcoWateringHub.TABLE_HUB_NAME_COLUMN_NAME);
-            this.address = jsonOBJ.getString(EcoWateringHub.TABLE_HUB_ADDRESS_COLUMN_NAME);
-            this.city = jsonOBJ.getString(EcoWateringHub.TABLE_HUB_CITY_COLUMN_NAME);
-            this.country = jsonOBJ.getString(EcoWateringHub.TABLE_HUB_COUNTRY_COLUMN_NAME);
-            this.latitude = jsonOBJ.getDouble(EcoWateringHub.TABLE_HUB_LATITUDE_COLUMN_NAME);
-            this.longitude = jsonOBJ.getDouble(EcoWateringHub.TABLE_HUB_LONGITUDE_COLUMN_NAME);
+            this.deviceID = jsonOBJ.getString(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME);
+            this.name = jsonOBJ.getString(SqlDbHelper.TABLE_HUB_NAME_COLUMN_NAME);
+            this.address = jsonOBJ.getString(SqlDbHelper.TABLE_HUB_ADDRESS_COLUMN_NAME);
+            this.city = jsonOBJ.getString(SqlDbHelper.TABLE_HUB_CITY_COLUMN_NAME);
+            this.country = jsonOBJ.getString(SqlDbHelper.TABLE_HUB_COUNTRY_COLUMN_NAME);
+            this.latitude = jsonOBJ.getDouble(SqlDbHelper.TABLE_HUB_LATITUDE_COLUMN_NAME);
+            this.longitude = jsonOBJ.getDouble(SqlDbHelper.TABLE_HUB_LONGITUDE_COLUMN_NAME);
             // REMOTE DEVICE LIST RECOVERING
             this.remoteDeviceList = new ArrayList<>();
-            if(!jsonOBJ.getString(EcoWateringHub.TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
-                JSONArray jsonRemoteDeviceList = new JSONArray(jsonOBJ.getString(EcoWateringHub.TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME));
+            if(!jsonOBJ.getString(SqlDbHelper.TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
+                JSONArray jsonRemoteDeviceList = new JSONArray(jsonOBJ.getString(SqlDbHelper.TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME));
                 for(int i=0; i<jsonRemoteDeviceList.length(); i++) {
                     this.remoteDeviceList.add(jsonRemoteDeviceList.getString(i));
                 }
             }
-            this.isAutomated = jsonOBJ.getString(TABLE_HUB_IS_AUTOMATED_COLUMN_NAME).equals(IS_AUTOMATED_TRUE_VALUE);
-            this.isDataObjectRefreshing = jsonOBJ.getString(TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME).equals(IS_DATA_OBJECT_REFRESHING_TRUE_VALUE);
-            this.batteryPercent = jsonOBJ.getInt(TABLE_HUB_BATTERY_PERCENT_COLUMN_NAME);
+            this.isAutomated = jsonOBJ.getString(SqlDbHelper.TABLE_HUB_IS_AUTOMATED_COLUMN_NAME).equals(IS_AUTOMATED_TRUE_VALUE);
+            this.isDataObjectRefreshing = jsonOBJ.getString(SqlDbHelper.TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME).equals(IS_DATA_OBJECT_REFRESHING_TRUE_VALUE);
+            this.batteryPercent = jsonOBJ.getInt(SqlDbHelper.TABLE_HUB_BATTERY_PERCENT_COLUMN_NAME);
             // IRRIGATION SYSTEM RECOVERING
             if(!jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME).equals(Common.NULL_STRING_VALUE))
                 this.irrigationSystem = new IrrigationSystem(jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME));
@@ -115,7 +104,7 @@ public class EcoWateringHub implements Parcelable {
         contentValues.put(SqlDbHelper.TABLE_HUB_COUNTRY_COLUMN_NAME, address.getCountryName());
         contentValues.put(SqlDbHelper.TABLE_HUB_LATITUDE_COLUMN_NAME, address.getLatitude());
         contentValues.put(SqlDbHelper.TABLE_HUB_LONGITUDE_COLUMN_NAME, address.getLongitude());
-        contentValues.put(IrrigationSystem.TABLE_IRRIGATION_SYSTEM_MODEL_COLUMN_NAME, irrigationSystem.getModel());
+        contentValues.put(SqlDbHelper.TABLE_IRR_SYS_MODEL_COLUMN_NAME, irrigationSystem.getModel());
         SqlDbHelper.addNewEcoWateringHub(contentValues, (callback));
     }
 
