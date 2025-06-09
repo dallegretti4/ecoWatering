@@ -38,7 +38,8 @@ import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.connection.DeviceRequestRefreshingRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.data.DataObjectRefreshingRunnable;
 
-public class EcoWateringForegroundService extends Service {
+public class EcoWateringForegroundHubService extends Service {
+    private static final String SET_BATTERY_PERCENT_SUCCESS_RESPONSE = "batteryPercentSet";
     private static final String TAG_IRRIGATION_SYSTEM_START = "START_IRRIGATION_SYSTEM";
     private static final String NAME_IRRIGATION_SYSTEM_START = "startIrrigationSystem";
     private static final String TAG_IRRIGATION_SYSTEM_STOP = "STOP_IRRIGATION_SYSTEM";
@@ -46,10 +47,9 @@ public class EcoWateringForegroundService extends Service {
     private static final String TAG_IRRIGATION_PLAN_REFRESH = "REFRESH_IRRIGATION_PLAN";
     private static final String NAME_IRRIGATION_PLAN_REFRESH = "refreshIrrigationPlan";
     private static final int NOTIFICATION_ID = 1;
-    private static final String WAKE_LOCK_TAG = "ecoWateringHub:wakeLockEcoWateringService";
-    private static final String CHANNEL_ID = "EcoWateringServiceChannel";
-    private static final String NOTIFICATION_CHANNEL_NAME = "ecoWatering Service";
-    private static final String SIMPLE_DATE_FORMAT = "HH:mm";
+    private static final String WAKE_LOCK_TAG = "ecoWateringHub:wakeLockEcoWateringHubService";
+    private static final String CHANNEL_ID = "EcoWateringHubServiceChannel";
+    private static final String NOTIFICATION_CHANNEL_NAME = "ecoWateringHub Service";
     private static final long DEVICE_REQUESTS_REFRESHING_FREQUENCY = 3 * 1000; // MILLISECONDS
     private static final long DATA_OBJECT_REFRESHING_FREQUENCY = 60 * 1000;
     private static final long HUB_REFRESHING_FREQUENCY = 20 * 1000;
@@ -59,7 +59,7 @@ public class EcoWateringForegroundService extends Service {
     private Thread dataObjectRefreshingThread;
     private Thread hubRefreshingThread;
 
-    public EcoWateringForegroundService() {}
+    public EcoWateringForegroundHubService() {}
 
     @Override
     public void onCreate() {
@@ -67,7 +67,7 @@ public class EcoWateringForegroundService extends Service {
         acquireWakeLock();
         createNotificationChannel();
         startForeground(NOTIFICATION_ID, getNotification(this, this.hub));
-        Log.i(Common.LOG_SERVICE, "EcoWateringForegroundService -> onCreate()");
+        Log.i(Common.LOG_SERVICE, "EcoWateringForegroundHubService -> onCreate()");
     }
 
     @Override
@@ -115,11 +115,16 @@ public class EcoWateringForegroundService extends Service {
                         Thread.currentThread().interrupt();
                         break;
                     }
-                    // REFRESH HUB AND UPDATE NOTIFICATION
-                    String jsonResponse = EcoWateringHub.getEcoWateringHubJsonStringNoThread(Common.getThisDeviceID(this));
-                    this.hub = new EcoWateringHub(jsonResponse);
-                    MainActivity.setThisEcoWateringHub(this.hub);
-                    updateNotification(this, this.hub);
+                    // CHECK BATTERY STATE
+                    this.hub.setBatteryPercent(this, getBatteryPercentage(this), (response -> {
+                        if(response.equals(SET_BATTERY_PERCENT_SUCCESS_RESPONSE)) {
+                            // REFRESH HUB AND UPDATE NOTIFICATION
+                            String jsonResponse = EcoWateringHub.getEcoWateringHubJsonStringNoThread(Common.getThisDeviceID(this));
+                            this.hub = new EcoWateringHub(jsonResponse);
+                            MainActivity.setThisEcoWateringHub(this.hub);
+                            updateNotification(this, this.hub);
+                        }
+                    }));
                 }
             });
             this.hubRefreshingThread.start();
@@ -134,15 +139,17 @@ public class EcoWateringForegroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if ((this.wakeLock != null) && this.wakeLock.isHeld()) {
+        if ((this.wakeLock != null) && this.wakeLock.isHeld())
             this.wakeLock.release();
-        }
-        if(this.deviceRequestRefreshingThread != null) this.deviceRequestRefreshingThread.interrupt();
-        if(this.dataObjectRefreshingThread != null) this.dataObjectRefreshingThread.interrupt();
-        if(this.hubRefreshingThread != null) this.hubRefreshingThread.interrupt();
+        if(this.deviceRequestRefreshingThread != null)
+            this.deviceRequestRefreshingThread.interrupt();
+        if(this.dataObjectRefreshingThread != null)
+            this.dataObjectRefreshingThread.interrupt();
+        if(this.hubRefreshingThread != null)
+            this.hubRefreshingThread.interrupt();
         stopForeground(true);
         stopSelf();
-        Log.i(Common.LOG_SERVICE, "ecoWateringForegroundService -> onDestroy");
+        Log.i(Common.LOG_SERVICE, "ecoWateringForegroundHubService -> onDestroy");
     }
 
     private void acquireWakeLock() {
@@ -167,12 +174,11 @@ public class EcoWateringForegroundService extends Service {
 
     private static Notification getNotification(@NonNull Context context, EcoWateringHub hub) {
         String text;
-        if(hub != null) text = context.getString(R.string.sensors_notification_text) + new SimpleDateFormat(SIMPLE_DATE_FORMAT, Locale.getDefault()).format(new Date()) + "\n" +
-                    context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.ambient_temperature_label) + ": " + hub.getAmbientTemperature() + "\n" +
+        if(hub != null) text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.ambient_temperature_label) + ": " + hub.getAmbientTemperature() + "\n" +
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.relative_humidity_label) + ": " + hub.getRelativeHumidity() + "%\n" +
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.light_uv_index_label) + ": " + hub.getIndexUV() + "\n" +
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.precipitation_label) + ": " + hub.getWeatherInfo().getPrecipitation() + context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.precipitation_measurement_unit);
-        else text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.notification_data_object_refreshing_disabled);
+        else text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.starting_label);
         // OVERRIDE NOTIFICATION FOR BATTERY LOW CASE
         if((getBatteryPercentage(context) >= 0) && (getBatteryPercentage(context) <= 20))
             text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.low_battery_notification);
@@ -207,10 +213,10 @@ public class EcoWateringForegroundService extends Service {
     public static void checkEcoWateringForegroundServiceNeedToBeStarted(@NonNull Context context, @NonNull EcoWateringHub hub) {
         if((hub.isDataObjectRefreshing()) ||
                 ((hub.getRemoteDeviceList() != null) && !hub.getRemoteDeviceList().isEmpty())) {
-            EcoWateringForegroundService.startEcoWateringForegroundService(context, hub);
+            startEcoWateringForegroundHubService(context, hub);
         }
         else {  // TO BE SURE ECO WATERING FOREGROUND SERVICE IS NO ALIVE
-            EcoWateringForegroundService.stopEcoWateringForegroundService(context);
+            stopEcoWateringForegroundHubService(context);
         }
     }
 
@@ -309,17 +315,17 @@ public class EcoWateringForegroundService extends Service {
         return calendar;
     }
 
-    private static void startEcoWateringForegroundService(@NonNull Context context, @NonNull EcoWateringHub hub) {
-        stopEcoWateringForegroundService(context);  // TO BE SURE ECO WATERING FOREGROUND SERVICE IS UNIQUE
+    private static void startEcoWateringForegroundHubService(@NonNull Context context, @NonNull EcoWateringHub hub) {
+        stopEcoWateringForegroundHubService(context);  // TO BE SURE ECO WATERING FOREGROUND SERVICE IS UNIQUE
         Bundle b = new Bundle();
         b.putParcelable(Common.MANAGE_EWH_INTENT_OBJ, hub);
-        Intent startIntent = new Intent(context, EcoWateringForegroundService.class);
+        Intent startIntent = new Intent(context, EcoWateringForegroundHubService.class);
         startIntent.putExtra(Common.MANAGE_EWH_INTENT_OBJ, b);
         ContextCompat.startForegroundService(context, startIntent);
     }
 
-    private static void stopEcoWateringForegroundService(@NonNull Context context) {
-        Intent stopIntent = new Intent(context, EcoWateringForegroundService.class);
+    private static void stopEcoWateringForegroundHubService(@NonNull Context context) {
+        Intent stopIntent = new Intent(context, EcoWateringForegroundHubService.class);
         context.stopService(stopIntent);
     }
 }

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -28,7 +27,7 @@ import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.connection.mode.bluetooth.BtConnectionFragment;
 import it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi.WiFiConnectionFragment;
-import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundService;
+import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundHubService;
 
 public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ManageConnectedRemoteEWDevicesFragment.OnConnectedRemoteEWDeviceActionCallback,
@@ -80,7 +79,7 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
         EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse) -> {
             MainActivity.setThisEcoWateringHub(new EcoWateringHub(jsonResponse));
             // CHECK ECO WATERING FOREGROUND SERVICE NEED TO BE STOPPED
-            EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this, MainActivity.getThisEcoWateringHub());
+            EcoWateringForegroundHubService.checkEcoWateringForegroundServiceNeedToBeStarted(this, MainActivity.getThisEcoWateringHub());
             // REFRESH FRAGMENT
             startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
             finish();

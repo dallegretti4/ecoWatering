@@ -28,11 +28,11 @@ public class IrrigationSystemStoppingWorker extends Worker {
                             Common.getThisDeviceID(this.context),
                             false
                     );
-                    EcoWateringForegroundService.scheduleIrrigationSystemStoppingWorker(this.context, hub, false); // REPEAT WORK
+                    EcoWateringForegroundHubService.scheduleIrrigationSystemStoppingWorker(this.context, hub, false); // REPEAT WORK
                 }
             }));
         // NO INTERNET CONNECTION CASE
-        else EcoWateringForegroundService.scheduleIrrigationSystemStoppingWorker(this.context, null, true);
+        else EcoWateringForegroundHubService.scheduleIrrigationSystemStoppingWorker(this.context, null, true);
         return Result.success();
     }
 }

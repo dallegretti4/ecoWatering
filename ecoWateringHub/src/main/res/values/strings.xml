@@ -16,7 +16,6 @@
     <string name="remote_device_already_exists_message">Try with another device.</string>
     <string name="remote_device_already_exists_title">Remote device already connected</string>
     <string name="remote_device_not_available_title">Device not available</string>
-    <string name="sensors_notification_text">Last update: </string>
     <string name="try_to_connect_title">Wait a moment. We\'re try to connect…</string>
     <string name="update_Location_button">Update position</string>
     <string name="why_grant_location_permission_dialog_title">We need to know your position</string>

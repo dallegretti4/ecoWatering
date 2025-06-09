@@ -63,6 +63,7 @@
     <string name="new_name_label">New name</string>
     <string name="no_irrigation_needed">No irrigation needed</string>
     <string name="no_sensor_selected_label">No sensor selected</string>
+    <string name="not_defined_label">N/D</string>
     <string name="notification_data_object_refreshing_disabled">Background refreshing disabled</string>
     <string name="off_value">Off</string>
     <string name="ok_button">OK</string>
@@ -92,6 +93,7 @@
     <string name="sensor_ambient_temperature">Ambient temperature sensor</string>
     <string name="sensor_chosen_title_dialog">Do you want to use this sensor?</string>
     <string name="sensor_detached_title">Sensor successfully detached</string>
+    <string name="sensors_notification_text">Last update: </string>
     <string name="sensor_light">Light sensor</string>
     <string name="sensor_list_empty">Sorry, no sensor founded.\nPlease, make you sure sensors are correctly connected to the ecoWateringHub and retry.</string>
     <string name="sensor_not_configured_info">If there are not configured sensors, ecoWatering will use Open-Meteo.com information. Configure your sensors for a better performing.</string>
@@ -100,6 +102,7 @@
     <string name="sensors_label">Sensors</string>
     <string name="setting_button">Setting</string>
     <string name="show_automated_irrigation_system_info">show automated irrigation system info</string>
+    <string name="starting_label">Starting…</string>
     <string name="state_label">State :</string>
     <string name="system_automated_label">System automated</string>
     <string name="temperature_celsius">O Celsius</string>

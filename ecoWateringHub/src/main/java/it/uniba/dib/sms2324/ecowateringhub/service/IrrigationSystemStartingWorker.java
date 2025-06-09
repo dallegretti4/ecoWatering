@@ -31,13 +31,13 @@ public class IrrigationSystemStartingWorker extends Worker {
                             Common.getThisDeviceID(this.context),
                             true
                     );
-                    EcoWateringForegroundService.scheduleIrrigationSystemStartingWorker(this.context, hub, false); // REPEAT WORK
+                    EcoWateringForegroundHubService.scheduleIrrigationSystemStartingWorker(this.context, hub, false); // REPEAT WORK
                 }
             }));
         // NO INTERNET CONNECTION CASE
         else {
             SharedPreferencesHelper.writeBooleanOnSharedPreferences(this.context, SharedPreferencesHelper.IRR_SYS_START_DELAYED_FILENAME, SharedPreferencesHelper.IRR_SYS_START_DELAYED_KEY, true);
-            EcoWateringForegroundService.scheduleIrrigationSystemStartingWorker(this.context, null, true);
+            EcoWateringForegroundHubService.scheduleIrrigationSystemStartingWorker(this.context, null, true);
         }
         return Result.success();
     }

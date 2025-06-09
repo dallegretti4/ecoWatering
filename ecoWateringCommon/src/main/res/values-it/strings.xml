@@ -64,6 +64,7 @@
     <string name="no_irrigation_needed">Irrigazione non necessaria</string>
     <string name="no_sensor_selected_label">Nessun sensore selezionato</string>
     <string name="notification_data_object_refreshing_disabled">Aggiornamento in background disabiltato</string>
+    <string name="not_defined_label">N/D</string>
     <string name="off_value">Off</string>
     <string name="ok_button">OK</string>
     <string name="on_value">On</string>
@@ -95,12 +96,14 @@
     <string name="sensor_light">Sensore di luminosità</string>
     <string name="sensor_list_empty">Nessun sensore trovato.\nAssicurati che il sensore sia correttamente collegato all\'ecoWateringHub e riprova.</string>
     <string name="sensor_not_configured_info">In assensa di sensori connessi, ecoWatering userà le informazioni Open-Meteo.com . Configura i tuoi sensori per un esperienza migliore.</string>
+    <string name="sensors_notification_text">Ultimo aggiornamento: </string>
     <string name="sensor_relative_humidity">Sensore di umidità relativa</string>
     <string name="sensors_configuration_title">Scegli il sensore di %s che vuoi utilizzare.</string>
     <string name="sensors_label">Sensori</string>
     <string name="setting_button">Impostazioni</string>
     <string name="show_automated_irrigation_system_info">Mostra informazioni dell\'impianto d\'irrigazione</string>
     <string name="state_label">Stato :</string>
+    <string name="starting_label">Avvio…</string>
     <string name="system_automated_label">Sistema automatizzato</string>
     <string name="temperature_celsius">O Celsius</string>
     <string name="today_label">Oggi</string>

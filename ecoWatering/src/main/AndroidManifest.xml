@@ -8,10 +8,14 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <uses-feature android:name="android.hardware.bluetooth"/>
     <uses-feature android:name="android.hardware.location"/>
@@ -40,6 +44,12 @@
         <activity android:name=".connection.ConnectToEWHubActivity" android:exported="false"/>
 
         <activity android:name=".management.ManageEWHubActivity" android:exported="false"/>
+
+        <service
+            android:name=".service.EcoWateringForegroundDeviceService"
+            android:foregroundServiceType="specialUse"
+            android:process=":persistent_service"
+            android:exported="false"/>
     </application>
 
 </manifest>

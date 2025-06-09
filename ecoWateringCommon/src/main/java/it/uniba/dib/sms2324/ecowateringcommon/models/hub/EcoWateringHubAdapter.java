@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 
 import java.util.List;
 
@@ -38,6 +39,16 @@ public class EcoWateringHubAdapter extends ArrayAdapter<EcoWateringHub> {
         firstItemTextView.setText(hub.getName());
         TextView secondItemTextView = convertView.findViewById(R.id.secondItemTextView);
         secondItemTextView.setText(hub.getPosition());
+        ImageView batteryImageView = convertView.findViewById(R.id.batteryStateImageView);
+        batteryImageView.setImageResource(hub.getBatteryImageResourceId());
+        batteryImageView.setImageTintList(ResourcesCompat.getColorStateList(this.context.getResources(), R.color.ew_primary_color_50_from_device, this.context.getTheme()));
+        TextView batteryPercentTextView = convertView.findViewById(R.id.batteryPercentTextView);
+        if(hub.getBatteryPercent() < 0)
+            batteryPercentTextView.setText(this.context.getString(R.string.not_defined_label));
+        else {
+            String percentText = hub.getBatteryPercent() + "%";
+            batteryPercentTextView.setText(percentText);
+        }
         return convertView;
     }
 }

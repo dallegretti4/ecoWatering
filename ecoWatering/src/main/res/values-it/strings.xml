@@ -8,6 +8,7 @@
     <string name="disconnected_from_ewh_success_title">Disconnessione da Hub avvenuta con successa.</string>
     <string name="first_start_message_text_view">Il nome scelto, sarà usato per identificare il tuo dispositivo.</string>
     <string name="first_start_title_text_view">Scegli un nome</string>
+    <string name="hub_need_to_be_recharged">Attenzione, batteria scarica! Ricarica l\'hub %s!</string>
     <string name="insert_device_name_hint">Inserisci nome</string>
     <string name="remote_device_added_success_message">Adesso puoi controllare il tuo Hub.</string>
     <string name="remote_device_added_success_title">Dispositivo autorizzato</string>

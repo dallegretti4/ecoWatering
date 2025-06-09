@@ -33,7 +33,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment;
 import it.uniba.dib.sms2324.ecowateringhub.data.DataObjectRefreshingRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.data.EcoWateringSensor;
 import it.uniba.dib.sms2324.ecowateringhub.connection.ManageEcoWateringDevicesConnectionActivity;
-import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundService;
+import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundHubService;
 import it.uniba.dib.sms2324.ecowateringhub.setup.StartFirstFragment;
 import it.uniba.dib.sms2324.ecowateringhub.setup.StartSecondFragment;
 
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements
                     if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
                         thisEcoWateringHub = new EcoWateringHub(existsResponse);    // INSTANCE OF THIS HUB
                         new Thread(new DataObjectRefreshingRunnable(this, thisEcoWateringHub, DataObjectRefreshingRunnable.FORCE_SENSORS_DURATION)).start(); // FORCE SENSORS AND WEATHER INFO REFRESHING
-                        EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this, thisEcoWateringHub);
+                        EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this, thisEcoWateringHub);
                         if(thisEcoWateringHub.isAutomated()) changeFragment(new ManageHubAutomaticControlFragment(Common.CALLED_FROM_HUB, thisEcoWateringHub), true);
                         else changeFragment(new ManageHubManualControlFragment(Common.CALLED_FROM_HUB, thisEcoWateringHub), true);
                     }
@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements
             if(response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) {
                 EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
                     thisEcoWateringHub = new EcoWateringHub(jsonResponse);
-                    EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this, thisEcoWateringHub);
+                    EcoWateringForegroundHubService.checkEcoWateringForegroundServiceNeedToBeStarted(this, thisEcoWateringHub);
                 }));
             }
             else runOnUiThread(this::showHttpErrorFaultDialog);
@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements
             if(response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
                 EcoWateringHub.getEcoWateringHubJsonString(Common.getThisDeviceID(this), (jsonResponse -> {
                     thisEcoWateringHub = new EcoWateringHub(jsonResponse);
-                    EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this, thisEcoWateringHub);
+                    EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this, thisEcoWateringHub);
                     startActivity(new Intent(this, MainActivity.class));
                     finish();
                 }));

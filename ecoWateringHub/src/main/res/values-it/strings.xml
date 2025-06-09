@@ -17,7 +17,6 @@
     <string name="remote_device_already_exists_message">Prova con un altro dispositivo.</string>
     <string name="remote_device_already_exists_title">Dispositivo già connesso</string>
     <string name="remote_device_not_available_title">Dispositivo non disponibile</string>
-    <string name="sensors_notification_text">Ultimo aggiornamento: </string>
     <string name="try_to_connect_title">Attendi. Stiamo cercando di connetterti…</string>
     <string name="update_Location_button">Aggiorna posizione</string>
     <string name="why_grant_location_permission_dialog_title">Abbiamo bisogno di conoscere la tua posizione</string>

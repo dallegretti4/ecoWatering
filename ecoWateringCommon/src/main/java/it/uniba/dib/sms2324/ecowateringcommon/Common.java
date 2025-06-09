@@ -37,6 +37,7 @@ public class Common {
     public static final int GPS_ENABLED_RESULT = 1007;
     public static final int LOCATION_PERMISSION_REQUEST = 2002;
     public static final String MANAGE_EWH_INTENT_OBJ = "MANAGE_EWH_OBJ";
+    public static final String MANAGE_EWD_INTENT_OBJ = "MANAGE_EWD_INTENT_OBJ";
     public static final int NULL_INT_VALUE = 7001;
     public static final String NULL_STRING_VALUE = "null";
     public static final int REFRESH_FRAGMENT = 1030;
@@ -55,6 +56,7 @@ public class Common {
     public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_RD = "rd";
     public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_TH = "th";
     public static final String DATE_SPLITTER = "-";
+    public static final String SIMPLE_DATE_FORMAT = "HH:mm";
 
     // INTERFACES
 

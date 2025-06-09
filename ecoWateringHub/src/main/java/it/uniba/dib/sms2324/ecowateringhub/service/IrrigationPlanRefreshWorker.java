@@ -29,12 +29,12 @@ public class IrrigationPlanRefreshWorker extends Worker {
                         IrrigationPlanPreview irrigationPlanPreview = new IrrigationPlanPreview(jsonResponse);
                         irrigationPlanPreview.updateIrrigationPlanOnServer(this.context, Common.getThisDeviceID(this.context));
                     }));
-                    EcoWateringForegroundService.scheduleIrrigationPlanRefreshingWorker(this.context, false);   // REPEAT WORK
+                    EcoWateringForegroundHubService.scheduleIrrigationPlanRefreshingWorker(this.context, false);   // REPEAT WORK
                 }
             }));
         }
         else {
-            EcoWateringForegroundService.scheduleIrrigationPlanRefreshingWorker(this.context, true);
+            EcoWateringForegroundHubService.scheduleIrrigationPlanRefreshingWorker(this.context, true);
         }
         return Result.success();
     }

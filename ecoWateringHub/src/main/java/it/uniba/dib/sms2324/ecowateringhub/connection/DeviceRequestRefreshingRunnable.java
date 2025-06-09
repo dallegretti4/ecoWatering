@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
-import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundService;
+import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundHubService;
 
 public class DeviceRequestRefreshingRunnable implements Runnable {
     private final Context context;
@@ -53,7 +53,7 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                 case DeviceRequest.REQUEST_START_DATA_OBJECT_REFRESHING:
                     this.hub.setIsDataObjectRefreshing(this.context, true, (response) -> {
                         if (response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE))
-                            EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this.context, this.hub);
+                            EcoWateringForegroundHubService.checkEcoWateringForegroundServiceNeedToBeStarted(this.context, this.hub);
                     });
                     break;
                 // STOP BACKGROUND REFRESHING CASE
@@ -62,18 +62,18 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                     this.hub.setIsDataObjectRefreshing(this.context, false, (response) -> {
                         if ((response.equals(EcoWateringHub.SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE)) &&
                                 ((this.hub.getRemoteDeviceList() == null) || this.hub.getRemoteDeviceList().isEmpty()))
-                            EcoWateringForegroundService.checkEcoWateringForegroundServiceNeedToBeStarted(this.context, this.hub);
+                            EcoWateringForegroundHubService.checkEcoWateringForegroundServiceNeedToBeStarted(this.context, this.hub);
                     });
                     break;
                 //  ENABLE AUTOMATE SYSTEM CASE
                 case DeviceRequest.REQUEST_ENABLE_AUTOMATE_SYSTEM:
                     this.hub.setIsAutomated(true, (response -> {
                         if(response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
-                            if(this.hub.getIrrigationPlan() != null) EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this.context, this.hub);
+                            if(this.hub.getIrrigationPlan() != null) EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this.context, this.hub);
                             else {
                                 EcoWateringHub.getEcoWateringHubJsonString(this.hub.getDeviceID(), (jsonResponse -> {
                                     EcoWateringHub tmpHub = new EcoWateringHub(jsonResponse);
-                                    EcoWateringForegroundService.checkEcoWateringSystemNeedToBeAutomated(this.context, tmpHub);
+                                    EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this.context, tmpHub);
                                 }));
                             }
                         }

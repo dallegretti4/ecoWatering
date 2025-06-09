@@ -19,10 +19,10 @@
         android:scaleX="0.85"
         android:scaleY="0.85"
         android:elevation="4dp"
-        app:layout_constraintWidth_percent="0.3"
+        app:layout_constraintWidth_percent="0.25"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintLeft_toLeftOf="parent">
         <ImageView
             android:id="@+id/weatherIconImageView"
             android:layout_width="wrap_content"
@@ -40,13 +40,15 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/infoContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
-        app:layout_constraintWidth_percent="0.7"
+        app:layout_constraintWidth_percent="0.55"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintLeft_toRightOf="@+id/weatherIconImageViewContainer"
+        app:layout_constraintRight_toLeftOf="@+id/batteryContainer">
 
         <TextView
             android:id="@+id/firstItemTextView"
@@ -64,5 +66,37 @@
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@+id/firstItemTextView"
             app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/batteryContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintWidth_percent="0.2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+        <ImageView
+            android:id="@+id/batteryStateImageView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintHeight_percent="0.35"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/batteryPercentTextView"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+        <TextView
+            android:id="@+id/batteryPercentTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@+id/batteryStateImageView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -52,6 +52,7 @@ public class HttpHelper {
     public static final String MODE_UPDATE_IRRIGATION_PLAN = "UPDATE_IRRIGATION_PLAN";
     public static final String MODE_SET_IS_AUTOMATED = "SET_IS_AUTOMATED";
     public static final String MODE_UPDATE_SENSOR_LIST = "UPDATE_SENSOR_LIST";
+    public static final String MODE_SET_BATTERY_PERCENT = "SET_BATTERY_PERCENT";
     public static final String TIME_PARAMETER = "TIME";
     public static final String SENSOR_TYPE_PARAMETER = "SENSOR_TYPE";
     public static final String SENSOR_ID_PARAMETER = "SENSOR_ID";

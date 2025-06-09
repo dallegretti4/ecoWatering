@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
@@ -44,6 +45,7 @@ public class EcoWateringHub implements Parcelable {
     private static final String TABLE_HUB_REMOTE_DEVICE_LIST_COLUMN_NAME = "remoteDeviceList";
     public static final String TABLE_HUB_IS_AUTOMATED_COLUMN_NAME = "isAutomated";
     public static final String TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME = "isDataObjectRefreshing";
+    public static final String TABLE_HUB_BATTERY_PERCENT_COLUMN_NAME = "batteryPercent";
     private String deviceID;
     private String name;
     private String address;
@@ -54,6 +56,7 @@ public class EcoWateringHub implements Parcelable {
     private List<String> remoteDeviceList;
     private boolean isAutomated;
     private boolean isDataObjectRefreshing;
+    private int batteryPercent;
 
     // NOT ON DATABASE
     private IrrigationSystem irrigationSystem;
@@ -84,6 +87,8 @@ public class EcoWateringHub implements Parcelable {
             this.isAutomated = jsonOBJ.getString(TABLE_HUB_IS_AUTOMATED_COLUMN_NAME).equals(IS_AUTOMATED_TRUE_VALUE);
             // IS BACKGROUND REFRESHING RECOVERING
             this.isDataObjectRefreshing = jsonOBJ.getString(TABLE_HUB_IS_DATA_OBJECT_REFRESHING_COLUMN_NAME).equals(IS_DATA_OBJECT_REFRESHING_TRUE_VALUE);
+            // BATTERY PERCENT RECOVERY
+            this.batteryPercent = jsonOBJ.getInt(TABLE_HUB_BATTERY_PERCENT_COLUMN_NAME);
             // IRRIGATION SYSTEM RECOVERING
             if(!jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME).equals(Common.NULL_STRING_VALUE)) {
                 this.irrigationSystem = new IrrigationSystem(jsonOBJ.getString(BO_IRRIGATION_SYSTEM_COLUMN_NAME));
@@ -237,8 +242,8 @@ public class EcoWateringHub implements Parcelable {
         }).start();
     }
 
-    public void setIsDataObjectRefreshing(@NonNull Context context, boolean value, Common.OnStringResponseGivenCallback callback) {// CONVERT STATE
-        Log.i(Common.LOG_NORMAL, "----------------> set Is DOR: ");
+    public void setIsDataObjectRefreshing(@NonNull Context context, boolean value, Common.OnStringResponseGivenCallback callback) {
+        // CONVERT STATE
         int valueInt = 0;
         if(value) {
             valueInt = 1;
@@ -250,6 +255,18 @@ public class EcoWateringHub implements Parcelable {
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
             Log.i(Common.LOG_NORMAL, "setIsDataObjectRefreshing response: " + response);
+            callback.getResponse(response);
+        }).start();
+    }
+
+    public void setBatteryPercent(@NonNull Context context, int batteryPercent, Common.OnStringResponseGivenCallback callback) {
+        String jsonString = "{\"" +
+                EcoWateringHub.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
+                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_SET_BATTERY_PERCENT + "\",\"" +
+                HttpHelper.VALUE_PARAMETER + "\":" + batteryPercent + "}";
+        new Thread(() -> {
+            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+            Log.i(Common.LOG_NORMAL, "setBatteryPercent response: " + response);
             callback.getResponse(response);
         }).start();
     }
@@ -314,6 +331,9 @@ public class EcoWateringHub implements Parcelable {
     public boolean isDataObjectRefreshing() {
         return this.isDataObjectRefreshing;
     }
+    public int getBatteryPercent() {
+        return this.batteryPercent;
+    }
 
     public IrrigationSystem getIrrigationSystem() {
         return this.irrigationSystem;
@@ -325,6 +345,21 @@ public class EcoWateringHub implements Parcelable {
 
     public IrrigationPlan getIrrigationPlan() {
         return this.irrigationPlan;
+    }
+
+    public int getBatteryImageResourceId() {
+        if(this.batteryPercent < 0)
+            return R.drawable.battery_alert_icon;
+        else if(this.batteryPercent == 0)
+            return R.drawable.battery_0_icon;
+        else if(this.batteryPercent <= 20)
+            return R.drawable.battery_2_icon;
+        else if(this.batteryPercent <= 40)
+            return R.drawable.battery_4_icon;
+        else if(this.batteryPercent <=80)
+            return R.drawable.battery_6_icon;
+        else
+            return R.drawable.battery_full_icon;
     }
 
     @NonNull
@@ -394,6 +429,7 @@ public class EcoWateringHub implements Parcelable {
         remoteDeviceList = in.createStringArrayList();
         isAutomated = in.readByte() != 0;
         isDataObjectRefreshing = in.readByte() != 0;
+        batteryPercent = in.readInt();
         irrigationSystem = in.readParcelable(IrrigationSystem.class.getClassLoader());
         weatherInfo = in.readParcelable(WeatherInfo.class.getClassLoader());
         sensorInfo = in.readParcelable(SensorsInfo.class.getClassLoader());
@@ -429,6 +465,7 @@ public class EcoWateringHub implements Parcelable {
         dest.writeStringList(remoteDeviceList);
         dest.writeByte((byte) (isAutomated ? 1 : 0));
         dest.writeByte((byte) (isDataObjectRefreshing ? 1 : 0));
+        dest.writeInt(batteryPercent);
         dest.writeParcelable(irrigationSystem, flags);
         dest.writeParcelable(weatherInfo, flags);
         dest.writeParcelable(sensorInfo, flags);

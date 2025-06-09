@@ -45,7 +45,7 @@
             android:exported="false"/>
 
         <service
-            android:name=".service.EcoWateringForegroundService"
+            android:name=".service.EcoWateringForegroundHubService"
             android:foregroundServiceType="specialUse"
             android:process=":persistent_service"
             android:exported="false"/>

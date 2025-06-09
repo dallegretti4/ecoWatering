@@ -13,6 +13,7 @@ import android.view.KeyEvent;
 
 import it.uniba.dib.sms2324.ecowatering.connection.ConnectToEWHubActivity;
 import it.uniba.dib.sms2324.ecowatering.entry.MainFragment;
+import it.uniba.dib.sms2324.ecowatering.service.EcoWateringForegroundDeviceService;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.UserProfileFragment;
 import it.uniba.dib.sms2324.ecowatering.setup.StartFirstFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements
                 if(!existsResponse.equals(HttpHelper.HTTP_RESPONSE_ERROR)) {
                     // DEVICE ALREADY REGISTERED CASE
                     thisEcoWateringDevice = new EcoWateringDevice(existsResponse);
+                    EcoWateringForegroundDeviceService.checkIfServiceNeedToBeStarted(this, thisEcoWateringDevice);
                     if(thisEcoWateringDevice.getEcoWateringHubList() == null || thisEcoWateringDevice.getEcoWateringHubList().isEmpty()) {
                         // NEVER CONNECTED TO A ECO WATERING HUB CASE
                         Intent firstStartIntent = new Intent(this, ConnectToEWHubActivity.class);
