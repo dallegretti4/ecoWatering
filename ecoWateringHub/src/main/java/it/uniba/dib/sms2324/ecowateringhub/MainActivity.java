@@ -221,6 +221,11 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    @Override
+    public void scheduleIrrSys(int[] startingDate, int[] startingTime, int[] irrigationDuration) {
+        EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this, startingDate, startingTime, irrigationDuration);
+    }
+
     @Override   // CALLED FROM UserProfileFragment.OnUserProfileActionCallback AND AutomateSystemFragment.OnAutomateSystemActionCallback TOO
     public void restartApp() {
         startActivity(new Intent(this, MainActivity.class));

@@ -43,10 +43,15 @@
     <string name="empty_history">Empty history</string>
     <string name="go_to_settings_button">Go to Settings</string>
     <string name="history_label">History</string>
+    <string name="hours_label">Hours</string>
     <string name="http_error_dialog_message">Retry later.</string>
     <string name="http_error_dialog_title">Sorry, something went wrong</string>
+    <string name="insert_irr_sys_scheduling_starting_time">Insert the starting time</string>
+    <string name="insert_irr_sys_scheduling_stopping_time">Insert the stopping time</string>
     <string name="internet_connection_fault_msg">Make you sure you are connected to Internet and retry.</string>
     <string name="internet_connection_fault_title">Device is not connected to Internet</string>
+    <string name="invalid_pasted_time_toast">Warning! insert a valid time</string>
+    <string name="irr_sys_stopping_time_title">How long you want to enable it?</string>
     <string name="irrigation_plan_agree_dialog_message">You can always stop following the plan and keep manual control on the system.</string>
     <string name="irrigation_plan_agree_dialog_title">Do you agree our irrigation plan?</string>
     <string name="irrigation_system_label">Irrigation System</string>
@@ -56,6 +61,7 @@
     <string name="light_uv_index_label">UV index</string>
     <string name="low_battery_notification">Warning! Low Battery, recharge your device!</string>
     <string name="manage_remote_device_toolbar_title">Connected Devices</string>
+    <string name="minutes_label">Minutes</string>
     <string name="name_label">Name</string>
     <string name="next_button">Next</string>
     <string name="next_starting_label">Next starting</string>
@@ -87,6 +93,7 @@
     <string name="precipitation_label_moderate_precipitation">Moderate rain expected</string>
     <string name="precipitation_label_no_precipitation">No precipitation expected</string>
     <string name="precipitation_measurement_unit">mm</string>
+    <string name="schedule_label">Schedule</string>
     <string name="selected_sensor_label">Selected sensor</string>
     <string name="sensor_added_successfully">Sensor is successfully configured</string>
     <string name="sensor_already_configured">This sensor is already configured.</string>

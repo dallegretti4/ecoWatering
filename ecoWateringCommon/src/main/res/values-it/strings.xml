@@ -43,10 +43,15 @@
     <string name="empty_history">Cronologia vuota</string>
     <string name="go_to_settings_button">Vai alle impostazioni</string>
     <string name="history_label">Cronologia</string>
+    <string name="hours_label">Ore</string>
     <string name="http_error_dialog_message">Riprova più tardi.</string>
     <string name="http_error_dialog_title">Ci dispiace, qualcosa è andato storto</string>
+    <string name="insert_irr_sys_scheduling_starting_time">Inserisci l\'orario di avvio</string>
+    <string name="insert_irr_sys_scheduling_stopping_time">Inserisci l\'orario di disattivazione</string>
     <string name="internet_connection_fault_msg">Assicurati di essere connesso ad Internet e riprova.</string>
     <string name="internet_connection_fault_title">Il dispositivo non è connesso a Internet</string>
+    <string name="invalid_pasted_time_toast">Attenzione! inserisci un\'orario valido</string>
+    <string name="irr_sys_stopping_time_title">Per quanto tempo vuoi attivarlo?</string>
     <string name="irrigation_plan_agree_dialog_message">Potrai smettere di seguire il piano e tornare al controllo manuale in qualsiasi momento.</string>
     <string name="irrigation_plan_agree_dialog_title">Accetti il piano di irrigazione?</string>
     <string name="irrigation_system_label">Impianto d\'irrigazione</string>
@@ -56,6 +61,7 @@
     <string name="light_uv_index_label">indice UV</string>
     <string name="low_battery_notification">Attenzione! Batteria scarica, ricarica il dispositivo!</string>
     <string name="manage_remote_device_toolbar_title">Dispositivi connessi</string>
+    <string name="minutes_label">Minuti</string>
     <string name="name_label">Nome</string>
     <string name="next_button">Continua</string>
     <string name="next_starting_label">Prossimo avvio</string>
@@ -87,6 +93,7 @@
     <string name="precipitation_label_moderate_precipitation">Pioggia moderata prevista</string>
     <string name="precipitation_label_no_precipitation">Nessuna probabilità di precipitazioni</string>
     <string name="precipitation_measurement_unit">mm</string>
+    <string name="schedule_label">Programma</string>
     <string name="selected_sensor_label">Sensore selezionato</string>
     <string name="sensor_added_successfully">Sensore collegato correttamente</string>
     <string name="sensor_already_configured">Questo sensore è già configurato.</string>

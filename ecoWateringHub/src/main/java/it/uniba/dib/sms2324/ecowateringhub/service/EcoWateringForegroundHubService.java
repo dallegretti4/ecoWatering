@@ -42,6 +42,10 @@ public class EcoWateringForegroundHubService extends Service {
     private static final String SET_BATTERY_PERCENT_SUCCESS_RESPONSE = "batteryPercentSet";
     private static final String TAG_IRRIGATION_SYSTEM_START = "START_IRRIGATION_SYSTEM";
     private static final String NAME_IRRIGATION_SYSTEM_START = "startIrrigationSystem";
+    public static final String TAG_IRRIGATION_SYSTEM_MANUAL_START = "START_MANUAL_IRRIGATION_SYSTEM";
+    private static final String NAME_IRRIGATION_SYSTEM_MANUAL_START = "startManualIrrigationSystem";
+    public static final String TAG_IRRIGATION_SYSTEM_MANUAL_STOP = "STOP_MANUAL_IRRIGATION_SYSTEM";
+    private static final String NAME_IRRIGATION_SYSTEM_MANUAL_STOP = "stOPManualIrrigationSystem";
     private static final String TAG_IRRIGATION_SYSTEM_STOP = "STOP_IRRIGATION_SYSTEM";
     private static final String NAME_IRRIGATION_SYSTEM_STOP = "stopIrrigationSystem";
     private static final String TAG_IRRIGATION_PLAN_REFRESH = "REFRESH_IRRIGATION_PLAN";
@@ -295,8 +299,39 @@ public class EcoWateringForegroundHubService extends Service {
         Log.i(Common.LOG_SERVICE, "---------------------> IrrigationSystemStoppingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
     }
 
+    public static void scheduleManualIrrSysWorker(@NonNull Context context, int[] startingDate, int[] startingTime, int[] irrigationDuration) {
+        Calendar currentCalendar = Calendar.getInstance();
+        currentCalendar.setTimeInMillis(System.currentTimeMillis());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, startingDate[0]);
+        calendar.set(Calendar.MONTH, startingDate[1]);
+        calendar.set(Calendar.DAY_OF_MONTH, startingDate[2]);
+        calendar.set(Calendar.HOUR_OF_DAY, startingTime[0]);
+        calendar.set(Calendar.MINUTE, startingTime[1]);
+
+        long startDelay = calendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
+
+        // TO START IRR SYS
+        if(startDelay < 0) {
+            sendPeriodicWorkRequest(context, IrrigationSystemManualSetWorker.class, 5000, TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
+            Log.i(Common.LOG_SERVICE, "-----------------> IrrSysStartManualWorker now");
+        }
+        else {
+            sendPeriodicWorkRequest(context, IrrigationSystemManualSetWorker.class, startDelay, TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
+            Log.i(Common.LOG_SERVICE, "-----------------> IrrSysStartManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+        }
+
+        // TO STOP IRR SYS
+        calendar.add(Calendar.HOUR_OF_DAY, irrigationDuration[0]);
+        calendar.add(Calendar.MINUTE, irrigationDuration[1]);
+        long stopDelay = calendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
+        sendPeriodicWorkRequest(context, IrrigationSystemManualSetWorker.class, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
+        Log.i(Common.LOG_SERVICE, "-----------------> IrrSysStopManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+    }
+
     private static void sendPeriodicWorkRequest(@NonNull Context context, Class<? extends ListenableWorker> worker, long initialDelay, String tag, String name) {
-        PeriodicWorkRequest irrigationSystemStartingRequest = new PeriodicWorkRequest.Builder(worker, 1, TimeUnit.DAYS)
+        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(worker, 1, TimeUnit.DAYS)
                 .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
                 .addTag(tag)
                 .build();
@@ -305,7 +340,7 @@ public class EcoWateringForegroundHubService extends Service {
                 .cancelUniqueWork(name)
                 .getResult()
                 .addListener(
-                        () -> WorkManager.getInstance(context).enqueueUniquePeriodicWork(name, ExistingPeriodicWorkPolicy.KEEP, irrigationSystemStartingRequest),
+                        () -> WorkManager.getInstance(context).enqueueUniquePeriodicWork(name, ExistingPeriodicWorkPolicy.KEEP, request),
                         Executors.newSingleThreadExecutor()
                 );
     }

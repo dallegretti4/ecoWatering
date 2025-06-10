@@ -150,6 +150,11 @@ public class ManageEWHubActivity extends AppCompatActivity implements
         else DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), DeviceRequest.REQUEST_STOP_DATA_OBJECT_REFRESHING);
     }
 
+    @Override
+    public void scheduleIrrSys(int[] startingDate, int[] startingTime, int[] irrigationDuration) {
+
+    }
+
     //  CALLED FROM ManageHubAutomaticControlFragment.OnManageHubAutomaticControlActionCallback
     @Override
     public void controlSystemManually() {
