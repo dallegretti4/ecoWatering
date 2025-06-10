@@ -173,7 +173,7 @@ public class SqlDbHelper {
 
     // IRRIGATION SYSTEM METHODS
 
-    public static void setState(@NonNull ContentValues contentValues, Common.OnStringResponseGivenCallback callback) {
+    public static void setIrrSysState(@NonNull ContentValues contentValues, Common.OnStringResponseGivenCallback callback) {
         StringBuilder stringBuilder = new StringBuilder("{\"");
         stringBuilder.append(TABLE_HUB_DEVICE_ID_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_HUB_DEVICE_ID_COLUMN_NAME)).append("\",\"")
                 .append(HttpHelper.MODE_PARAMETER).append("\":\"").append(HttpHelper.MODE_SET_IRRIGATION_SYSTEM_STATE).append("\",\"")

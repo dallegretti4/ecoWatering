@@ -136,13 +136,29 @@ public class EcoWateringHub implements Parcelable {
     }
 
     public void setIsAutomated(boolean value, Common.OnStringResponseGivenCallback callback) {
-        int intValue = 0;
-        if(value)
-            intValue = 1;
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, this.deviceID);
-        contentValues.put(HttpHelper.VALUE_PARAMETER, intValue);
-        SqlDbHelper.setIsAutomated(contentValues, (callback));
+        if(value) {
+            ContentValues irrSysContentValues = new ContentValues();
+            irrSysContentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, this.deviceID);
+            irrSysContentValues.put(SqlDbHelper.TABLE_IRR_SYS_ID_COLUMN_NAME, this.deviceID);
+            irrSysContentValues.put(SqlDbHelper.TABLE_IRR_SYS_STATE_COLUMN_NAME, 0);
+            // NEED TO BE SURE IRRIGATION SYSTEM IS DISABLED
+            SqlDbHelper.setIrrSysState(irrSysContentValues, (response -> {
+                if(response.equals(HttpHelper.HTTP_RESPONSE_ERROR))
+                    callback.getResponse(response);
+                else {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, this.deviceID);
+                    contentValues.put(HttpHelper.VALUE_PARAMETER, 1);
+                    SqlDbHelper.setIsAutomated(contentValues, (callback));
+                }
+            }));
+        }
+        else {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, this.deviceID);
+            contentValues.put(HttpHelper.VALUE_PARAMETER, 0);
+            SqlDbHelper.setIsAutomated(contentValues, (callback));
+        }
     }
 
     public void setIsDataObjectRefreshing(@NonNull Context context, boolean value, Common.OnStringResponseGivenCallback callback) {

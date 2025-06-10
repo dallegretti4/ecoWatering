@@ -19,7 +19,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.Irrigat
 public class IrrigationSystem implements Parcelable {
     private static final String IRRIGATION_SYSTEM_SIMULATION_MODEL_NAME = "DALL - Irrigation System - SIMULATED";
     private static final String IRRIGATION_SYSTEM_STATE_ON_RESPONSE = "irrigationSystemSwitchedOn";
-    private static final String IRRIGATION_SYSTEM_STATE_OFF_RESPONSE = "irrigationSystemSwitchedOff";
+    public static final String IRRIGATION_SYSTEM_STATE_OFF_RESPONSE = "irrigationSystemSwitchedOff";
     private static final String STATE_TRUE_VALUE = "1";
     private String model;
     private boolean state;
@@ -98,7 +98,7 @@ public class IrrigationSystem implements Parcelable {
         contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, deviceID);
         contentValues.put(SqlDbHelper.TABLE_IRR_SYS_ID_COLUMN_NAME, irrigationSystemID);
         contentValues.put(SqlDbHelper.TABLE_IRR_SYS_STATE_COLUMN_NAME, stateInt);
-        SqlDbHelper.setState(contentValues, (response -> {
+        SqlDbHelper.setIrrSysState(contentValues, (response -> {
             if(response != null) {
                 if(state && response.equals(IRRIGATION_SYSTEM_STATE_ON_RESPONSE)) this.state = true;
                 else if(!state && response.equals(IRRIGATION_SYSTEM_STATE_OFF_RESPONSE)) this.state = false;
