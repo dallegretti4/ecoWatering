@@ -1,9 +1,9 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,20 +17,12 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class IrrigationPlan implements Parcelable {
     protected static final int FORECAST_DAYS = 7; // MAX 16
     public static final double BASE_DAILY_IRRIGATION_MINUTES = 20.0;
     public static final String BO_IRRIGATION_PLAN_COLUMN_NAME = "irrigationPlan";
-    private static final String TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME = "days";
-    private static final String TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME = "ambientTemperature";
-    private static final String TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME = "indexUV";
-    private static final String TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME = "relativeHumidity";
-    private static final String TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME = "weatherCode";
-    private static final String TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME = "precipitation";
-    private static final String TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME = "irrigationMinutesPlan";
-    protected static final String BO_FORECAST_DAYS_COLUMN_NAME = "forecast_days";
+    public static final String BO_FORECAST_DAYS_COLUMN_NAME = "forecast_days";
     protected String[] days = new String[FORECAST_DAYS];
     protected double[] ambientTemperature = new double[FORECAST_DAYS];
     protected double[] indexUV = new double[FORECAST_DAYS];
@@ -45,13 +37,13 @@ public class IrrigationPlan implements Parcelable {
         if(jsonString != null && !jsonString.equals(Common.NULL_STRING_VALUE)) {
             try {
                 JSONObject jsonObject = new JSONObject(jsonString);
-                String daysString = jsonObject.getString(TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME);
-                String ambientTemperatureString = jsonObject.getString(TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME);
-                String indexUVString = jsonObject.getString(TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME);
-                String relativeHumidityString = jsonObject.getString(TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME);
-                String weatherCodeString = jsonObject.getString(TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME);
-                String precipitationString = jsonObject.getString(TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME);
-                String irrigationMinutesPlan = jsonObject.getString(TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME);
+                String daysString = jsonObject.getString(SqlDbHelper.TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME);
+                String ambientTemperatureString = jsonObject.getString(SqlDbHelper.TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME);
+                String indexUVString = jsonObject.getString(SqlDbHelper.TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME);
+                String relativeHumidityString = jsonObject.getString(SqlDbHelper.TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME);
+                String weatherCodeString = jsonObject.getString(SqlDbHelper.TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME);
+                String precipitationString = jsonObject.getString(SqlDbHelper.TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME);
+                String irrigationMinutesPlan = jsonObject.getString(SqlDbHelper.TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME);
 
                 JSONArray daysJsonArray = new JSONArray(daysString);
                 JSONArray ambientTemperatureJsonArray = new JSONArray(ambientTemperatureString);
@@ -146,21 +138,18 @@ public class IrrigationPlan implements Parcelable {
                 irrigationMinutesPlanString.append(this.irrigationMinutesPlan[i]).append("]");
             }
         }
-        String jsonString = "{\"" +
-                SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME + "\":\"" + hubID + "\",\"" +
-                HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_IRRIGATION_PLAN + "\",\"" +
-                HttpHelper.REMOTE_DEVICE_PARAMETER + "\":\"" + Common.getThisDeviceID(context) + "\",\"" +
-                TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME + "\":" + daysString + ",\"" +
-                TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME + "\":" + ambientTemperatureString + ",\"" +
-                TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME + "\":" + indexUVString + ",\"" +
-                TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME + "\":" + relativeHumidityString + ",\"" +
-                TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME + "\":" + weatherCodeString + ",\"" +
-                TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME + "\":" + precipitationString + ",\"" +
-                TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME + "\":" + irrigationMinutesPlanString + "}";
-        new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-            Log.i(Common.LOG_NORMAL, "updateIrrigationPlan response: " + response);
-        }).start();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, hubID);
+        contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, Common.getThisDeviceID(context));
+        contentValues.put(SqlDbHelper.TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME, daysString.toString());
+        contentValues.put(SqlDbHelper.TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME, ambientTemperatureString.toString());
+        contentValues.put(SqlDbHelper.TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME, indexUVString.toString());
+        contentValues.put(SqlDbHelper.TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME, relativeHumidityString.toString());
+        contentValues.put(SqlDbHelper.TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME, weatherCodeString.toString());
+        contentValues.put(SqlDbHelper.TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME, precipitationString.toString());
+        contentValues.put(SqlDbHelper.TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME, irrigationMinutesPlanString.toString());
+        SqlDbHelper.updateIrrigationPlanOnServer(contentValues);
     }
 
     public ArrayList<IrrigationDailyPlan> getIrrigationDailyPlanList() {

@@ -100,7 +100,7 @@ public class AutomateSystemFragment extends Fragment {
         automateSystemAgreeButtonSetup(view);
         if(savedInstanceState == null) {
             Common.showLoadingFragment(view, R.id.mainFragmentLayout, R.id.includeLoadingFragment);
-            IrrigationPlanPreview.getIrrigationPlanPreviewJsonString(hub, Common.getThisDeviceID(requireContext()), (response) -> {
+            IrrigationPlanPreview.getIrrigationPlanPreview(hub, Common.getThisDeviceID(requireContext()), (response) -> {
                 irrigationPlanPreview = new IrrigationPlanPreview(response);
                 horizontalScrollViewMode(view);
                 requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.mainFragmentLayout, R.id.includeLoadingFragment));

@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlan;
 
 public class SqlDbHelper {
     private static final String LOG_DB = "DATABASE_LOG";
@@ -48,6 +49,14 @@ public class SqlDbHelper {
     public static final String TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME = "caller";
     public static final String TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME = "request";
     public static final String TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME = "date";
+    //  IRRIGATION PLAN
+    public static final String TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME = "days";
+    public static final String TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME = "ambientTemperature";
+    public static final String TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME = "indexUV";
+    public static final String TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME = "relativeHumidity";
+    public static final String TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME = "weatherCode";
+    public static final String TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME = "precipitation";
+    public static final String TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME = "irrigationMinutesPlan";
 
 
     // HUB METHODS
@@ -263,6 +272,41 @@ public class SqlDbHelper {
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(stringBuilder.toString());
             Log.i(LOG_DB, "deleteDeviceRequest response: " + response);
+        }).start();
+    }
+
+    // IRRIGATION PLAN PREVIEW METHODS
+    public static void getIrrigationPlanPreview(@NonNull ContentValues contentValues, Common.OnStringResponseGivenCallback callback) {
+        StringBuilder stringBuilder = new StringBuilder("{\"");
+        stringBuilder.append(TABLE_HUB_DEVICE_ID_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_HUB_DEVICE_ID_COLUMN_NAME)).append("\",\"")
+                .append(HttpHelper.MODE_PARAMETER).append("\":\"").append(HttpHelper.MODE_GET_IRRIGATION_PLAN_PREVIEW).append("\",\"")
+                .append(HttpHelper.REMOTE_DEVICE_PARAMETER).append("\":\"").append(contentValues.get(HttpHelper.REMOTE_DEVICE_PARAMETER)).append("\",\"")
+                .append(TABLE_HUB_LATITUDE_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_HUB_LATITUDE_COLUMN_NAME)).append(",\"")
+                .append(TABLE_HUB_LONGITUDE_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_HUB_LONGITUDE_COLUMN_NAME)).append(",\"")
+                .append(IrrigationPlan.BO_FORECAST_DAYS_COLUMN_NAME).append("\":").append(contentValues.get(IrrigationPlan.BO_FORECAST_DAYS_COLUMN_NAME)).append("}");
+        new Thread(() -> {
+            String response = HttpHelper.sendHttpPostRequest(stringBuilder.toString());
+            Log.i(LOG_DB, "getIrrigationPlanPreview response: " + response);
+            callback.getResponse(response);
+        }).start();
+    }
+
+    // IRRIGATION PLAN METHODS
+    public static void updateIrrigationPlanOnServer(@NonNull ContentValues contentValues) {
+        StringBuilder stringBuilder = new StringBuilder("{\"");
+        stringBuilder.append(TABLE_HUB_DEVICE_ID_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_HUB_DEVICE_ID_COLUMN_NAME)).append("\",\"")
+                .append(HttpHelper.MODE_PARAMETER).append("\":\"").append(HttpHelper.MODE_UPDATE_IRRIGATION_PLAN).append("\",\"")
+                .append(HttpHelper.REMOTE_DEVICE_PARAMETER).append("\":\"").append(contentValues.get(HttpHelper.REMOTE_DEVICE_PARAMETER)).append("\",\"")
+                .append(TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_IRRIGATION_PLAN_DAYS_COLUMN_NAME)).append(",\"")
+                .append(TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_IRRIGATION_PLAN_AMBIENT_TEMPERATURE_COLUMN_NAME)).append(",\"")
+                .append(TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_IRRIGATION_PLAN_UV_INDEX_COLUMN_NAME)).append(",\"")
+                .append(TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_IRRIGATION_PLAN_RELATIVE_HUMIDITY_COLUMN_NAME)).append(",\"")
+                .append(TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_IRRIGATION_PLAN_WEATHER_CODE_COLUMN_NAME)).append(",\"")
+                .append(TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_IRRIGATION_PLAN_PRECIPITATION_COLUMN_NAME)).append(",\"")
+                .append(TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME).append("\":").append(contentValues.get(TABLE_IRRIGATION_PLAN_IRRIGATION_MINUTES_PLAN_COLUMN_NAME)).append("}");
+        new Thread(() -> {
+            String response = HttpHelper.sendHttpPostRequest(stringBuilder.toString());
+            Log.i(LOG_DB, "updateIrrigationPlanOnServer response: " + response);
         }).start();
     }
 }

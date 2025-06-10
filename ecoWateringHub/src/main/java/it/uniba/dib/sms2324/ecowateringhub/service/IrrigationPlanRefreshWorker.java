@@ -25,7 +25,7 @@ public class IrrigationPlanRefreshWorker extends Worker {
             EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this.context), (jsonHub -> {
                 EcoWateringHub hub = new EcoWateringHub(jsonHub);
                 if(hub.isAutomated()) {
-                    IrrigationPlanPreview.getIrrigationPlanPreviewJsonString(hub, Common.getThisDeviceID(this.context), (jsonResponse -> {
+                    IrrigationPlanPreview.getIrrigationPlanPreview(hub, Common.getThisDeviceID(this.context), (jsonResponse -> {
                         IrrigationPlanPreview irrigationPlanPreview = new IrrigationPlanPreview(jsonResponse);
                         irrigationPlanPreview.updateIrrigationPlanOnServer(this.context, Common.getThisDeviceID(this.context));
                     }));
