@@ -134,7 +134,9 @@ public class AutomateSystemFragment extends Fragment {
     private void horizontalScrollViewMode(@NonNull View view) {
         LinearLayout container = view.findViewById(R.id.scrollViewInnerLinearLayout);
         for(IrrigationDailyPlan irrigationDailyPlan : irrigationPlanPreview.getIrrigationDailyPlanList()) {
-            container.addView(irrigationDailyPlan.drawIrrigationDailyPlan(requireContext(), container, this.primary_color_50));
+            new Thread(() -> requireActivity().runOnUiThread(
+                    () -> container.addView(irrigationDailyPlan.drawIrrigationDailyPlan(requireContext(), container, this.primary_color_50)))
+            ).start();
         }
     }
 
