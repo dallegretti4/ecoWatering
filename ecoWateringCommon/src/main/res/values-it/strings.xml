@@ -29,15 +29,19 @@
     <string name="connection_chooser_fragment_title_device">Per connettere il tuo dispositivo, devi ricevere una richiesta di connessione dal tuo ecoWatering Hub.\n\nScegli il modo che preferisci per ricevere la richiesta.</string>
     <string name="connection_chooser_fragment_title_hub">Scelgi il modo che preferisci per inviare una richiesta di connessione al tuo dispositivo.</string>
     <string name="control_system_manually_dialog_message">Tutte i comandi passeranno al controllo manuale, accertati di avere tutto sotto controllo.</string>
-    <string name="date_builder_label">%2$s %1$s %3$d</string>
+    <string name="date_builder_extended_label">%2$s %1$s %3$d</string>
+    <string name="date_builder_label">%1$d/%2$d/%3$d</string>
     <string name="delete_account_button">Elimina account</string>
     <string name="delete_account_message">I tuoi dati saranno rimossi per sempre.</string>
     <string name="delete_account_title">Vuoi davvero eliminare il tuo account?</string>
+    <string name="delete_scheduling">Cancella programmazione</string>
+    <string name="delete_scheduling_title_dialog">Vuoi cancellare la programmazione?</string>
     <string name="detach_button">Disconnetti</string>
     <string name="detach_sensor_dialog_title">Vuoi davvero disconnettere il sensore?</string>
     <string name="device_account_successful_deleted_title">Account eliminato</string>
     <string name="device_id_label">DeviceID:</string>
     <string name="disconnect">Disconnetti</string>
+    <string name="duration_label">Durata: </string>
     <string name="eco_watering_hub_app_name">ecoWateringHub</string>
     <string name="edit_user_name_content_description">Premi per modificare il tuo username</string>
     <string name="empty_history">Cronologia vuota</string>
@@ -94,6 +98,7 @@
     <string name="precipitation_label_no_precipitation">Nessuna probabilità di precipitazioni</string>
     <string name="precipitation_measurement_unit">mm</string>
     <string name="schedule_label">Programma</string>
+    <string name="scheduling_label">Programmazione</string>
     <string name="selected_sensor_label">Sensore selezionato</string>
     <string name="sensor_added_successfully">Sensore collegato correttamente</string>
     <string name="sensor_already_configured">Questo sensore è già configurato.</string>
@@ -109,6 +114,8 @@
     <string name="sensors_label">Sensori</string>
     <string name="setting_button">Impostazioni</string>
     <string name="show_automated_irrigation_system_info">Mostra informazioni dell\'impianto d\'irrigazione</string>
+    <string name="show_scheduling_label">Mostra programmazione</string>
+    <string name="start_label">Start: </string>
     <string name="state_label">Stato :</string>
     <string name="starting_label">Avvio…</string>
     <string name="system_automated_label">Sistema automatizzato</string>

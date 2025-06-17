@@ -69,7 +69,7 @@ public class IrrigationDailyPlan {
         int year = Common.getSpecificYear(this.day);  // YEAR RECOVERING
 
         view.findViewById(R.id.dateContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
-        ((TextView) view.findViewById(R.id.dateTextView)).setText(context.getString(R.string.date_builder_label, month, day, year));
+        ((TextView) view.findViewById(R.id.dateTextView)).setText(context.getString(R.string.date_builder_extended_label, month, day, year));
         view.findViewById(R.id.weatherIconImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
         ((ImageView) view.findViewById(R.id.weatherIconImageView)).setImageResource(WeatherInfo.getWeatherImageResourceId(this.getWeatherCode()));
         ((TextView) view.findViewById(R.id.weatherStateFirstDegreesTextView)).setText(String.valueOf(this.getAmbientTemperature()));

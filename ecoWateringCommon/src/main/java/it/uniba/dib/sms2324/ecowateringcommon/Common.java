@@ -25,8 +25,6 @@ import java.util.UUID;
 public class Common {
 
     // CONSTANTS
-
-    public static final int ACTION_BACK_PRESSED = 1023;
     public static final int BT_PERMISSION_REQUEST = 2001;
     public static final String CALLED_FROM_HUB = "CALLED_FROM_HUB";
     public static final String CALLED_FROM_DEVICE = "CALLED_FROM_DEVICE";
@@ -40,7 +38,6 @@ public class Common {
     public static final String MANAGE_EWD_INTENT_OBJ = "MANAGE_EWD_INTENT_OBJ";
     public static final int NULL_INT_VALUE = 7001;
     public static final String NULL_STRING_VALUE = "null";
-    public static final int REFRESH_FRAGMENT = 1030;
     public static final String REMOVE_REMOTE_DEVICE_RESPONSE = "remoteDeviceRemoved";
     public static final String LOG_NORMAL = "NORMAL_LOG";
     public static final String LOG_SERVICE = "SERVICE_LOG";
@@ -56,7 +53,6 @@ public class Common {
     public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_RD = "rd";
     public static final String ENGLISH_SUFFIX_ORDINAL_NUMBER_TH = "th";
     public static final String DATE_SPLITTER = "-";
-    public static final String SIMPLE_DATE_FORMAT = "HH:mm";
 
     // INTERFACES
 

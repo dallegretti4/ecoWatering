@@ -56,6 +56,7 @@ public class HttpHelper {
     public static final String MODE_SET_IS_AUTOMATED = "SET_IS_AUTOMATED";
     public static final String MODE_UPDATE_SENSOR_LIST = "UPDATE_SENSOR_LIST";
     public static final String MODE_SET_BATTERY_PERCENT = "SET_BATTERY_PERCENT";
+    public static final String MODE_SET_IRR_SYS_SCHEDULING = "SET_IRR_SYS_SCHEDULING";
     public static final String TIME_PARAMETER = "TIME";
     public static final String SENSOR_TYPE_PARAMETER = "SENSOR_TYPE";
     public static final String SENSOR_ID_PARAMETER = "SENSOR_ID";
@@ -64,6 +65,9 @@ public class HttpHelper {
     public static final String REMOTE_DEVICE_PARAMETER = "REMOTE_DEVICE";
     public static final String VALUE_PARAMETER = "VALUE";
     public static final String REQUEST_PARAMETER = "REQUEST";
+    public static final String STARTING_DATE_PARAMETER = "startingDate";
+    public static final String STARTING_TIME_PARAMETER = "startingTime";
+    public static final String IRRIGATION_DURATION_PARAMETER = "irrigationDuration";
 
 
     /**

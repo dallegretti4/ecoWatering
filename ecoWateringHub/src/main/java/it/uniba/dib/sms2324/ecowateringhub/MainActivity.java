@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
@@ -22,6 +23,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemScheduling;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlanPreview;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.AutomateSystemFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
@@ -223,7 +225,21 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void scheduleIrrSys(int[] startingDate, int[] startingTime, int[] irrigationDuration) {
-        EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this, startingDate, startingTime, irrigationDuration);
+        Log.i(Common.LOG_NORMAL, "-------------> starting date: " + startingDate[0] + " - " + startingDate[1]+ " - " + startingDate[2]);
+        if(startingDate[0] != 0) {
+            Bundle b = new Bundle();
+            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE, startingDate);
+            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME, startingTime);
+            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION, irrigationDuration);
+            IrrigationSystem.setScheduling(this, b, (response -> {
+                if(response.equals(IrrigationSystem.IRRIGATION_SYSTEM_SET_SCHEDULING_RESPONSE))
+                    EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this, b);
+                else
+                    runOnUiThread(this::showHttpErrorFaultDialog);
+            }));
+        }
+        else
+            EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this, thisEcoWateringHub);
     }
 
     @Override   // CALLED FROM UserProfileFragment.OnUserProfileActionCallback AND AutomateSystemFragment.OnAutomateSystemActionCallback TOO

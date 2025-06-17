@@ -27,6 +27,7 @@ public class SharedPreferencesHelper {
     public static final String WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY = "WIFI_CONNECTION_FRAGMENT_IS_REFRESHING_KEY";
     public static final String CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME = "CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME";
     public static final String CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY = "CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY";
+    public static final String IRR_SYS_MANUAL_SCHEDULING_FILENAME = "IRR_SYS_MANUAL_SCHEDULING";
     @SuppressLint("ApplySharedPref")
     public static void writeStringOnSharedPreferences(@NonNull Context context, String fileName, String keyValue, String stringValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
@@ -45,6 +46,13 @@ public class SharedPreferencesHelper {
         Log.i(Common.LOG_SHARED_PREFERENCES, "write Boolean on " + fileName + " - VALUE: " + booleanValue);
     }
 
+    public static void writeIntOnSharedPreferences(@NonNull Context context, String fileName, String keyValue, int value) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(keyValue, value);
+        editor.apply();
+    }
+
     public static String readStringFromSharedPreferences(@NonNull Context context, String fileName, String keyValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         String returnString = sharedPreferences.getString(keyValue, Common.NULL_STRING_VALUE);
@@ -57,5 +65,10 @@ public class SharedPreferencesHelper {
         boolean returnValue = sharedPreferences.getBoolean(keyValue, false);
         Log.i(Common.LOG_SHARED_PREFERENCES, "read String from " + fileName + " - VALUE: " + returnValue);
         return returnValue;
+    }
+
+    public static int readIntFromSharedPreferences(@NonNull Context context, String fileName, String keyValue) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(keyValue, 0);
     }
 }

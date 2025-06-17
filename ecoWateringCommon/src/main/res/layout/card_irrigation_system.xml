@@ -224,15 +224,34 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- PROGRAMMING BUTTON IF IS NOT AUTOMATED -->
-    <Button
-        android:id="@+id/irrSysProgrammingButton"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/irrSysSchedulingButtonsContainer"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="@string/schedule_label"
-        android:textColor="@color/black_white_100"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/irrigationSystemStateSwitchCompatClickable"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent">
+        <Button
+            android:id="@+id/irrSysShowSchedulingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="@color/ew_secondary_color"
+            android:text="@string/show_scheduling_label"
+            android:textColor="@color/black_white_100"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+        <Button
+            android:id="@+id/irrSysSchedulingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/schedule_label"
+            android:textColor="@color/black_white_100"
+            app:layout_constraintTop_toBottomOf="@+id/irrSysShowSchedulingButton"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

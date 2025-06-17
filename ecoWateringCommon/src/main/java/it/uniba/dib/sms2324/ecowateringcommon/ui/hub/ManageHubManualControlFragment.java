@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -20,10 +21,12 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlan;
 
 public class ManageHubManualControlFragment extends ManageHubFragment {
     private OnHubManualActionChosenCallback onHubManualActionChosenCallback;
@@ -58,7 +61,6 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                 return Common.VOID_STRING_VALUE;
             }
     };
-    private int[] irrigationDuration = new int[2];
     private EditText schedulingHoursEditText;
     private EditText schedulingMinutesEditText;
     private final TextWatcher textWatcher = new TextWatcher() {
@@ -87,20 +89,23 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
             }
         }
     };
-    private static int[] startingDate = new int[3];
-    private static int[] startingTime = new int[2];
+    private final static int[] startingDate = new int[3];
+    private final static int[] startingTime = new int[2];
+    private final static String[] stringIrrigationDuration = new String[2];
     private final DatePicker.OnDateChangedListener onDateChangedListener = (view, year, monthOfYear, dayOfMonth) -> {
         startingDate[0] = year;
-        startingDate[1] = monthOfYear;
+        startingDate[1] = monthOfYear + 1;
         startingDate[2] = dayOfMonth;
     };
     private final TimePicker.OnTimeChangedListener onTimeChangedListener = (view, hourOfDay, minute) -> {
         startingTime[0] = hourOfDay;
         startingTime[1] = minute;
     };
-    private static boolean isSchedulingCardVisible;
+    private static boolean isScheduleCardVisible;
     private static boolean isSwitchIrrigationSystemDialogVisible;
-    private static boolean isIrrSysSchedulingConfirmDialogVisible;
+    private static boolean isIrrSysScheduleConfirmDialogVisible;
+    private static boolean isSchedulingCardVisible;
+    private static boolean isDeleteSchedulingDialogVisible;
     private static boolean isHttpErrorFaultDialogVisible;
 
     public ManageHubManualControlFragment() {
@@ -127,11 +132,26 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if(savedInstanceState != null)  {  // CONFIGURATION CHANGED CASE
+            schedulingHoursEditText.setText(stringIrrigationDuration[0]);
+            schedulingMinutesEditText.setText(stringIrrigationDuration[1]);
             if(isSwitchIrrigationSystemDialogVisible) showSwitchIrrigationSystemDialog(view, !hub.getIrrigationSystem().getState());
-            if(isSchedulingCardVisible) showSchedulingCard(view);
-            if(isIrrSysSchedulingConfirmDialogVisible) showIrrSysSchedulingConfirmDialog(view);
+            if(isScheduleCardVisible) showScheduleCard(view);
+            if(isSchedulingCardVisible) showSchedulingCard((view));
+            if(isDeleteSchedulingDialogVisible) showDeleteSchedulingDialog();
+            if(isIrrSysScheduleConfirmDialogVisible) showIrrSysScheduleConfirmDialog(view);
             else if(isHttpErrorFaultDialogVisible) showHttpErrorFaultDialog();
         }
+        else {
+            setInitialStartingDate();
+            setInitialStartingTime();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        stringIrrigationDuration[0] = schedulingHoursEditText.getText().toString();
+        stringIrrigationDuration[1] = schedulingMinutesEditText.getText().toString();
     }
 
     @Override
@@ -171,11 +191,24 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
 
     private void irrigationSystemCardSetup(@NonNull View view) {
         view.findViewById(R.id.titleIrrigationSystemCard).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        view.findViewById(R.id.irrSysSchedulingButtonsContainer).setVisibility(View.VISIBLE);
 
-        Button irrSysProgrammingButton = view.findViewById(R.id.irrSysProgrammingButton);
-        irrSysProgrammingButton.setVisibility(View.VISIBLE);
+        Button irrSysShowSchedulingButton = view.findViewById(R.id.irrSysShowSchedulingButton);
+        if(hub.getIrrigationSystem().getIrrigationSystemScheduling() != null) {
+            irrSysShowSchedulingButton.setEnabled(true);
+            irrSysShowSchedulingButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), R.color.ew_secondary_color, requireContext().getTheme()));
+        }
+        else {
+            irrSysShowSchedulingButton.setEnabled(false);
+            irrSysShowSchedulingButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), R.color.ew_secondary_color_90, requireContext().getTheme()));
+            irrSysShowSchedulingButton.setOnClickListener((v -> {
+                showSchedulingCard(view);
+            }));
+        }
+
+        Button irrSysProgrammingButton = view.findViewById(R.id.irrSysSchedulingButton);
         irrSysProgrammingButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
-        irrSysProgrammingButton.setOnClickListener((v -> showSchedulingCard(view)));
+        irrSysProgrammingButton.setOnClickListener((v -> showScheduleCard(view)));
 
         confirmSchedulingButton = view.findViewById(R.id.confirmSchedulingButton);
         if(confirmSchedulingButton.isEnabled())
@@ -184,7 +217,7 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
             confirmSchedulingButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_70, requireContext().getTheme()));
         confirmSchedulingButton.setOnClickListener((v -> {
             if(isValidIntervalDate())
-                requireActivity().runOnUiThread(() ->showIrrSysSchedulingConfirmDialog(view));
+                requireActivity().runOnUiThread(() -> showIrrSysScheduleConfirmDialog(view));
             else {
                 requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), getString(R.string.invalid_pasted_time_toast), Toast.LENGTH_LONG).show());
                 v.setOnClickListener(null);
@@ -239,12 +272,12 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         });
     }
 
-    private void showSchedulingCard(@NonNull View view) {
-        isSchedulingCardVisible = true;
-        view.findViewById(R.id.irrSysSchedulingCard).setVisibility(View.VISIBLE);
+    private void showScheduleCard(@NonNull View view) {
+        isScheduleCardVisible = true;
+        view.findViewById(R.id.irrSysScheduleCard).setVisibility(View.VISIBLE);
 
         Button cancelSchedulingButton = view.findViewById(R.id.cancelSchedulingButton);
-        cancelSchedulingButton.setOnClickListener((v -> closeSchedulingCard(view)));
+        cancelSchedulingButton.setOnClickListener((v -> hideScheduleCard(view)));
 
         long currentDate = System.currentTimeMillis();
         Calendar calendar = Calendar.getInstance();
@@ -252,12 +285,15 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
 
         DatePicker schedulingStartingDatePicker = view.findViewById(R.id.schedulingStartingDatePicker);
         schedulingStartingDatePicker.setMinDate(currentDate);
-        schedulingStartingDatePicker.setMaxDate(currentDate + (7 * 24 * 60 * 60 * 1000));
+
+        schedulingStartingDatePicker.setMaxDate(currentDate + (21 * 24 * 60 * 60 * 1000));
         schedulingStartingDatePicker.setOnDateChangedListener(onDateChangedListener);
 
         TimePicker schedulingStartingTimePicker = view.findViewById(R.id.schedulingStartingTimePicker);
+        if(!Locale.getDefault().getCountry().equals(Locale.ENGLISH.getCountry()))
+            schedulingStartingTimePicker.setIs24HourView(true);
         schedulingStartingTimePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY));
-        schedulingStartingTimePicker.setMinute(calendar.get(Calendar.MINUTE));
+        schedulingStartingTimePicker.setMinute(calendar.get(Calendar.MINUTE)+1);
         schedulingStartingTimePicker.setOnTimeChangedListener(onTimeChangedListener);
 
         schedulingHoursEditText = view.findViewById(R.id.schedulingHoursEditText);
@@ -266,30 +302,49 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         schedulingHoursEditText.addTextChangedListener(textWatcher);
 
         schedulingMinutesEditText = view.findViewById(R.id.schedulingMinutesEditText);
-        schedulingMinutesEditText.setText(String.valueOf(20));
+        schedulingMinutesEditText.setText(String.valueOf((int) IrrigationPlan.BASE_DAILY_IRRIGATION_MINUTES));
         schedulingMinutesEditText.setFilters(minutesInputFilters);
         schedulingMinutesEditText.addTextChangedListener(textWatcher);
+        stringIrrigationDuration[0] = String.valueOf((int) IrrigationPlan.BASE_DAILY_IRRIGATION_MINUTES);
     }
 
-    private void closeSchedulingCard(@NonNull View view) {
+    private void hideScheduleCard(@NonNull View view) {
+        isScheduleCardVisible = false;
+        view.findViewById(R.id.irrSysScheduleCard).setVisibility(View.GONE);
+    }
+
+    private void showSchedulingCard(@NonNull View view) {
+        isSchedulingCardVisible = true;
+        view.findViewById(R.id.irrSysSchedulingCard).setVisibility(View.VISIBLE);
+        hub.getIrrigationSystem().getIrrigationSystemScheduling().draw(
+                requireContext(),
+                view,
+                this.primary_color_50,
+                (v -> hideSchedulingCard(view)),
+                (v -> {
+                    isSchedulingCardVisible = false;
+                    showDeleteSchedulingDialog();
+                })
+        );
+    }
+
+    private void hideSchedulingCard(@NonNull View view) {
         isSchedulingCardVisible = false;
         view.findViewById(R.id.irrSysSchedulingCard).setVisibility(View.GONE);
     }
 
     private boolean isValidIntervalDate() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
         Calendar start = Calendar.getInstance();
         start.set(Calendar.YEAR, startingDate[0]);
         start.set(Calendar.MONTH, startingDate[1]);
         start.set(Calendar.DAY_OF_MONTH, startingDate[2]);
-        start.set(Calendar.HOUR_OF_DAY, 0);
-        start.set(Calendar.MINUTE, 0);
-        start.set(Calendar.SECOND, 0);
-        start.set(Calendar.MILLISECOND, 0);
-
-        start.add(Calendar.HOUR_OF_DAY, startingTime[0]);
-        start.add(Calendar.MINUTE, startingTime[1]);
-
-        return start.getTimeInMillis() > System.currentTimeMillis();
+        start.set(Calendar.HOUR_OF_DAY, (startingTime[0]));
+        start.set(Calendar.MINUTE, (startingTime[1]));
+        Log.i(Common.LOG_NORMAL, "---------> isValidIntervalDate start: " + start.getTime());
+        Log.i(Common.LOG_NORMAL, "---------> isValidIntervalDate calen: " + calendar.getTime());
+        return start.getTimeInMillis() > calendar.getTimeInMillis();
     }
 
     private void stopAndStartFragmentRefreshing() {
@@ -299,6 +354,21 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         catch (InterruptedException ignored) {}
         isRefreshManageHubFragmentRunning = true;
         refreshManageHubFragmentHandler.post(refreshManageHubFragmentRunnable);
+    }
+
+    private void setInitialStartingDate() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        startingDate[0] = calendar.get(Calendar.YEAR);
+        startingDate[1] = calendar.get(Calendar.MONTH) + 1;
+        startingDate[2] = calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private void setInitialStartingTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        startingTime[0] = calendar.get(Calendar.HOUR_OF_DAY);
+        startingTime[1] = calendar.get(Calendar.MINUTE)+1;
     }
 
     private void showSwitchIrrigationSystemDialog(@NonNull View view, boolean isChecked) {
@@ -320,24 +390,38 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                 .show();
     }
 
-    private void showIrrSysSchedulingConfirmDialog(@NonNull View view) {
-        isIrrSysSchedulingConfirmDialogVisible = true;
+    private void showIrrSysScheduleConfirmDialog(@NonNull View view) {
+        isIrrSysScheduleConfirmDialogVisible = true;
+
         Calendar start = Calendar.getInstance();
         start.set(Calendar.YEAR, startingDate[0]);
         start.set(Calendar.MONTH, startingDate[1]);
         start.set(Calendar.DAY_OF_MONTH, startingDate[2]);
-        start.set(Calendar.HOUR_OF_DAY, 0);
-        start.set(Calendar.MINUTE, 0);
-        start.set(Calendar.SECOND, 0);
-        start.set(Calendar.MILLISECOND, 0);
-        start.add(Calendar.HOUR_OF_DAY, startingTime[0]);
-        start.add(Calendar.MINUTE, startingTime[1]);
+        start.set(Calendar.HOUR_OF_DAY, startingTime[0]);
+        start.set(Calendar.MINUTE, startingTime[1]);
+
+        String minutesStartingTime = String.valueOf(startingTime[1]);
+        if(Integer.parseInt(minutesStartingTime) < 10)
+            minutesStartingTime = "0" + startingTime[1];
+
+        String day = String.valueOf(startingDate[2]);
+        if(getResources().getConfiguration().getLocales().get(0).getLanguage().equals(Common.LANGUAGE_ENGLISH))
+            day = Common.concatDayEnglishLanguage(startingDate[2], day);
 
         StringBuilder message = new StringBuilder(getString(R.string.next_starting_label));
-        message.append(": ").append(getString(R.string.date_builder_label, String.valueOf(startingDate[1]), String.valueOf(startingDate[2]), startingDate[0])).append(" - ")
-                .append(startingTime[0]).append(":").append(startingTime[1]).append("\n");
-        message.append(getString(R.string.next_stopping_label)).append(": ").append(getString(R.string.date_builder_label, String.valueOf(start.get(Calendar.MONTH)), String.valueOf(start.get(Calendar.DAY_OF_MONTH)), start.get(Calendar.YEAR))).append(" - ")
-                .append(startingTime[0]).append(startingTime[1]);
+        message.append(":\n     ").append(getString(R.string.date_builder_extended_label, getResources().getStringArray(R.array.month_names)[startingDate[1] - 1], day, startingDate[0])).append(" - ")
+                .append(startingTime[0]).append(":").append(minutesStartingTime).append("\n\n");
+
+        start.add(Calendar.HOUR_OF_DAY, Integer.parseInt(schedulingHoursEditText.getText().toString()));
+        start.add(Calendar.MINUTE, Integer.parseInt(schedulingMinutesEditText.getText().toString()));
+
+        day = String.valueOf(start.get(Calendar.DAY_OF_MONTH));
+        if(getResources().getConfiguration().getLocales().get(0).getLanguage().equals(Common.LANGUAGE_ENGLISH))
+            day = Common.concatDayEnglishLanguage(start.get(Calendar.DAY_OF_MONTH), day);
+        String date = getString(R.string.date_builder_extended_label, getResources().getStringArray(R.array.month_names)[start.get(Calendar.MONTH)-1], day, start.get(Calendar.YEAR));
+        message.append(getString(R.string.next_stopping_label)).append(":\n     ").append(date).append(" - ")
+                .append(start.get(Calendar.HOUR_OF_DAY)).append(":").append(start.get(Calendar.MINUTE));
+
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.are_you_sure_label))
                 .setMessage(message)
@@ -345,19 +429,41 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                 .setPositiveButton(
                         getString(R.string.confirm_button),
                         (dialogInterface, i) -> {
-                            isIrrSysSchedulingConfirmDialogVisible = false;
+                            isIrrSysScheduleConfirmDialogVisible = false;
                             new Thread(this::stopAndStartFragmentRefreshing).start();
                             view.findViewById(R.id.loadingCard).setVisibility(View.VISIBLE);
+                            int[] irrigationDuration = new int[2];
                             irrigationDuration[0] = Integer.parseInt(schedulingHoursEditText.getText().toString());
                             irrigationDuration[1] = Integer.parseInt(schedulingMinutesEditText.getText().toString());
                             this.onHubManualActionChosenCallback.scheduleIrrSys(startingDate, startingTime, irrigationDuration);
+                            hideScheduleCard(view);
                         }
                 ).setNegativeButton(
                         getString(R.string.cancel_button),
                         (dialogInterface, i) -> {
-                            isIrrSysSchedulingConfirmDialogVisible = false;
+                            isIrrSysScheduleConfirmDialogVisible = false;
                             dialogInterface.dismiss();
                         }
+                ).show();
+    }
+
+    private void showDeleteSchedulingDialog() {
+        isDeleteSchedulingDialogVisible = true;
+        new AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.delete_scheduling_title_dialog))
+                .setPositiveButton(
+                        getString(R.string.confirm_button),
+                        ((dialogInterface, i) -> {
+                            isDeleteSchedulingDialogVisible = false;
+                            int[] nullInt = {0,0,0};
+                            onHubManualActionChosenCallback.scheduleIrrSys(nullInt, nullInt, nullInt);
+                        }))
+                .setNegativeButton(
+                        getString(R.string.close_button),
+                        ((dialogInterface, i) -> {
+                            isDeleteSchedulingDialogVisible = false;
+                            dialogInterface.dismiss();
+                        })
                 ).show();
     }
 

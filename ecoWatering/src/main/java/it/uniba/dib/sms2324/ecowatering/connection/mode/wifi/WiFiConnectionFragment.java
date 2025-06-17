@@ -91,7 +91,6 @@ public class WiFiConnectionFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         Common.lockLayout(requireActivity());
-        // TOOLBAR SETUP
         toolbarSetup(view);
         // WIFI P2P MANAGER & CHANNEL SETUP
         wifiP2pManager = (WifiP2pManager) requireActivity().getSystemService(Context.WIFI_P2P_SERVICE);
@@ -132,17 +131,16 @@ public class WiFiConnectionFragment extends Fragment {
         else {
             enableGPS((result) -> {
                 if (result == Common.GPS_ENABLED_RESULT) {
-                    // MAKE SURE THERE AREN'T WIFI DIRECT GROUPS
-                    wifiP2pManager.removeGroup(channel, this.wifiP2pActionListener);
-                    // CREATE WIFI DIRECT GROUP
-                    createGroup((resultCode) -> {
+                    wifiP2pManager.removeGroup(channel, this.wifiP2pActionListener);    // MAKE SURE THERE AREN'T WIFI DIRECT GROUPS
+                    createGroup((resultCode) -> {   // CREATE NEW WIFI DIRECT GROUP
                         if(resultCode == WIFI_GROUP_CREATED_SUCCESS_RESULT) {
                             new WiFiConnectionRequestThread(requireContext(), (response) -> {
-                                if(response != null) {
+                                if(response != null)
                                     manageResponse(response);
-                                }
                             }).start();
                         }
+                        else
+                            onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_WIFI);
                     });
                 }
             });

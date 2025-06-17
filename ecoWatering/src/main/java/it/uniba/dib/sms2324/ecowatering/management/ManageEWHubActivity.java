@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlanPreview;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.AutomateSystemFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
@@ -152,7 +154,21 @@ public class ManageEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void scheduleIrrSys(int[] startingDate, int[] startingTime, int[] irrigationDuration) {
-
+        StringBuilder stringBuilder = new StringBuilder(DeviceRequest.REQUEST_SCHEDULE_IRR_SYS);
+        stringBuilder.append(DeviceRequest.REQUEST_PARAMETER_DIVISOR).append("{\"").append(DeviceRequest.STARTING_DATE_PARAMETER).append("\":[");
+        if(startingDate[0] != 0)
+            stringBuilder.append(startingDate[0]).append(",").append(startingDate[1]).append(",").append(startingDate[2]).append("],\"")
+                    .append(DeviceRequest.STARTING_TIME_PARAMETER).append("\":[")
+                    .append(startingTime[0]).append(",").append(startingTime[1]).append("],\"")
+                    .append(DeviceRequest.IRRIGATION_DURATION_PARAMETER).append("\":[")
+                    .append(irrigationDuration[0]).append(",").append(irrigationDuration[1]).append("]}");
+        else
+            stringBuilder.append(0).append(",").append(0).append(",").append(0).append("],\"")
+                    .append(DeviceRequest.STARTING_TIME_PARAMETER).append("\":[")
+                    .append(0).append(",").append(0).append("],\"")
+                    .append(DeviceRequest.IRRIGATION_DURATION_PARAMETER).append("\":[")
+                    .append(0).append(",").append(0).append("]}");
+        DeviceRequest.sendRequest(this, selectedEWHub.getDeviceID(), stringBuilder.toString());
     }
 
     //  CALLED FROM ManageHubAutomaticControlFragment.OnManageHubAutomaticControlActionCallback

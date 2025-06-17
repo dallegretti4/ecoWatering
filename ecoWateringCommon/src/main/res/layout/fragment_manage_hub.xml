@@ -84,6 +84,18 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
+    <!-- IRR SYS SCHEDULE CARD -->
+    <include
+        android:id="@+id/irrSysScheduleCard"
+        layout="@layout/card_irr_sys_schedule"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <!-- IRR SYS SCHEDULING CARD -->
     <include
         android:id="@+id/irrSysSchedulingCard"

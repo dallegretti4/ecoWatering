@@ -7,18 +7,22 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.ListenableWorker;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -31,8 +35,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
+import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemScheduling;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.connection.DeviceRequestRefreshingRunnable;
@@ -43,9 +50,9 @@ public class EcoWateringForegroundHubService extends Service {
     private static final String TAG_IRRIGATION_SYSTEM_START = "START_IRRIGATION_SYSTEM";
     private static final String NAME_IRRIGATION_SYSTEM_START = "startIrrigationSystem";
     public static final String TAG_IRRIGATION_SYSTEM_MANUAL_START = "START_MANUAL_IRRIGATION_SYSTEM";
-    private static final String NAME_IRRIGATION_SYSTEM_MANUAL_START = "startManualIrrigationSystem";
-    public static final String TAG_IRRIGATION_SYSTEM_MANUAL_STOP = "STOP_MANUAL_IRRIGATION_SYSTEM";
-    private static final String NAME_IRRIGATION_SYSTEM_MANUAL_STOP = "stOPManualIrrigationSystem";
+    public static final String NAME_IRRIGATION_SYSTEM_MANUAL_START = "startManualIrrigationSystem";
+    protected static final String TAG_IRRIGATION_SYSTEM_MANUAL_STOP = "STOP_MANUAL_IRRIGATION_SYSTEM";
+    public static final String NAME_IRRIGATION_SYSTEM_MANUAL_STOP = "stOPManualIrrigationSystem";
     private static final String TAG_IRRIGATION_SYSTEM_STOP = "STOP_IRRIGATION_SYSTEM";
     private static final String NAME_IRRIGATION_SYSTEM_STOP = "stopIrrigationSystem";
     private static final String TAG_IRRIGATION_PLAN_REFRESH = "REFRESH_IRRIGATION_PLAN";
@@ -179,15 +186,18 @@ public class EcoWateringForegroundHubService extends Service {
 
     private static Notification getNotification(@NonNull Context context, EcoWateringHub hub) {
         String text;
-        if(hub != null) text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.ambient_temperature_label) + ": " + hub.getAmbientTemperature() + "\n" +
+        if(HttpHelper.isDeviceConnectedToInternet(context)) {
+            if(hub != null) text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.ambient_temperature_label) + ": " + hub.getAmbientTemperature() + "\n" +
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.relative_humidity_label) + ": " + hub.getRelativeHumidity() + "%\n" +
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.light_uv_index_label) + ": " + hub.getIndexUV() + "\n" +
                     context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.precipitation_label) + ": " + hub.getWeatherInfo().getPrecipitation() + context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.precipitation_measurement_unit);
-        else text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.starting_label);
-        // OVERRIDE NOTIFICATION FOR BATTERY LOW CASE
-        if((getBatteryPercentage(context) >= 0) && (getBatteryPercentage(context) <= 20))
-            text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.low_battery_notification);
-
+            else text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.starting_label);
+            // OVERRIDE NOTIFICATION FOR BATTERY LOW CASE
+            if((getBatteryPercentage(context) >= 0) && (getBatteryPercentage(context) <= 20))
+                text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.low_battery_notification);
+        }
+        else
+            text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title);
 
         return new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle(context.getString(R.string.app_name))
@@ -245,7 +255,6 @@ public class EcoWateringForegroundHubService extends Service {
             calendar.set(Calendar.HOUR_OF_DAY, 3);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
         }
         long initialDelay = calendar.getTimeInMillis() - currentTime;
         if(initialDelay < 0) {
@@ -299,35 +308,63 @@ public class EcoWateringForegroundHubService extends Service {
         Log.i(Common.LOG_SERVICE, "---------------------> IrrigationSystemStoppingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
     }
 
-    public static void scheduleManualIrrSysWorker(@NonNull Context context, int[] startingDate, int[] startingTime, int[] irrigationDuration) {
-        Calendar currentCalendar = Calendar.getInstance();
-        currentCalendar.setTimeInMillis(System.currentTimeMillis());
+    public static void scheduleManualIrrSysWorker(@NonNull Context context, @NonNull Bundle b) {
+        int[] startingDate = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE);
+        int[] startingTime = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME);
+        int[] irrigationDuration = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION);
+        if((startingDate != null) && (startingTime != null) && (irrigationDuration != null)) {
+            SharedPreferencesHelper.writeIntOnSharedPreferences(context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.HOUR_OF_DAY), irrigationDuration[0]);
+            SharedPreferencesHelper.writeIntOnSharedPreferences(context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.MINUTE), irrigationDuration[1]);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, startingDate[0]);
+            calendar.set(Calendar.MONTH, startingDate[1] - 1);
+            calendar.set(Calendar.DAY_OF_MONTH, startingDate[2]);
+            calendar.set(Calendar.HOUR_OF_DAY, startingTime[0]);
+            calendar.set(Calendar.MINUTE, startingTime[1]);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, startingDate[0]);
-        calendar.set(Calendar.MONTH, startingDate[1]);
-        calendar.set(Calendar.DAY_OF_MONTH, startingDate[2]);
-        calendar.set(Calendar.HOUR_OF_DAY, startingTime[0]);
-        calendar.set(Calendar.MINUTE, startingTime[1]);
-
-        long startDelay = calendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
-
-        // TO START IRR SYS
-        if(startDelay < 0) {
-            sendPeriodicWorkRequest(context, IrrigationSystemManualSetWorker.class, 5000, TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
-            Log.i(Common.LOG_SERVICE, "-----------------> IrrSysStartManualWorker now");
+            long currentTime = System.currentTimeMillis();
+            long startDelay = calendar.getTimeInMillis() - currentTime;
+            // TO START IRR SYS
+            if(startDelay < 0) {
+                sendOneTimeWorkRequest(context, (10 * 1000), TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
+                Log.i(Common.LOG_SERVICE, "IrrSysStartManualWorker now");
+                calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(currentTime);
+                calendar.add(Calendar.HOUR_OF_DAY, irrigationDuration[0]);
+                calendar.add(Calendar.MINUTE, irrigationDuration[1]);
+                long stopDelay = ((long)irrigationDuration[0] * 60 * 60 * 1000) + ((long)irrigationDuration[1] * 60 * 1000);
+                sendOneTimeWorkRequest(context, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
+                // UPDATE SCHEDULING ON DATABASE
+                startingDate[0] = calendar.get(Calendar.YEAR);
+                startingDate[1] = calendar.get(Calendar.MONTH);
+                startingDate[2] = calendar.get(Calendar.DAY_OF_MONTH);
+                startingTime[0] = calendar.get(Calendar.HOUR_OF_DAY);
+                startingTime[1] = calendar.get(Calendar.MINUTE);
+                Bundle b1 = new Bundle();
+                b1.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE, startingDate);
+                b1.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME, startingTime);
+                b1.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION, irrigationDuration);
+                IrrigationSystem.setScheduling(context, b1, null);
+            }
+            else {
+                sendOneTimeWorkRequest(context, startDelay, TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
+                Log.i(Common.LOG_SERVICE, "IrrSysStartManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+                calendar.add(Calendar.HOUR_OF_DAY, irrigationDuration[0]);
+                calendar.add(Calendar.MINUTE, irrigationDuration[1]);
+                long stopDelay = calendar.getTimeInMillis() - currentTime;
+                sendOneTimeWorkRequest(context, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
+            }
+            Log.i(Common.LOG_SERVICE, "IrrSysStopManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
         }
-        else {
-            sendPeriodicWorkRequest(context, IrrigationSystemManualSetWorker.class, startDelay, TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
-            Log.i(Common.LOG_SERVICE, "-----------------> IrrSysStartManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
-        }
+    }
 
-        // TO STOP IRR SYS
-        calendar.add(Calendar.HOUR_OF_DAY, irrigationDuration[0]);
-        calendar.add(Calendar.MINUTE, irrigationDuration[1]);
-        long stopDelay = calendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
-        sendPeriodicWorkRequest(context, IrrigationSystemManualSetWorker.class, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
-        Log.i(Common.LOG_SERVICE, "-----------------> IrrSysStopManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+    public static void cancelIrrSysManualSchedulingWorker(@NonNull Context context, EcoWateringHub hub) {
+        WorkManager.getInstance(context)
+                .cancelUniqueWork(NAME_IRRIGATION_SYSTEM_MANUAL_START);
+        WorkManager.getInstance(context)
+                .cancelUniqueWork(NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
+        IrrigationSystem.setScheduling(context, null, null);
+        hub.getIrrigationSystem().setState(Common.getThisDeviceID(context), Common.getThisDeviceID(context), false);
     }
 
     private static void sendPeriodicWorkRequest(@NonNull Context context, Class<? extends ListenableWorker> worker, long initialDelay, String tag, String name) {
@@ -345,8 +382,19 @@ public class EcoWateringForegroundHubService extends Service {
                 );
     }
 
+    protected static void sendOneTimeWorkRequest(@NonNull Context context, long initialDelay, String tag, String name) {
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(IrrigationSystemManualSetWorker.class)
+                .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+                .addTag(tag)
+                .build();
+
+        WorkManager.getInstance(context)
+                .enqueueUniqueWork(name, ExistingWorkPolicy.REPLACE, request);
+    }
+
     private static Calendar getCalendarPlusXMinutes(int minute) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.add(Calendar.MINUTE, minute);
         return calendar;
     }

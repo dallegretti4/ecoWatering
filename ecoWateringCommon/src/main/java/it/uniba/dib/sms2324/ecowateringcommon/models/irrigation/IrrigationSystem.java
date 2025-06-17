@@ -1,6 +1,8 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -20,10 +22,12 @@ public class IrrigationSystem implements Parcelable {
     private static final String IRRIGATION_SYSTEM_SIMULATION_MODEL_NAME = "DALL - Irrigation System - SIMULATED";
     private static final String IRRIGATION_SYSTEM_STATE_ON_RESPONSE = "irrigationSystemSwitchedOn";
     public static final String IRRIGATION_SYSTEM_STATE_OFF_RESPONSE = "irrigationSystemSwitchedOff";
+    public static final String IRRIGATION_SYSTEM_SET_SCHEDULING_RESPONSE = "irrSysSchedulingSet";
     private static final String STATE_TRUE_VALUE = "1";
     private String model;
     private boolean state;
     private ArrayList<IrrigationSystemActivityLogInstance> activityLog;
+    private IrrigationSystemScheduling irrigationSystemScheduling;
 
     // CONSTRUCTOR
     public IrrigationSystem(String jsonString) {
@@ -43,6 +47,9 @@ public class IrrigationSystem implements Parcelable {
                     this.activityLog.add(new IrrigationSystemActivityLogInstance(jsonArray.getString(i)));
                 }
             }
+            // IRRIGATION SYSTEM SCHEDULING RECOVERING
+            if(!jsonOBJ.isNull(SqlDbHelper.TABLE_IRR_SYS_SCHEDULING_COLUMN_NAME))
+                this.irrigationSystemScheduling = new IrrigationSystemScheduling(jsonOBJ.getString(SqlDbHelper.TABLE_IRR_SYS_SCHEDULING_COLUMN_NAME));
         }
         catch(JSONException e) {
             e.printStackTrace();
@@ -106,6 +113,14 @@ public class IrrigationSystem implements Parcelable {
         }));
     }
 
+    public static void setScheduling(@NonNull Context context, Bundle b, Common.OnStringResponseGivenCallback callback) {
+        SqlDbHelper.setIrrSysScheduling(context, b, (callback));
+    }
+
+    public IrrigationSystemScheduling getIrrigationSystemScheduling() {
+        return this.irrigationSystemScheduling;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -115,7 +130,22 @@ public class IrrigationSystem implements Parcelable {
     // PARCELABLE IMPLEMENTATION
     protected IrrigationSystem(Parcel in) {
         model = in.readString();
-        state = in.readByte() == 1;
+        state = in.readByte() != 0;
+        activityLog = in.createTypedArrayList(IrrigationSystemActivityLogInstance.CREATOR);
+        irrigationSystemScheduling = in.readParcelable(IrrigationSystemScheduling.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(model);
+        dest.writeByte((byte) (state ? 1 : 0));
+        dest.writeTypedList(activityLog);
+        dest.writeParcelable(irrigationSystemScheduling, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<IrrigationSystem> CREATOR = new Creator<IrrigationSystem>() {
@@ -123,20 +153,10 @@ public class IrrigationSystem implements Parcelable {
         public IrrigationSystem createFromParcel(Parcel in) {
             return new IrrigationSystem(in);
         }
+
         @Override
         public IrrigationSystem[] newArray(int size) {
             return new IrrigationSystem[size];
         }
     };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeString(model);
-        parcel.writeByte((byte) (state ? 1 : 0));
-    }
 }

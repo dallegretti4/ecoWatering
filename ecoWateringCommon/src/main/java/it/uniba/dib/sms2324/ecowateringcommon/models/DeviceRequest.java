@@ -20,12 +20,17 @@ import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 
 public class DeviceRequest {
+    public static final String REQUEST_PARAMETER_DIVISOR = "::";
     public static final String REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM = "SWITCH_OFF_IRRIGATION_SYSTEM";
     public static final String REQUEST_SWITCH_ON_IRRIGATION_SYSTEM = "SWITCH_ON_IRRIGATION_SYSTEM";
     public static final String REQUEST_ENABLE_AUTOMATE_SYSTEM = "ENABLE_AUTOMATE_SYSTEM";
     public static final String REQUEST_DISABLE_AUTOMATE_SYSTEM = "DISABLE_AUTOMATE_SYSTEM";
     public static final String REQUEST_START_DATA_OBJECT_REFRESHING = "START_DATA_OBJECT_REFRESHING";
     public static final String REQUEST_STOP_DATA_OBJECT_REFRESHING = "STOP_DATA_OBJECT_REFRESHING";
+    public static final String REQUEST_SCHEDULE_IRR_SYS = "REQUEST_SCHEDULE_IRR_SYS";
+    public static final String STARTING_DATE_PARAMETER = "startingDate";
+    public static final String STARTING_TIME_PARAMETER = "startingTime";
+    public static final String IRRIGATION_DURATION_PARAMETER = "irrigationDuration";
     private final String id;
     private final String caller;
     private final String request;

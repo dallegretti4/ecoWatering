@@ -64,7 +64,7 @@ public class IrrigationSystemActivityLogInstanceAdapter extends ArrayAdapter<Irr
         String month = context.getResources().getStringArray(R.array.month_names)[Common.getSpecificMonth(parsedDate)-1];
         int year = Common.getSpecificYear(parsedDate);  // YEAR RECOVERING
         TextView dateTextView = convertView.findViewById(R.id.dateTextView);
-        dateTextView.setText(context.getString(R.string.date_builder_label, month, day, year));
+        dateTextView.setText(context.getString(R.string.date_builder_extended_label, month, day, year));
         dateTextView.setBackgroundTintList(ResourcesCompat.getColorStateList(this.context.getResources(), this.primary_color, this.context.getTheme()));
         // WATERING MINUTES ON THIS DAY
         ((TextView) convertView.findViewById(R.id.wateringMinutesExecutedValueTextView)).setText(String.valueOf(activityLogInstance.getMinutes()));
