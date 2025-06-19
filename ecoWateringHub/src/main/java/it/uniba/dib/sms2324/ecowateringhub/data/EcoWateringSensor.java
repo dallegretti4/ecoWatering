@@ -11,10 +11,10 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
-import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
 
 public abstract class EcoWateringSensor implements SensorEventListener {
+    protected static final String LOG_SENSOR = "SENSOR_LOG";
     protected final String sensorID;
     protected SensorManager sensorManager;
     protected Sensor sensor;
@@ -46,7 +46,7 @@ public abstract class EcoWateringSensor implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if((event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) || (event.sensor.getType() == Sensor.TYPE_LIGHT) || (event.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY)) {
-            Log.i(Common.LOG_NORMAL, "light sensor event: " + event.values[0]);
+            Log.i(LOG_SENSOR, "light sensor event: " + event.values[0]);
             this.currentValue = event.values[0];
         }
     }

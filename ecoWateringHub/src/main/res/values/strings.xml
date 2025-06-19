@@ -19,7 +19,9 @@
     <string name="try_to_connect_title">Wait a moment. We\'re try to connect…</string>
     <string name="update_Location_button">Update position</string>
     <string name="why_grant_location_permission_dialog_title">We need to know your position</string>
-    <string name="why_grant_location_permission_dialog_message">Please grant location permission.\nWe will use your location, to allow the app to generate a consistently plane for your Hub, based on weather.</string>
+    <string name="why_grant_location_permission_dialog_message">Please grant location permission.\nWe will use your hub location, to allow the app to generate a consistently plane for your Hub, based on forecast weather.</string>
     <string name="why_use_location_dialog_title">Please, allow us to know your location</string>
+    <string name="why_use_gps_dialog_title">Please, enable GPS</string>
+    <string name="why_use_gps_dialog_msg">We can\'t start to signing up your hub without geolocation</string>
     <string name="wifi_connection_title">Select the device</string>
 </resources>

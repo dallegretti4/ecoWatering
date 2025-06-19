@@ -123,7 +123,10 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionFinish(int resultCode) {
-        if(resultCode == OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT) {
+        if(resultCode == OnConnectionFinishCallback.CONNECTION_ERROR_RESULT) {
+            runOnUiThread(this::showDeviceNotAvailableDialog);
+        }
+        else if(resultCode == OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT) {
             runOnUiThread(this::showDeviceAlreadyConnectedDialog);
         }
         else if(resultCode == OnConnectionFinishCallback.CONNECTION_CONNECTED_DEVICE_RESULT) {
@@ -281,6 +284,16 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
                         }))
                 .setCancelable(false);
         dialog.show();
+    }
+
+    private void showDeviceNotAvailableDialog() {
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
+                .setPositiveButton(
+                        getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
+                        (dialogInterface, i) -> runOnUiThread(this::closeConnection))
+                .setCancelable(false)
+                .show();
     }
 
     /**

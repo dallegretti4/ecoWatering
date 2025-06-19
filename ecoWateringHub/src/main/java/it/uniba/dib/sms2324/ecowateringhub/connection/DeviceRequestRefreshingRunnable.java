@@ -1,7 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringhub.connection;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -11,13 +10,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
-import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemScheduling;
 import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundHubService;
 
 public class DeviceRequestRefreshingRunnable implements Runnable {
@@ -48,16 +46,15 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
         deviceRequest.delete(); // FOR FIRST, TO BE SURE, NEXT DeviceRequestsRefreshingRunnable CAN'T FIND THIS REQUEST
         // CHECK IS DEVICE REQUEST VALID
         if(deviceRequest.isValidDeviceRequest()) {
+            Log.i(Common.LOG_SERVICE, "---> solve request:" + deviceRequest.getRequest());
             String requestParameter = deviceRequest.getRequest().split(DeviceRequest.REQUEST_PARAMETER_DIVISOR)[0];
             switch (requestParameter) {
-                // SWITCH ON IRRIGATION SYSTEM CASE
+                // SWITCH ON/OFF IRRIGATION SYSTEM CASE
                 case DeviceRequest.REQUEST_SWITCH_ON_IRRIGATION_SYSTEM:
-                    this.hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(this.context), true);
-                    break;
-
-                // SWITCH OFF IRRIGATION SYSTEM CASE
                 case DeviceRequest.REQUEST_SWITCH_OFF_IRRIGATION_SYSTEM:
-                    this.hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(this.context), false);
+                    EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this.context);
+                    this.hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(this.context), deviceRequest.getRequest().equals(DeviceRequest.REQUEST_SWITCH_ON_IRRIGATION_SYSTEM));
+                    IrrigationSystem.setScheduling(this.context, null, null, null);
                     break;
 
                 // START BACKGROUND REFRESHING CASE
@@ -81,6 +78,8 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                 case DeviceRequest.REQUEST_ENABLE_AUTOMATE_SYSTEM:
                     this.hub.setIsAutomated(true, (response -> {
                         if(response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
+                            EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this.context);
+                            IrrigationSystem.setScheduling(this.context, null, null, null);
                             if(this.hub.getIrrigationPlan() != null) EcoWateringForegroundHubService.checkEcoWateringSystemNeedToBeAutomated(this.context, this.hub);
                             else {
                                 EcoWateringHub.getEcoWateringHub(this.hub.getDeviceID(), (jsonResponse -> {
@@ -94,16 +93,18 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
 
                 //  DISABLE AUTOMATE SYSTEM CASE
                 case DeviceRequest.REQUEST_DISABLE_AUTOMATE_SYSTEM:
-                    this.hub.setIsAutomated(false, (response -> {}));
+                    this.hub.setIsAutomated(false, null);
                     break;
 
                 //  SCHEDULE IRR SYS MANUALLY CASE
                 case DeviceRequest.REQUEST_SCHEDULE_IRR_SYS:
-                    String deviceRequestParameter = deviceRequest.getRequest().split(DeviceRequest.REQUEST_PARAMETER_DIVISOR)[1];
+                    Log.i(Common.LOG_SERVICE, "--->DeviceRequest.REQUEST_SCHEDULE_IRR_SYS: " + deviceRequest.getRequest());
+                    String deviceRequestParameter = deviceRequest.getRequest().split(DeviceRequest.REQUEST_PARAMETER_DIVISOR)[1].replace("\\\"", "\"");
                     int[] startingDate = new int[3];
                     int[] startingTime = new int[2];
                     int[] irrigationDuration = new int[2];
                     try {
+                        Log.i(Common.LOG_SERVICE, "--->DeviceRequest.REQUEST_SCHEDULE_IRR_SYS TRY");
                         JSONObject jsonObject = new JSONObject(deviceRequestParameter);
                         JSONArray startingDateJsonArray = jsonObject.getJSONArray(DeviceRequest.STARTING_DATE_PARAMETER);
                         startingDate[0] = startingDateJsonArray.getInt(0);
@@ -119,19 +120,25 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                         irrigationDuration[1] = irrigationDurationJsonArray.getInt(1);
                         //  ENABLE IRR SYS MANUAL SCHEDULING
                         if(startingDate[0] != 0) {
-                            Bundle b = new Bundle();
-                            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE, startingDate);
-                            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME, startingTime);
-                            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION, irrigationDuration);
-                            IrrigationSystem.setScheduling(this.context,  b, (response -> {
-                                if(response.equals(IrrigationSystem.IRRIGATION_SYSTEM_SET_SCHEDULING_RESPONSE))
-                                    EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this.context, b);
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.set(Calendar.YEAR, startingDate[0]);
+                            calendar.set(Calendar.MONTH, startingDate[1]);
+                            calendar.set(Calendar.DAY_OF_MONTH, startingDate[2]);
+                            calendar.set(Calendar.HOUR_OF_DAY, startingTime[0]);
+                            calendar.set(Calendar.MINUTE, startingTime[1]);
+                            IrrigationSystem.setScheduling(this.context,  calendar, irrigationDuration, (response -> {
+                                EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this.context, calendar, irrigationDuration);
                             }));
                         }
-                        else  //  DISABLE IRR SYS MANUAL SCHEDULING
-                            EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this.context, this.hub);
+                        else {  //  DISABLE IRR SYS MANUAL SCHEDULING
+                            EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this.context);
+                            IrrigationSystem.setScheduling(this.context, null, null, null);
+                        }
+                        // DISABLE IRR SYS FOR SECURITY
+                        this.hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(this.context), false);
                     }
                     catch (JSONException e) {
+                        Log.i(Common.LOG_SERVICE, "------> DeviceRequest.REQUEST_SCHEDULE_IRR_SYS CATCH");
                         e.printStackTrace();
                     }
                     break;

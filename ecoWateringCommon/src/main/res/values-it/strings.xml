@@ -55,7 +55,9 @@
     <string name="internet_connection_fault_msg">Assicurati di essere connesso ad Internet e riprova.</string>
     <string name="internet_connection_fault_title">Il dispositivo non è connesso a Internet</string>
     <string name="invalid_pasted_time_toast">Attenzione! inserisci un\'orario valido</string>
+    <string name="irr_sys_already_scheduled_title">Attenzione, in caso di programmazione già definita in precedenza, una nuova programmazione la sostituirebbe.</string>
     <string name="irr_sys_stopping_time_title">Per quanto tempo vuoi attivarlo?</string>
+    <string name="irr_sys_switch_message">Eventuali programmazioni saranno annullate</string>
     <string name="irrigation_plan_agree_dialog_message">Potrai smettere di seguire il piano e tornare al controllo manuale in qualsiasi momento.</string>
     <string name="irrigation_plan_agree_dialog_title">Accetti il piano di irrigazione?</string>
     <string name="irrigation_system_label">Impianto d\'irrigazione</string>
@@ -124,6 +126,7 @@
     <string name="user_must_enable_wifi_message">Attiva il WiFi o vai alle impostazioni.</string>
     <string name="user_must_enable_wifi_title">Per connetterti, devi attivare il WiFi.</string>
     <string name="user_profile_menu_item_label">Gestisci profilo</string>
+    <string name="warning_label">Attenzione!</string>
     <string name="watering_minutes_estimated_today_label">Minuti di irrigazione stimati oggi: </string>
     <string name="watering_minutes_executed_label">Minuti di irrigazioni effettuati: </string>
     <string name="watering_minutes_saved_label">Minuti di irrigazione risparmiati</string>
@@ -134,6 +137,8 @@
     <string name="why_use_location_dialog_title">Abbiamo bisogno di accedere alla tua posizione.</string>
     <string name="wifi_button">WiFi</string>
     <string name="wifi_connection_toolbar_title">Connessione WiFi</string>
+    <string name="wifi_disabled_dialog_title">Attenzione! WiFi disattivato o in disattivazione.</string>
+    <string name="wifi_disabled_dialog_msg">Per favore riprova.</string>
 
     <plurals name="remote_devices_connected_plurals">
         <item quantity="one"> Dispositivo connesso</item>

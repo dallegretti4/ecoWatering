@@ -39,7 +39,7 @@ public class IrrigationSystemManualSetWorker extends Worker {
                     hub.getIrrigationSystem().setState(Common.getThisDeviceID(context), Common.getThisDeviceID(context), tags.contains(EcoWateringForegroundHubService.TAG_IRRIGATION_SYSTEM_MANUAL_START));
                     //  SWITCH OFF CASE
                     if(tags.contains(EcoWateringForegroundHubService.TAG_IRRIGATION_SYSTEM_MANUAL_STOP))
-                        IrrigationSystem.setScheduling(this.context, null, null);
+                        IrrigationSystem.setScheduling(this.context, null, null, null);
                     //  SWITCH ON CASE
                     else {
                         SharedPreferencesHelper.writeIntOnSharedPreferences(this.context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.HOUR_OF_DAY), 0);
@@ -61,17 +61,11 @@ public class IrrigationSystemManualSetWorker extends Worker {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis());
                 calendar.add(Calendar.MINUTE, 1);
-                int[] startingDate = {calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH)};
-                int[] startingTime = {calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)};
                 int[] irrigationDuration = {
                         SharedPreferencesHelper.readIntFromSharedPreferences(this.context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.HOUR_OF_DAY)),
                         SharedPreferencesHelper.readIntFromSharedPreferences(this.context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.MINUTE))
                 };
-                Bundle b = new Bundle();
-                b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE, startingDate);
-                b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME, startingTime);
-                b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION, irrigationDuration);
-                EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this.context, b);
+                EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this.context, calendar, irrigationDuration);
             }
         }
         return Result.success();

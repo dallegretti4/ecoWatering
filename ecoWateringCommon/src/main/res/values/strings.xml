@@ -55,7 +55,9 @@
     <string name="internet_connection_fault_msg">Make you sure you are connected to Internet and retry.</string>
     <string name="internet_connection_fault_title">Device is not connected to Internet</string>
     <string name="invalid_pasted_time_toast">Warning! insert a valid time</string>
+    <string name="irr_sys_already_scheduled_title">Warning! If scheduling is already defined, new scheduling will replace it.</string>
     <string name="irr_sys_stopping_time_title">How long you want to enable it?</string>
+    <string name="irr_sys_switch_message">Any scheduling will be canceled</string>
     <string name="irrigation_plan_agree_dialog_message">You can always stop following the plan and keep manual control on the system.</string>
     <string name="irrigation_plan_agree_dialog_title">Do you agree our irrigation plan?</string>
     <string name="irrigation_system_label">Irrigation System</string>
@@ -124,6 +126,7 @@
     <string name="user_must_enable_wifi_message">Enable WiFi or go to Setting.</string>
     <string name="user_must_enable_wifi_title">To connect, you need to enable WiFi.</string>
     <string name="user_profile_menu_item_label">Manage profile</string>
+    <string name="warning_label">Warning!</string>
     <string name="watering_minutes_estimated_today_label">Estimated watering minutes today: </string>
     <string name="watering_minutes_executed_label">Executed watering minutes: </string>
     <string name="watering_minutes_saved_label">Saved watering minutes</string>
@@ -133,6 +136,8 @@
     <string name="why_use_location_dialog_message">We will use your location just to connect your device with an other one.</string>
     <string name="why_use_location_dialog_title">Please allow us to know your location.</string>
     <string name="wifi_button">WiFi</string>
+    <string name="wifi_disabled_dialog_title">Warning! WiFi disabled or disabling.</string>
+    <string name="wifi_disabled_dialog_msg">Please retry.</string>
     <string name="wifi_connection_toolbar_title">WiFi connection</string>
 
     <plurals name="remote_devices_connected_plurals">

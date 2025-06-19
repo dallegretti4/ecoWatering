@@ -1,13 +1,17 @@
 package it.uniba.dib.sms2324.ecowatering.connection.mode.wifi;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -41,6 +45,7 @@ public class WiFiConnectionFragment extends Fragment {
     private static final int WIFI_GROUP_CREATED_FAILURE_RESULT = 1014;
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel channel;
+    private WiFiConnectionRequestThread wifiConnectionThread;
     private OnConnectionFinishCallback onConnectionFinishCallback;
     private final MenuProvider menuProvider = new MenuProvider() {
         @Override
@@ -70,6 +75,17 @@ public class WiFiConnectionFragment extends Fragment {
         }
     };
 
+    protected final BroadcastReceiver wifiP2pReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(intent.getAction())) {
+                if((intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1) != WifiManager.WIFI_STATE_ENABLING) &&
+                        (intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1) != WifiManager.WIFI_STATE_ENABLED))
+                    requireActivity().runOnUiThread(() -> showWifiDisabledDialog());
+            }
+        }
+    };
+
     public WiFiConnectionFragment() {
         super(R.layout.fragment_wifi_connection);
     }
@@ -77,6 +93,7 @@ public class WiFiConnectionFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        Log.i(Common.LOG_NORMAL, ".................> on Attach");
         if (context instanceof OnConnectionFinishCallback) {
             onConnectionFinishCallback = (OnConnectionFinishCallback) context;
         }
@@ -85,6 +102,7 @@ public class WiFiConnectionFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        Log.i(Common.LOG_NORMAL, ".................> on Detach");
         onConnectionFinishCallback = null;
     }
 
@@ -104,6 +122,8 @@ public class WiFiConnectionFragment extends Fragment {
         super.onPause();
         Common.unlockLayout(requireActivity());
         wifiP2pManager.removeGroup(channel, null);
+        requireActivity().unregisterReceiver(wifiP2pReceiver);
+        wifiConnectionThread.closeSocket();
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -118,7 +138,7 @@ public class WiFiConnectionFragment extends Fragment {
         }
     }
 
-    private void startToListenForRequest() {
+    public void startToListenForRequest() {
         WifiManager wifiManager = (WifiManager) requireContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         // WIFI NOT ENABLED CASE
         if (!wifiManager.isWifiEnabled()) {
@@ -134,10 +154,20 @@ public class WiFiConnectionFragment extends Fragment {
                     wifiP2pManager.removeGroup(channel, this.wifiP2pActionListener);    // MAKE SURE THERE AREN'T WIFI DIRECT GROUPS
                     createGroup((resultCode) -> {   // CREATE NEW WIFI DIRECT GROUP
                         if(resultCode == WIFI_GROUP_CREATED_SUCCESS_RESULT) {
-                            new WiFiConnectionRequestThread(requireContext(), (response) -> {
+                            // RECEIVER SETUP
+                            IntentFilter intentFilter = new IntentFilter();
+                            intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+                            requireActivity().registerReceiver(wifiP2pReceiver, intentFilter);
+                            wifiConnectionThread = new WiFiConnectionRequestThread(requireContext(), (response) -> {
                                 if(response != null)
                                     manageResponse(response);
-                            }).start();
+                            });
+                            wifiConnectionThread.start();
+                            // SET TIME LIMIT TO CONNECTION THREAD
+                            new Handler(Looper.getMainLooper()).postDelayed(
+                                    (() -> onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT)),
+                                    OnConnectionFinishCallback.MAX_TIME_CONNECTION
+                            );
                         }
                         else
                             onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_WIFI);
@@ -210,6 +240,18 @@ public class WiFiConnectionFragment extends Fragment {
             default:
                 break;
         }
+    }
+
+    private void showWifiDisabledDialog() {
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.wifi_disabled_dialog_title))
+                .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.wifi_disabled_dialog_msg))
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    onConnectionFinishCallback.closeConnection();
+                })
+                .setCancelable(false)
+                .show();
     }
 
     private void showEnableWiFiDialog() {

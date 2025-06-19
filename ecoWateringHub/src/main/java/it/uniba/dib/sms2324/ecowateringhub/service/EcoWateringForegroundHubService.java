@@ -39,7 +39,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
-import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemScheduling;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 import it.uniba.dib.sms2324.ecowateringhub.R;
 import it.uniba.dib.sms2324.ecowateringhub.connection.DeviceRequestRefreshingRunnable;
@@ -136,6 +135,8 @@ public class EcoWateringForegroundHubService extends Service {
                                 updateNotification(this, this.hub);
                             }));
                         }
+                        else
+                            updateNotification(this, this.hub);
                     }));
                 }
             });
@@ -197,7 +198,7 @@ public class EcoWateringForegroundHubService extends Service {
                 text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.low_battery_notification);
         }
         else
-            text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title);
+            text = context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.warning_label) + " " + context.getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title);
 
         return new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle(context.getString(R.string.app_name))
@@ -308,63 +309,38 @@ public class EcoWateringForegroundHubService extends Service {
         Log.i(Common.LOG_SERVICE, "---------------------> IrrigationSystemStoppingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
     }
 
-    public static void scheduleManualIrrSysWorker(@NonNull Context context, @NonNull Bundle b) {
-        int[] startingDate = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE);
-        int[] startingTime = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME);
-        int[] irrigationDuration = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION);
-        if((startingDate != null) && (startingTime != null) && (irrigationDuration != null)) {
-            SharedPreferencesHelper.writeIntOnSharedPreferences(context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.HOUR_OF_DAY), irrigationDuration[0]);
-            SharedPreferencesHelper.writeIntOnSharedPreferences(context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.MINUTE), irrigationDuration[1]);
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.YEAR, startingDate[0]);
-            calendar.set(Calendar.MONTH, startingDate[1] - 1);
-            calendar.set(Calendar.DAY_OF_MONTH, startingDate[2]);
-            calendar.set(Calendar.HOUR_OF_DAY, startingTime[0]);
-            calendar.set(Calendar.MINUTE, startingTime[1]);
-
-            long currentTime = System.currentTimeMillis();
-            long startDelay = calendar.getTimeInMillis() - currentTime;
-            // TO START IRR SYS
-            if(startDelay < 0) {
-                sendOneTimeWorkRequest(context, (10 * 1000), TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
-                Log.i(Common.LOG_SERVICE, "IrrSysStartManualWorker now");
-                calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(currentTime);
-                calendar.add(Calendar.HOUR_OF_DAY, irrigationDuration[0]);
-                calendar.add(Calendar.MINUTE, irrigationDuration[1]);
-                long stopDelay = ((long)irrigationDuration[0] * 60 * 60 * 1000) + ((long)irrigationDuration[1] * 60 * 1000);
-                sendOneTimeWorkRequest(context, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
-                // UPDATE SCHEDULING ON DATABASE
-                startingDate[0] = calendar.get(Calendar.YEAR);
-                startingDate[1] = calendar.get(Calendar.MONTH);
-                startingDate[2] = calendar.get(Calendar.DAY_OF_MONTH);
-                startingTime[0] = calendar.get(Calendar.HOUR_OF_DAY);
-                startingTime[1] = calendar.get(Calendar.MINUTE);
-                Bundle b1 = new Bundle();
-                b1.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE, startingDate);
-                b1.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME, startingTime);
-                b1.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION, irrigationDuration);
-                IrrigationSystem.setScheduling(context, b1, null);
-            }
-            else {
-                sendOneTimeWorkRequest(context, startDelay, TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
-                Log.i(Common.LOG_SERVICE, "IrrSysStartManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
-                calendar.add(Calendar.HOUR_OF_DAY, irrigationDuration[0]);
-                calendar.add(Calendar.MINUTE, irrigationDuration[1]);
-                long stopDelay = calendar.getTimeInMillis() - currentTime;
-                sendOneTimeWorkRequest(context, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
-            }
+    public static void scheduleManualIrrSysWorker(@NonNull Context context, @NonNull Calendar calendar, int[] irrigationDuration) {
+        Log.i(Common.LOG_SERVICE, "scheduleManualIrrSysWorker");
+        long currentTime = System.currentTimeMillis();
+        long startDelay = calendar.getTimeInMillis() - currentTime;
+        SharedPreferencesHelper.writeIntOnSharedPreferences(context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.HOUR_OF_DAY), irrigationDuration[0]);
+        SharedPreferencesHelper.writeIntOnSharedPreferences(context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.MINUTE), irrigationDuration[1]);
+        // TO START IRR SYS
+        if(startDelay < 0) {    // NEED TO START NOW
+            sendOneTimeWorkRequest(context, (10 * 1000), TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
+            Log.i(Common.LOG_SERVICE, "IrrSysStartManualWorker now");
+            long stopDelay = ((long)irrigationDuration[0] * 60 * 60 * 1000) + ((long)irrigationDuration[1] * 60 * 1000);
+            sendOneTimeWorkRequest(context, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
+            // UPDATE SCHEDULING ON DATABASE
+            IrrigationSystem.setScheduling(context, calendar, irrigationDuration, null);
+        }
+        else {
+            sendOneTimeWorkRequest(context, startDelay, TAG_IRRIGATION_SYSTEM_MANUAL_START, NAME_IRRIGATION_SYSTEM_MANUAL_START);
+            Log.i(Common.LOG_SERVICE, "IrrSysStartManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+            calendar.add(Calendar.HOUR_OF_DAY, irrigationDuration[0]);
+            calendar.add(Calendar.MINUTE, irrigationDuration[1]);
+            long stopDelay = calendar.getTimeInMillis() - currentTime;
+            sendOneTimeWorkRequest(context, stopDelay, TAG_IRRIGATION_SYSTEM_MANUAL_STOP, NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
             Log.i(Common.LOG_SERVICE, "IrrSysStopManualWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
         }
     }
 
-    public static void cancelIrrSysManualSchedulingWorker(@NonNull Context context, EcoWateringHub hub) {
+    public static void cancelIrrSysManualSchedulingWorker(@NonNull Context context) {
         WorkManager.getInstance(context)
                 .cancelUniqueWork(NAME_IRRIGATION_SYSTEM_MANUAL_START);
         WorkManager.getInstance(context)
                 .cancelUniqueWork(NAME_IRRIGATION_SYSTEM_MANUAL_STOP);
-        IrrigationSystem.setScheduling(context, null, null);
-        hub.getIrrigationSystem().setState(Common.getThisDeviceID(context), Common.getThisDeviceID(context), false);
+        Log.i(Common.LOG_SERVICE, "cancelIrrSysManualSchedulingWorker");
     }
 
     private static void sendPeriodicWorkRequest(@NonNull Context context, Class<? extends ListenableWorker> worker, long initialDelay, String tag, String name) {

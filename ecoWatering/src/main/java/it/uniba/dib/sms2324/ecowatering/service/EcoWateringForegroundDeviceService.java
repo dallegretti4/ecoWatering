@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowatering.R;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
@@ -115,11 +116,14 @@ public class EcoWateringForegroundDeviceService extends Service {
         if((this.hubList != null) && (!this.hubList.isEmpty())) {
             for(EcoWateringHub hub : this.hubList) {
                 if(hub.getBatteryPercent() <= 20)
-                    stringBuilder.append(hub.getName()).append(getString(it.uniba.dib.sms2324.ecowatering.R.string.hub_need_to_be_recharged, hub.getName())).append("\n");
+                    stringBuilder.append(getString(it.uniba.dib.sms2324.ecowatering.R.string.hub_need_to_be_recharged, hub.getName())).append("\n");
             }
         }
         if(stringBuilder.toString().equals(Common.VOID_STRING_VALUE))
             stringBuilder.append(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.starting_label));
+
+        if(!HttpHelper.isDeviceConnectedToInternet(this))
+            stringBuilder = new StringBuilder().append(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.warning_label)).append(" ").append(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title));
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(getString(R.string.app_name))

@@ -2,6 +2,7 @@ package it.uniba.dib.sms2324.ecowateringcommon.models;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
@@ -52,7 +54,7 @@ public class DeviceRequest {
                     returnArray.add(new DeviceRequest(
                             jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_ID_COLUMN_NAME),
                             jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME),
-                            jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME),
+                            jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME).replace("\"", "\\\""),
                             jsonObject.getString(SqlDbHelper.TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME)
                     ));
                 }
@@ -96,9 +98,17 @@ public class DeviceRequest {
     }
 
     public boolean isValidDeviceRequest() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Common.DATE_FORMAT_STRING); // DATE PARSER SETUP
-        LocalDateTime inputDateTime = LocalDateTime.parse(this.date, formatter);
-        LocalDateTime currentDate = LocalDateTime.now(ZoneId.systemDefault());
-        return ((Duration.between(currentDate, inputDateTime).getSeconds() >= 0) && (Duration.between(currentDate, inputDateTime).getSeconds() <= 30));
+        String[] tmpDateArray = this.date.split("T");
+        String[] dateArray = tmpDateArray[0].split("-");
+        String[] timeArray = tmpDateArray[1].split(":");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, Integer.parseInt(dateArray[0]));
+        calendar.set(Calendar.MONTH, Integer.parseInt(dateArray[1]));
+        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateArray[2]));
+        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeArray[0]));
+        calendar.set(Calendar.MINUTE, Integer.parseInt(timeArray[1]));
+        boolean returnValue = (((System.currentTimeMillis() - calendar.getTimeInMillis()) < (15 * 1000)));
+        Log.i(Common.LOG_SERVICE, "-----> inputDate: " + returnValue);
+        return returnValue;
     }
 }

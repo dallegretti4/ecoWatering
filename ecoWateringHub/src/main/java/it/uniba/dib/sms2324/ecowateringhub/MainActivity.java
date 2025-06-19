@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import java.util.Calendar;
+
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements
     private static String tempHubName;
     private static Address tempAddress;
     private static boolean isWhyGrantLocationPermissionDialogVisible;
+    private static boolean isEnableGpsDialogVisible;
     private static boolean isHttpErrorFaultDialogVisible;
     private static boolean isInternetFaultDialog;
 
@@ -82,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements
             }
             else {
                 if(isWhyGrantLocationPermissionDialogVisible) runOnUiThread(this::showWhyGrantLocationPermissionDialog);
+                if(isEnableGpsDialogVisible) runOnUiThread(this::showEnableGpsDialog);
                 else if(isHttpErrorFaultDialogVisible) runOnUiThread(this::showHttpErrorFaultDialog);
                 else if(isInternetFaultDialog) runOnUiThread(this::showInternetFaultDialog);
             }
@@ -121,8 +125,10 @@ public class MainActivity extends AppCompatActivity implements
         if(requestCode == Common.GPS_ENABLE_REQUEST) {
             if(resultCode == RESULT_OK) {
                 startActivity(new Intent(this, MainActivity.class));
+                finish();
             }
-            finish();
+            else
+                runOnUiThread(this::showEnableGpsDialog);
         }
     }
 
@@ -207,7 +213,10 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void setIrrigationSystemState(boolean value) {
-        thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), value);
+        EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this);
+        IrrigationSystem.setScheduling(this, null, null, (response -> {
+            thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), value);
+        }));
     }
 
     @Override
@@ -224,22 +233,23 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void scheduleIrrSys(int[] startingDate, int[] startingTime, int[] irrigationDuration) {
-        Log.i(Common.LOG_NORMAL, "-------------> starting date: " + startingDate[0] + " - " + startingDate[1]+ " - " + startingDate[2]);
-        if(startingDate[0] != 0) {
-            Bundle b = new Bundle();
-            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE, startingDate);
-            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME, startingTime);
-            b.putIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION, irrigationDuration);
-            IrrigationSystem.setScheduling(this, b, (response -> {
-                if(response.equals(IrrigationSystem.IRRIGATION_SYSTEM_SET_SCHEDULING_RESPONSE))
-                    EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this, b);
-                else
+    public void scheduleIrrSys(Calendar calendar, int[] irrigationDuration) {
+        if(calendar != null) {
+            //  SCHEDULE CASE
+            IrrigationSystem.setScheduling(this, calendar, irrigationDuration, (response -> {
+                if(response.equals(IrrigationSystem.IRRIGATION_SYSTEM_SET_SCHEDULING_RESPONSE)) {
+                    EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this, calendar, irrigationDuration);
+                    thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), false);
+                } else
                     runOnUiThread(this::showHttpErrorFaultDialog);
             }));
         }
-        else
-            EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this, thisEcoWateringHub);
+        else {  // DELETE SCHEDULING CASE
+            EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this);
+            IrrigationSystem.setScheduling(this, null, null, (response ->
+                thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), false))
+            );
+        }
     }
 
     @Override   // CALLED FROM UserProfileFragment.OnUserProfileActionCallback AND AutomateSystemFragment.OnAutomateSystemActionCallback TOO
@@ -409,6 +419,22 @@ public class MainActivity extends AppCompatActivity implements
                 }
         ).setCancelable(false);
         dialog.show();
+    }
+
+    private void showEnableGpsDialog() {
+        isEnableGpsDialogVisible = true;
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.why_use_gps_dialog_title))
+                .setMessage(getString(R.string.why_use_gps_dialog_msg))
+                .setPositiveButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.retry_button), (dialogInterface, i) -> {
+                    isEnableGpsDialogVisible = false;
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                }).setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                    isEnableGpsDialogVisible = false;
+                    finish();
+                }).setCancelable(false)
+                .show();
     }
 
     private void showHttpErrorFaultDialog() {

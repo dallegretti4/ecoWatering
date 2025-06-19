@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
@@ -113,8 +114,8 @@ public class IrrigationSystem implements Parcelable {
         }));
     }
 
-    public static void setScheduling(@NonNull Context context, Bundle b, Common.OnStringResponseGivenCallback callback) {
-        SqlDbHelper.setIrrSysScheduling(context, b, (callback));
+    public static void setScheduling(@NonNull Context context, Calendar calendar, int[] irrigationDuration, Common.OnStringResponseGivenCallback callback) {
+        SqlDbHelper.setIrrSysScheduling(context, calendar, irrigationDuration, (callback));
     }
 
     public IrrigationSystemScheduling getIrrigationSystemScheduling() {

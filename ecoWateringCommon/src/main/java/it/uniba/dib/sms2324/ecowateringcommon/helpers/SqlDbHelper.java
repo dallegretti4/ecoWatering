@@ -2,13 +2,13 @@ package it.uniba.dib.sms2324.ecowateringcommon.helpers;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import java.util.Calendar;
+
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
-import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemScheduling;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlan;
 
 public class SqlDbHelper {
@@ -271,6 +271,7 @@ public class SqlDbHelper {
                 .append(TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME)).append("\",\"")
                 .append(TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME)).append("\",\"")
                 .append(TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME)).append("\"}");
+        Log.i(LOG_DB, "---------->delete query: " + stringBuilder);
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(stringBuilder.toString());
             Log.i(LOG_DB, "deleteDeviceRequest response: " + response);
@@ -313,25 +314,21 @@ public class SqlDbHelper {
     }
 
     // IRRIGATION SYSTEM SCHEDULING METHODS
-    public static void setIrrSysScheduling(@NonNull Context context, Bundle b, Common.OnStringResponseGivenCallback callback) {
+    public static void setIrrSysScheduling(@NonNull Context context, Calendar calendar, int[] irrigationDuration, Common.OnStringResponseGivenCallback callback) {
+        Log.i(LOG_DB, "setIrrSysScheduling start");
         StringBuilder stringBuilder = new StringBuilder("{\"");
         stringBuilder.append(TABLE_HUB_DEVICE_ID_COLUMN_NAME).append("\":\"").append(Common.getThisDeviceID(context)).append("\",\"")
                 .append(HttpHelper.MODE_PARAMETER).append("\":\"").append(HttpHelper.MODE_SET_IRR_SYS_SCHEDULING).append("\",\"");
-        if(b == null) {
+        if(calendar == null) {
                     stringBuilder.append(HttpHelper.STARTING_DATE_PARAMETER).append("\":\"").append(Common.NULL_STRING_VALUE).append("\",\"")
                     .append(HttpHelper.STARTING_TIME_PARAMETER).append("\":\"").append(Common.NULL_STRING_VALUE).append("\",\"")
                     .append(HttpHelper.IRRIGATION_DURATION_PARAMETER).append("\":\"").append(Common.NULL_STRING_VALUE).append("\"}");
         }
-        else {
-            int[] startingDate = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_DATE);
-            int[] startingTime = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_STARTING_TIME);
-            int[] irrigationDuration = b.getIntArray(IrrigationSystemScheduling.BO_IRR_SYS_SCHEDULING_IRRIGATION_DURATION);
-            if((startingDate != null) && (startingTime != null) && (irrigationDuration != null)) {
-                stringBuilder.append(HttpHelper.STARTING_DATE_PARAMETER).append("\":[").append(startingDate[0]).append(",").append(startingDate[1]).append(",").append(startingDate[2]).append("],\"")
-                        .append(HttpHelper.STARTING_TIME_PARAMETER).append("\":[").append(startingTime[0]).append(",").append(startingTime[1]).append("],\"")
-                        .append(HttpHelper.IRRIGATION_DURATION_PARAMETER).append("\":[").append(irrigationDuration[0]).append(",").append(irrigationDuration[1]).append("]}");
-            }
-        }
+        else
+            stringBuilder.append(HttpHelper.STARTING_DATE_PARAMETER).append("\":[").append(calendar.get(Calendar.YEAR)).append(",").append(calendar.get(Calendar.MONTH)).append(",").append(calendar.get(Calendar.DAY_OF_MONTH)).append("],\"")
+                    .append(HttpHelper.STARTING_TIME_PARAMETER).append("\":[").append(calendar.get(Calendar.HOUR_OF_DAY)).append(",").append(calendar.get(Calendar.MINUTE)).append("],\"")
+                    .append(HttpHelper.IRRIGATION_DURATION_PARAMETER).append("\":[").append(irrigationDuration[0]).append(",").append(irrigationDuration[1]).append("]}");
+        Log.i(LOG_DB, "setIrrSysScheduling query: " + stringBuilder);
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(stringBuilder.toString());
             Log.i(LOG_DB, "setIrrSysScheduling response: " + response);

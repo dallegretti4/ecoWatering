@@ -20,7 +20,9 @@
     <string name="try_to_connect_title">Attendi. Stiamo cercando di connetterti…</string>
     <string name="update_Location_button">Aggiorna posizione</string>
     <string name="why_grant_location_permission_dialog_title">Abbiamo bisogno di conoscere la tua posizione</string>
-    <string name="why_grant_location_permission_dialog_message">Per piacere concedi i permessi.\nUseremo la tua posizione, per generare un piano efficiente per il tuo Hub, basato sul meteo.</string>
+    <string name="why_grant_location_permission_dialog_message">Useremo la tua posizione, per generare un piano efficiente per il tuo Hub, basato sul meteo.</string>
     <string name="why_use_location_dialog_title">Abbiamo bisogno di conoscere la tua posizione</string>
+    <string name="why_use_gps_dialog_title">Per favore, abilita GPS</string>
+    <string name="why_use_gps_dialog_msg">Non possiamo registrare il tuo hub senza geolocalizzarlo.</string>
     <string name="wifi_connection_title">Seleziona il dispositivo</string>
 </resources>

@@ -93,23 +93,31 @@ public class WiFiConnectionFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action != null) {
-                if (action.equals(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION))
-                    // FILL LIST VIEW
-                    wifiP2pManager.requestPeers(channel, ((peerList) -> {
-                        ArrayList<WifiP2pDevice> tmpDeviceList = new ArrayList<>(peerList.getDeviceList());
-                        ArrayList<String> tmpDeviceStringList = tmpDeviceList.stream().map(device -> device.deviceName).collect(Collectors.toCollection(ArrayList::new));
-                        for(int i=0; i<tmpDeviceStringList.size(); i++) {
-                            if(!deviceStringList.contains(tmpDeviceStringList.get(i))) {
-                                deviceList.add(tmpDeviceList.get(i));
-                                deviceStringList.add(tmpDeviceStringList.get(i));
-                                requireActivity().runOnUiThread(deviceAdapter::notifyDataSetChanged);
+                switch (action) {
+                    case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION:
+                        // FILL LIST VIEW
+                        wifiP2pManager.requestPeers(channel, ((peerList) -> {
+                            ArrayList<WifiP2pDevice> tmpDeviceList = new ArrayList<>(peerList.getDeviceList());
+                            ArrayList<String> tmpDeviceStringList = tmpDeviceList.stream().map(device -> device.deviceName).collect(Collectors.toCollection(ArrayList::new));
+                            for (int i = 0; i < tmpDeviceStringList.size(); i++) {
+                                if (!deviceStringList.contains(tmpDeviceStringList.get(i))) {
+                                    deviceList.add(tmpDeviceList.get(i));
+                                    deviceStringList.add(tmpDeviceStringList.get(i));
+                                    requireActivity().runOnUiThread(deviceAdapter::notifyDataSetChanged);
+                                }
                             }
-                        }
-                    }));
-                else if(action.equals(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)) {
-                    NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-                    if(networkInfo != null && networkInfo.isConnectedOrConnecting())
-                        wifiP2pManager.requestConnectionInfo(channel, connectionInfoListener);
+                        }));
+                        break;
+                    case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
+                        NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+                        if (networkInfo != null && networkInfo.isConnectedOrConnecting())
+                            wifiP2pManager.requestConnectionInfo(channel, connectionInfoListener);
+                        break;
+                    case WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION:
+                        if ((intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1) != WifiManager.WIFI_STATE_ENABLED) &&
+                                (intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1) != WifiManager.WIFI_STATE_ENABLING))
+                            requireActivity().runOnUiThread(() -> showWifiDisabledDialog());
+                        break;
                 }
             }
         }
@@ -186,6 +194,8 @@ public class WiFiConnectionFragment extends Fragment {
         if(wiFiConnectionRequestThread != null && wiFiConnectionRequestThread.isAlive())
             wiFiConnectionRequestThread.interrupt();
         wifiP2pManager.stopPeerDiscovery(channel, null);
+        wifiP2pManager.removeGroup(channel, null);
+        wifiP2pManager.cancelConnect(channel, null);
         Common.unlockLayout(requireActivity());
     }
 
@@ -224,7 +234,6 @@ public class WiFiConnectionFragment extends Fragment {
         peersIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         peersIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         peersIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        peersIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         requireActivity().registerReceiver(peersReceiver, peersIntentFilter);
     }
 
@@ -243,9 +252,9 @@ public class WiFiConnectionFragment extends Fragment {
                         showErrorDialog();
                     }
                 });
-            } else {
-                showWhyUseLocationDialog();
             }
+            else
+                showWhyUseLocationDialog();
         });
     }
 
@@ -344,7 +353,18 @@ public class WiFiConnectionFragment extends Fragment {
                 .setNegativeButton(
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button),
                         ((dialogInterface, i) -> onConnectionFinishCallback.closeConnection()))
+                .setCancelable(false)
+                .show();
+    }
 
+    private void showWifiDisabledDialog() {
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.wifi_disabled_dialog_title))
+                .setMessage(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.wifi_disabled_dialog_msg))
+                .setNegativeButton(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.close_button), (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    onConnectionFinishCallback.closeConnection();
+                })
                 .setCancelable(false)
                 .show();
     }

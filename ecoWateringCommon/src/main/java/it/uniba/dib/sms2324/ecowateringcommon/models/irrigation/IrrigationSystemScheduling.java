@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,10 +58,10 @@ public class IrrigationSystemScheduling implements Parcelable {
     public void draw(@NonNull Context context, @NonNull View view, int primary_color_50, View.OnClickListener closeClickListener, View.OnClickListener deleteSchedulingClickListener) {
         view.findViewById(R.id.schedulingTitle).setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
         // DATE SETUP
-        String day = String.valueOf(Common.getSpecificDay(String.valueOf(this.startingDate[2])));
+        String day = String.valueOf(this.startingDate[2]);
         if(context.getResources().getConfiguration().getLocales().get(0).getLanguage().equals(Common.LANGUAGE_ENGLISH))
-            day = Common.concatDayEnglishLanguage(Common.getSpecificDay(String.valueOf(this.startingDate[2])), day);  // ENGLISH LANGUAGE CASE
-        String month = context.getResources().getStringArray(R.array.month_names)[Common.getSpecificMonth(String.valueOf(this.startingDate[1]))-1];
+            day = Common.concatDayEnglishLanguage(this.startingDate[2], day);  // ENGLISH LANGUAGE CASE
+        String month = context.getResources().getStringArray(R.array.month_names)[this.startingDate[1]-1];
         String date = context.getString(R.string.date_builder_extended_label, month, day, this.startingDate[0]);
         ((TextView) view.findViewById(R.id.startingDateTextView)).setText(date);
         // STARTING TIME SETUP
@@ -73,14 +74,15 @@ public class IrrigationSystemScheduling implements Parcelable {
         }
         if(this.irrigationDuration[1] > 0) {
             String minutes = this.irrigationDuration[1] + "m";
+            if(this.irrigationDuration[1] < 10)
+                minutes = "0" + this.irrigationDuration[1] + "m";
             ((TextView) view.findViewById(R.id.durationMinutesTextView)).setText(minutes);
         }
         // CLOSE BUTTON SETUP
-        ((Button) view.findViewById(R.id.deleteSchedulingButton)).setOnClickListener(closeClickListener);
+        ((Button) view.findViewById(R.id.deleteSchedulingButton)).setOnClickListener(deleteSchedulingClickListener);
         // DELETE SCHEDULING BUTTON SETUP
-        Button closeSchedulingButton = view.findViewById(R.id.closeSchedulingButton);
-        closeSchedulingButton.setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
-        closeSchedulingButton.setOnClickListener(deleteSchedulingClickListener);
+        ImageView closeSchedulingImageView = view.findViewById(R.id.closeSchedulingImageView);
+        closeSchedulingImageView.setOnClickListener(closeClickListener);
     }
 
 

@@ -18,6 +18,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 public class WiFiConnectionRequestThread extends Thread {
     private final Context context;
     private final Common.OnStringResponseGivenCallback callback;
+    private Socket socket;
 
     protected WiFiConnectionRequestThread(@NonNull Context context, Common.OnStringResponseGivenCallback callback) {
         this.context = context;
@@ -27,7 +28,7 @@ public class WiFiConnectionRequestThread extends Thread {
     @Override
     public void run() {
         try(ServerSocket serverSocket = new ServerSocket(8898)) {
-            Socket socket = serverSocket.accept();
+            socket = serverSocket.accept();
             // READ REQUEST NAME
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String requestName = reader.readLine();
@@ -39,10 +40,20 @@ public class WiFiConnectionRequestThread extends Thread {
                 String response = reader.readLine();
                 Log.i(Common.LOG_NORMAL, "response from reader: " + response);
                 callback.getResponse(response);
+                serverSocket.close();
+                socket.close();
             }
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    protected void closeSocket() {
+        try{
+            if(socket != null && !socket.isClosed())
+                this.socket.close();
+        }
+        catch (IOException ignored) {}
     }
 }

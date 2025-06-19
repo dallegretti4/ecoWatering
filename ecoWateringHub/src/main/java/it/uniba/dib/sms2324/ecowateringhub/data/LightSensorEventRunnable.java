@@ -20,6 +20,6 @@ public class LightSensorEventRunnable implements Runnable {
         Log.i(Common.LOG_NORMAL, date);
         String jsonString = "{\"" + HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_LIGHT_SENSOR_EVENT + "\",\"" + HttpHelper.TIME_PARAMETER + "\":\"" + date + "\"}";
         String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
-        Log.i(Common.LOG_NORMAL, "light sensor event response: " + response);
+        Log.i(EcoWateringSensor.LOG_SENSOR, "light sensor event response: " + response);
     }
 }
