@@ -41,7 +41,7 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manage_connected_remote_ew_devices);
+        setContentView(it.uniba.dib.sms2324.ecowateringcommon.R.layout.activity_frame_layout);
         fragmentManager = getSupportFragmentManager();
 
         if(savedInstanceState == null) {   // NOT CONFIGURATION CHANGED CASE
@@ -179,6 +179,10 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                 startActivity(connectionIntent);
                 finish();
             }
+            else {
+                startActivity(new Intent(this, ManageEcoWateringDevicesConnectionActivity.class));
+                finish();
+            }
         }
         // REQUESTED IN ManageRemoteEWDevicesConnectedActivity IN onModeSelected()
         else if(requestCode == Common.BT_PERMISSION_REQUEST) {
@@ -237,7 +241,7 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                     it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
                     it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
             );
-        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
+        fragmentTransaction.replace(it.uniba.dib.sms2324.ecowateringcommon.R.id.mainFrameLayout, fragment);
         if(addToBackStackFlag) fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }

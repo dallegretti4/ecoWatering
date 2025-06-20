@@ -8,7 +8,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -26,7 +25,6 @@ import java.util.Objects;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
-import it.uniba.dib.sms2324.ecowateringcommon.models.WeatherInfo;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public abstract class ManageHubFragment extends Fragment {
@@ -98,13 +96,13 @@ public abstract class ManageHubFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if(context instanceof OnManageHubActionCallback) {
-            this.onManageHubActionCallback = (OnManageHubActionCallback) context;
+            onManageHubActionCallback = (OnManageHubActionCallback) context;
         }
     }
     @Override
     public void onDetach() {
         super.onDetach();
-        this.onManageHubActionCallback = null;
+        onManageHubActionCallback = null;
     }
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -117,13 +115,11 @@ public abstract class ManageHubFragment extends Fragment {
                 hub = new EcoWateringHub(jsonResponse);
                 requireActivity().runOnUiThread(() -> manageHubViewSetup(view));
                 requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.manageHubFragmentContainer, R.id.includeLoadingFragment));
-                Common.unlockLayout(requireActivity());
             }));
         }
         else {
             requireActivity().runOnUiThread(() -> manageHubViewSetup(view));
             requireActivity().runOnUiThread(() -> Common.hideLoadingFragment(view, R.id.manageHubFragmentContainer, R.id.includeLoadingFragment));
-            Common.unlockLayout(requireActivity());
         }
     }
     @Override
@@ -134,16 +130,15 @@ public abstract class ManageHubFragment extends Fragment {
         this.refreshManageHubFragmentHandler.post(this.refreshManageHubFragmentRunnable);
     }
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onStop() {
+        super.onStop();
         isRefreshManageHubFragmentRunning = false;
-        this.refreshManageHubFragmentHandler.removeCallbacks(this.refreshManageHubFragmentRunnable);
     }
     protected Handler refreshManageHubFragmentHandler;
     protected final Runnable refreshManageHubFragmentRunnable = getRefreshManageHubFragmentRunnable();
 
     protected void manageHubViewSetup(@NonNull View view) {
-        weatherCardSetup(view);
+        hub.getWeatherInfo().draw(requireContext(), view, hub, this.primary_color_50);
         remoteDevicesConnectedCardSetup(view);
         configurationCardSetup(view);
         specializedViewSetup();
@@ -165,31 +160,6 @@ public abstract class ManageHubFragment extends Fragment {
         }
     }
 
-    private void weatherCardSetup(@NonNull View view) {
-        // WEATHER IMAGE VIEW SETUP
-        view.findViewById(R.id.weatherIconImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
-        ImageView weatherImageView = view.findViewById(R.id.weatherIconImageView);
-        weatherImageView.setImageResource(WeatherInfo.getWeatherImageResourceId(hub.getWeatherInfo().getWeatherCode()));
-        // AMBIENT TEMPERATURE TEXT VIEW SETUP
-        TextView degreesTextView = view.findViewById(R.id.weatherStateFirstDegreesTextView);
-        degreesTextView.setText(String.valueOf(((int) hub.getAmbientTemperature())));
-        // HUB ADDRESS TEXT VIEW SETUP
-        TextView addressTextView = view.findViewById(R.id.weatherStateAddressTextView);
-        addressTextView.setText(hub.getPosition());
-        // RELATIVE HUMIDITY PERCENT TEXT VIEW SETUP
-        TextView relativeHumidityPercentTextView = view.findViewById(R.id.relativeHumidityPercentTextView);
-        relativeHumidityPercentTextView.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
-        relativeHumidityPercentTextView.setText(String.valueOf((int)(hub.getRelativeHumidity())));
-        // UV INDEX TEXT VIEW SETUP
-        TextView uvIndexTextView = view.findViewById(R.id.lightIndexTextView);
-        uvIndexTextView.setText(String.valueOf((int)(hub.getIndexUV())));
-        uvIndexTextView.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
-        // PRECIPITATION CARD SETUP
-        ((TextView) view.findViewById(R.id.precipitationValueTextView)).setText(String.valueOf(hub.getWeatherInfo().getPrecipitation()));
-        view.findViewById(R.id.precipitationValueContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
-        ((TextView) view.findViewById(R.id.precipitationLabelTextView)).setText(getString(WeatherInfo.getPrecipitationStringResourceId(hub.getWeatherInfo().getPrecipitation())));
-    }
-
     private void remoteDevicesConnectedCardSetup(@NonNull View view) {
         // CONNECTED REMOTE DEVICES NUMBER TEXT VIEW SETUP
         TextView remoteDeviceConnectedNumberTextView = view.findViewById(R.id.remoteDeviceConnectedNumberTextView);
@@ -203,7 +173,7 @@ public abstract class ManageHubFragment extends Fragment {
                 hub.getRemoteDeviceList().size()));
         // GO TO CONNECTED REMOTE DEVICES FRAGMENT CARD SETUP
         ConstraintLayout remoteDevicesConnectedCard = view.findViewById(R.id.connectedRemoteDevicesCard);
-        remoteDevicesConnectedCard.setOnClickListener((v) -> this.onManageHubActionCallback.manageConnectedRemoteDevices());
+        remoteDevicesConnectedCard.setOnClickListener((v) -> onManageHubActionCallback.manageConnectedRemoteDevices());
     }
 
     private void configurationCardSetup(@NonNull View view) {
@@ -218,7 +188,7 @@ public abstract class ManageHubFragment extends Fragment {
             view.findViewById(R.id.ambientTemperatureSensorNotConfiguredNotification).setVisibility(View.GONE);
             view.findViewById(R.id.ambientTemperatureSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme())); // TITLE CARD COLOR
         }
-        view.findViewById(R.id.ambientTemperatureSensorCard).setOnClickListener((v) -> this.onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE));
+        view.findViewById(R.id.ambientTemperatureSensorCard).setOnClickListener((v) -> onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE));
 
         // LIGHT SENSOR CARD SETUP
         if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getLightChosenSensor() == null)) {
@@ -229,7 +199,7 @@ public abstract class ManageHubFragment extends Fragment {
             view.findViewById(R.id.lightSensorNotConfiguredNotification).setVisibility(View.GONE);
             view.findViewById(R.id.lightSensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireActivity().getTheme()));
         }
-        view.findViewById(R.id.lightSensorCard).setOnClickListener((v) -> this.onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_LIGHT));
+        view.findViewById(R.id.lightSensorCard).setOnClickListener((v) -> onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_LIGHT));
 
         // RELATIVE HUMIDITY SENSOR CARD SETUP
         if((hub.getSensorInfo() == null) || (hub.getSensorInfo().getRelativeHumidityChosenSensor() == null)) {
@@ -240,7 +210,7 @@ public abstract class ManageHubFragment extends Fragment {
             view.findViewById(R.id.relativeHumiditySensorNotConfiguredNotification).setVisibility(View.GONE);
             view.findViewById(R.id.relativeHumiditySensorImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
         }
-        view.findViewById(R.id.relativeHumiditySensorCard).setOnClickListener((v) -> this.onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY));
+        view.findViewById(R.id.relativeHumiditySensorCard).setOnClickListener((v) -> onManageHubActionCallback.configureSensor(SensorsInfo.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY));
     }
     protected abstract void specializedViewSetup();
     protected abstract Runnable getRefreshManageHubFragmentRunnable();

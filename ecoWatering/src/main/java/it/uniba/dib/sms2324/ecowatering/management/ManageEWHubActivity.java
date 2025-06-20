@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -23,7 +22,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlanPreview;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.AutomateSystemFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
@@ -46,7 +44,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manage_eco_watering_hub);
+        setContentView(it.uniba.dib.sms2324.ecowateringcommon.R.layout.activity_frame_layout);
         fragmentManager = getSupportFragmentManager();
         if(savedInstanceState == null) {
             Bundle b = getIntent().getBundleExtra(Common.MANAGE_EWH_INTENT_OBJ);
@@ -284,7 +282,7 @@ public class ManageEWHubActivity extends AppCompatActivity implements
             );
         if(addToBackStack)
             fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.replace(R.id.manageEWHubFrameLayout, fragment);
+        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
         fragmentTransaction.commit();
     }
 

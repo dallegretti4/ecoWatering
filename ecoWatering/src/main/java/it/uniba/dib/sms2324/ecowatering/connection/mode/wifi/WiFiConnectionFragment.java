@@ -43,9 +43,11 @@ import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 public class WiFiConnectionFragment extends Fragment {
     private static final int WIFI_GROUP_CREATED_SUCCESS_RESULT = 1013;
     private static final int WIFI_GROUP_CREATED_FAILURE_RESULT = 1014;
+    private boolean isWifiReceiverRegistered;
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel channel;
     private WiFiConnectionRequestThread wifiConnectionThread;
+    private Handler wifiConnectionHandler;
     private OnConnectionFinishCallback onConnectionFinishCallback;
     private final MenuProvider menuProvider = new MenuProvider() {
         @Override
@@ -64,6 +66,12 @@ public class WiFiConnectionFragment extends Fragment {
             return false;
         }
     };
+
+    private final Runnable wifiConnectionHandlerRunnable = (() -> {
+        if((wifiConnectionThread.isAlive()) && (onConnectionFinishCallback != null))
+            onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT);
+    });
+
     private final WifiP2pManager.ActionListener wifiP2pActionListener = new WifiP2pManager.ActionListener() {
         @Override
         public void onSuccess() {
@@ -118,12 +126,16 @@ public class WiFiConnectionFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        Common.unlockLayout(requireActivity());
+    public void onStop() {
+        super.onStop();
+        if(wifiConnectionHandler != null)
+            wifiConnectionHandler.removeCallbacks(wifiConnectionHandlerRunnable);
         wifiP2pManager.removeGroup(channel, null);
-        requireActivity().unregisterReceiver(wifiP2pReceiver);
-        wifiConnectionThread.closeSocket();
+        if(isWifiReceiverRegistered)
+            requireActivity().unregisterReceiver(wifiP2pReceiver);
+        if(wifiConnectionThread != null && wifiConnectionThread.isAlive())
+            wifiConnectionThread.closeSocket();
+        Common.unlockLayout(requireActivity());
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -158,16 +170,17 @@ public class WiFiConnectionFragment extends Fragment {
                             IntentFilter intentFilter = new IntentFilter();
                             intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
                             requireActivity().registerReceiver(wifiP2pReceiver, intentFilter);
+                            isWifiReceiverRegistered = true;
                             wifiConnectionThread = new WiFiConnectionRequestThread(requireContext(), (response) -> {
+                                if(wifiConnectionHandler != null)
+                                    wifiConnectionHandler.removeCallbacks(wifiConnectionHandlerRunnable);
                                 if(response != null)
                                     manageResponse(response);
                             });
                             wifiConnectionThread.start();
                             // SET TIME LIMIT TO CONNECTION THREAD
-                            new Handler(Looper.getMainLooper()).postDelayed(
-                                    (() -> onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT)),
-                                    OnConnectionFinishCallback.MAX_TIME_CONNECTION
-                            );
+                            wifiConnectionHandler = new Handler(Looper.getMainLooper());
+                            wifiConnectionHandler.postDelayed(wifiConnectionHandlerRunnable, OnConnectionFinishCallback.MAX_TIME_CONNECTION);
                         }
                         else
                             onConnectionFinishCallback.restartFragment(OnConnectionFinishCallback.CONNECTION_MODE_WIFI);
@@ -227,18 +240,20 @@ public class WiFiConnectionFragment extends Fragment {
     }
 
     private void manageResponse(@NonNull String response) {
-        switch (response) {
-            case OnConnectionFinishCallback.WIFI_ERROR_RESPONSE:
-                onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT);
-                break;
-            case OnConnectionFinishCallback.WIFI_ALREADY_CONNECTED_DEVICE_RESPONSE:
-                onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT);
-                break;
-            case OnConnectionFinishCallback.WIFI_CONNECTED_RESPONSE:
-                onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_CONNECTED_DEVICE_RESULT);
-                break;
-            default:
-                break;
+        if(onConnectionFinishCallback != null) {
+            switch (response) {
+                case OnConnectionFinishCallback.WIFI_ERROR_RESPONSE:
+                    onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT);
+                    break;
+                case OnConnectionFinishCallback.WIFI_ALREADY_CONNECTED_DEVICE_RESPONSE:
+                    onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT);
+                    break;
+                case OnConnectionFinishCallback.WIFI_CONNECTED_RESPONSE:
+                    onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_CONNECTED_DEVICE_RESULT);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

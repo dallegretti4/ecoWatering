@@ -28,6 +28,8 @@ public class SharedPreferencesHelper {
     public static final String CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME = "CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_FILENAME";
     public static final String CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY = "CONNECTION_CHOOSER_FRAGMENT_IS_REFRESHING_KEY";
     public static final String IRR_SYS_MANUAL_SCHEDULING_FILENAME = "IRR_SYS_MANUAL_SCHEDULING";
+    public static final String TUTORIAL_CHECK_FILENAME = "TUTORIAL_CHECK";
+    public static final String TUTORIAL_CHECK_KEY = "TUTORIAL_CHECK_KEY";
     @SuppressLint("ApplySharedPref")
     public static void writeStringOnSharedPreferences(@NonNull Context context, String fileName, String keyValue, String stringValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);

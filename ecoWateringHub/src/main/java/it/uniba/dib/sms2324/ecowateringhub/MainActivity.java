@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.os.Bundle;
@@ -62,11 +63,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle activitySavedInstanceState) {
         super.onCreate(activitySavedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(it.uniba.dib.sms2324.ecowateringcommon.R.layout.activity_frame_layout);
         fragmentManager = getSupportFragmentManager();
         if(HttpHelper.isDeviceConnectedToInternet(this)) {
             if(activitySavedInstanceState == null) {
-                Common.lockLayout(this); // CHECK IS NOT CONFIGURATION CHANGED
                 changeFragment(new LoadingFragment(), false);    // SHOW LOADING FRAGMENT
                 EcoWateringHub.getEcoWateringHub(Common.getThisDeviceID(this), ((existsResponse) -> {  // CHECK DEVICE IS REGISTERED
                     // NOT FIRST START CASE
@@ -195,8 +195,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void controlSystemManually() {
         thisEcoWateringHub.setIsAutomated(false, (response) -> {
-            if(!response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE))
+            if(!response.equals(EcoWateringHub.SET_IS_AUTOMATED_SUCCESS_RESPONSE)) {
                 runOnUiThread(this::showHttpErrorFaultDialog);
+                restartApp();
+            }
         });
     }
 
@@ -323,31 +325,33 @@ public class MainActivity extends AppCompatActivity implements
      * To replace the fragment.
      */
     private void changeFragment(@NonNull Fragment fragment, boolean addToBackStack) {
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        // INSERT SLIDE ANIMATION ON SensorConfigurationFragment
-        if((fragment instanceof SensorConfigurationFragment)) { // FOR SensorConfigurationFragment
-            if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY))
+        runOnUiThread(() -> {
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            // INSERT SLIDE ANIMATION ON SensorConfigurationFragment
+            if((fragment instanceof SensorConfigurationFragment)) { // FOR SensorConfigurationFragment
+                if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY))
+                    fragmentTransaction.setCustomAnimations(
+                            it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
+                            it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
+                            it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
+                            it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
+                    );
+                    // SENSOR CONFIGURATION FRAGMENT IS REFRESHING CASE
+                else SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY, false);
+            }
+            else if(fragment instanceof StartSecondFragment)
                 fragmentTransaction.setCustomAnimations(
                         it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
                         it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
                         it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
                         it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
                 );
-            // SENSOR CONFIGURATION FRAGMENT IS REFRESHING CASE
-            else SharedPreferencesHelper.writeBooleanOnSharedPreferences(this, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_FILENAME, SharedPreferencesHelper.SENSOR_CONFIGURATION_FRAGMENT_IS_REFRESHING_KEY, false);
-        }
-        else if(fragment instanceof StartSecondFragment)
-            fragmentTransaction.setCustomAnimations(
-                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_right,
-                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_left,
-                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_in_left,
-                it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
-            );
 
-        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
-        if(addToBackStack)
-            fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+            fragmentTransaction.replace(it.uniba.dib.sms2324.ecowateringcommon.R.id.mainFrameLayout, fragment);
+            if(addToBackStack)
+                fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        });
     }
 
     private void updateSensorsList() {

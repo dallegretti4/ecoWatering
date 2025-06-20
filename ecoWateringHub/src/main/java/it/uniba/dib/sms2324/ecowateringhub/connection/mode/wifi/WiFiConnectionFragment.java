@@ -65,8 +65,13 @@ public class WiFiConnectionFragment extends Fragment {
     private ArrayList<WifiP2pDevice> deviceList;
     private ArrayList<String> deviceStringList;
     private ArrayAdapter<String> deviceAdapter;
-    private WiFiConnectionRequestThread wiFiConnectionRequestThread;
     private OnConnectionFinishCallback onConnectionFinishCallback;
+    private WiFiConnectionRequestThread wiFiConnectionRequestThread;
+    private Handler wifiConnectionHandler;
+    private final Runnable wifiConnectionHandlerRunnable = (() -> {
+        if((progressBar.getVisibility() == View.VISIBLE) && (onConnectionFinishCallback != null))
+            onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT);
+    });
     private final MenuProvider menuProvider = new MenuProvider() {
         @Override
         public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
@@ -126,6 +131,8 @@ public class WiFiConnectionFragment extends Fragment {
         if(info.groupFormed && !info.isGroupOwner && info.groupOwnerAddress.getHostAddress() != null) {
             String peerAddress = info.groupOwnerAddress.getHostAddress();
             wiFiConnectionRequestThread = new WiFiConnectionRequestThread(requireContext(), peerAddress, ((response) -> {
+                if(wifiConnectionHandler != null)
+                    wifiConnectionHandler.removeCallbacks(wifiConnectionHandlerRunnable);
                 requireActivity().runOnUiThread(() -> {
                     titleTextView.setText(R.string.wifi_connection_title);
                     wifiConnectionListView.setVisibility(View.VISIBLE);
@@ -191,6 +198,8 @@ public class WiFiConnectionFragment extends Fragment {
     public void onPause() {
         super.onPause();
         requireActivity().unregisterReceiver(peersReceiver);
+        if(wifiConnectionHandler != null)
+            wifiConnectionHandler.removeCallbacks(wifiConnectionHandlerRunnable);
         if(wiFiConnectionRequestThread != null && wiFiConnectionRequestThread.isAlive())
             wiFiConnectionRequestThread.interrupt();
         wifiP2pManager.stopPeerDiscovery(channel, null);
@@ -319,10 +328,8 @@ public class WiFiConnectionFragment extends Fragment {
                     public void onSuccess() {
                         Log.i(Common.LOG_NORMAL, "connection started");
                         // SET TIME LIMIT TO CONNECTION THREAD
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            if(progressBar.getVisibility() == View.VISIBLE)
-                                onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT);
-                        }, OnConnectionFinishCallback.MAX_TIME_CONNECTION);
+                        wifiConnectionHandler =  new Handler(Looper.getMainLooper());
+                        wifiConnectionHandler.postDelayed(wifiConnectionHandlerRunnable, OnConnectionFinishCallback.MAX_TIME_CONNECTION);
                     }
                     @Override
                     public void onFailure(int i) {

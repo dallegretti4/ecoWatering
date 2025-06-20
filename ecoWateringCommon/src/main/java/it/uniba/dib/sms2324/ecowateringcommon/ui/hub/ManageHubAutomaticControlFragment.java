@@ -3,6 +3,7 @@ package it.uniba.dib.sms2324.ecowateringcommon.ui.hub;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -63,18 +64,19 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if(context instanceof OnManageHubAutomaticControlActionCallback) {
-            this.onManageHubAutomaticControlActionCallback = (OnManageHubAutomaticControlActionCallback) context;
+            onManageHubAutomaticControlActionCallback = (OnManageHubAutomaticControlActionCallback) context;
         }
     }
     @Override
     public void onDetach() {
         super.onDetach();
-        this.onManageHubAutomaticControlActionCallback = null;
+        onManageHubAutomaticControlActionCallback = null;
     }
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), onBackPressedCallback); // ON BACK PRESSED CALLBACK SETUP
+        Common.unlockLayout(requireActivity());
         if(savedInstanceState != null) {
             if(isIrrigationInfoCardVisible) showAutomatedIrrigationSystemInfoCard(view);
             if(isActivityLogHistoryVisible) showIrrigationSystemHistory(view);
@@ -99,7 +101,9 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         return new Runnable() {
             @Override
             public void run() {
+                Log.i(Common.LOG_NORMAL, ".....................> RUNNABLE");
                 if(onManageHubAutomaticControlActionCallback != null) onManageHubAutomaticControlActionCallback.refreshDataObject((ecoWateringHub) -> {
+                    Log.i(Common.LOG_NORMAL, ".....................> RUNNABLE");
                     hub = ecoWateringHub;
                     if (!hub.isAutomated()) onManageHubAutomaticControlActionCallback.restartApp();
                     else if (getView() != null) requireActivity().runOnUiThread(() -> manageHubViewSetup(getView()));
@@ -228,8 +232,10 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         historyListView.setAdapter(adapter);
         // FILL LIST
         for(IrrigationSystemActivityLogInstance instance : hub.getIrrigationSystem().getActivityLog()) {
-            activityLogArrayList.add(instance);
-            requireActivity().runOnUiThread(adapter::notifyDataSetChanged);
+            new Thread(() -> {
+                activityLogArrayList.add(instance);
+                requireActivity().runOnUiThread(adapter::notifyDataSetChanged);
+            }).start();
         }
         // HIDE BUTTON SETUP
         ImageView hideHistoryImageViewButton = view.findViewById(R.id.hideHistoryImageViewButton);
@@ -249,7 +255,7 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
                         getString(R.string.confirm_button),
                         (dialogInterface, i) -> {
                             isControlSystemManuallyDialogVisible = false;
-                            this.onManageHubAutomaticControlActionCallback.controlSystemManually();
+                            onManageHubAutomaticControlActionCallback.controlSystemManually();
                         }
                 ).setNegativeButton(
                         getString(R.string.close_button),

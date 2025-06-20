@@ -62,12 +62,11 @@
             android:id="@+id/wifiModeButton"
             android:layout_width="0dp"
             android:layout_height="72dp"
-            android:layout_marginBottom="20dp"
             android:text="@string/wifi_button"
             android:textColor="@color/black_white_100"
             app:layout_constraintWidth_percent="0.3"
-            app:layout_constraintTop_toBottomOf="@+id/connectionChooserTitleTextView"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/bluetoothModeButton"
+            app:layout_constraintBottom_toBottomOf="@+id/bluetoothModeButton"
             app:layout_constraintLeft_toRightOf="@+id/bluetoothModeButton"
             app:layout_constraintRight_toRightOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>

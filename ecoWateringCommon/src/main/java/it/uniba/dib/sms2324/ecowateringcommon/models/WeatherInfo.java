@@ -4,8 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,6 +132,31 @@ public class WeatherInfo implements Parcelable {
 
     public double getIndexUV() {
         return this.indexUV;
+    }
+
+    public void draw(@NonNull Context context, @NonNull View view, @NonNull final EcoWateringHub hub, final int primary_color_50) {
+        // WEATHER IMAGE VIEW SETUP
+        view.findViewById(R.id.weatherIconImageViewContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
+        ImageView weatherImageView = view.findViewById(R.id.weatherIconImageView);
+        weatherImageView.setImageResource(WeatherInfo.getWeatherImageResourceId(this.getWeatherCode()));
+        // AMBIENT TEMPERATURE TEXT VIEW SETUP
+        TextView degreesTextView = view.findViewById(R.id.weatherStateFirstDegreesTextView);
+        degreesTextView.setText(String.valueOf(((int) hub.getAmbientTemperature())));
+        // HUB ADDRESS TEXT VIEW SETUP
+        TextView addressTextView = view.findViewById(R.id.weatherStateAddressTextView);
+        addressTextView.setText(hub.getPosition());
+        // RELATIVE HUMIDITY PERCENT TEXT VIEW SETUP
+        TextView relativeHumidityPercentTextView = view.findViewById(R.id.relativeHumidityPercentTextView);
+        relativeHumidityPercentTextView.setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
+        relativeHumidityPercentTextView.setText(String.valueOf((int)(hub.getRelativeHumidity())));
+        // UV INDEX TEXT VIEW SETUP
+        TextView uvIndexTextView = view.findViewById(R.id.lightIndexTextView);
+        uvIndexTextView.setText(String.valueOf((int)(hub.getIndexUV())));
+        uvIndexTextView.setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
+        // PRECIPITATION CARD SETUP
+        ((TextView) view.findViewById(R.id.precipitationValueTextView)).setText(String.valueOf(this.getPrecipitation()));
+        view.findViewById(R.id.precipitationValueContainer).setBackgroundTintList(ResourcesCompat.getColorStateList(context.getResources(), primary_color_50, context.getTheme()));
+        ((TextView) view.findViewById(R.id.precipitationLabelTextView)).setText(context.getString(WeatherInfo.getPrecipitationStringResourceId(this.getPrecipitation())));
     }
 
     // PARCELABLE IMPLEMENTATION

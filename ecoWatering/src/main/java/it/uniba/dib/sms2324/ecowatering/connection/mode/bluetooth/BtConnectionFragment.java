@@ -59,10 +59,10 @@ public class BtConnectionFragment extends Fragment {
     private final ActivityResultLauncher<Intent> makeBtDiscoverableLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             ((result) -> {
-                if(result.getResultCode() == Activity.RESULT_CANCELED)
-                    onConnectionFinishCallback.closeConnection();
-                else
+                if(result.getResultCode() != Activity.RESULT_CANCELED)
                     startAcceptingBtRequest();
+                else
+                    onConnectionFinishCallback.closeConnection();
             })
     );
 
@@ -102,15 +102,11 @@ public class BtConnectionFragment extends Fragment {
    }
 
    @Override
-   public void onPause() {
-        super.onPause();
-        Common.unlockLayout(requireActivity());
-   }
-
-   @Override
    public void onStop() {
         super.onStop();
        this.makeBtDiscoverableLauncher.unregister();
+       this.bluetoothAdapter = null;
+       Common.unlockLayout(requireActivity());
    }
 
    private void toolbarSetup(@NonNull View view) {

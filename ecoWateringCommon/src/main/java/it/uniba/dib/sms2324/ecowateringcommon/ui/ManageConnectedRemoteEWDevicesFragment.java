@@ -31,7 +31,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
 public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
     private static final String CONNECTED_DEVICES_EWD_LIST_OUT_STATE = "CONNECTED_DEVICES_EWD_LIST_OUT_STATE";
-    private static final String DISCONNECT_DEVICE_CARD_POSITION_OUT_STATE = "DISCONNECT_DEVICE_CARD_POSITION_OUT_STATE";
     private OnConnectedRemoteEWDeviceActionCallback onConnectedRemoteEWDeviceActionCallback;
     public interface OnConnectedRemoteEWDeviceActionCallback {
         void onManageConnectedDevicesGoBack();
@@ -49,7 +48,7 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
     private ArrayList<String> remoteDeviceStringList;
     private ArrayList<EcoWateringDevice> remoteEWDeviceList;
     private EcoWateringDeviceAdapter ecoWateringDeviceAdapter;
-    private int outStatePosition = -1;
+    private static int devicePosition = -1;
     private static boolean isRemoveRemoteDeviceConfirmDialogVisible;
     private static boolean isRemoveRemoteDeviceSuccessfulDialogVisible;
     private static boolean isHttpErrorFaultDialogVisible;
@@ -135,10 +134,8 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> this.ecoWateringDeviceAdapter.notifyDataSetChanged());
             }
             // DISCONNECT DEVICE CARD ENABLED RECOVERING CASE
-            if(savedInstanceState.getInt(DISCONNECT_DEVICE_CARD_POSITION_OUT_STATE) != -1) {
-                if(isRemoveRemoteDeviceConfirmDialogVisible) showRemoveRemoteDeviceConfirmDialog(view, savedInstanceState.getInt(DISCONNECT_DEVICE_CARD_POSITION_OUT_STATE));
-                else showDisconnectDeviceCard(view, savedInstanceState.getInt(DISCONNECT_DEVICE_CARD_POSITION_OUT_STATE));
-            }
+            if(isRemoveRemoteDeviceConfirmDialogVisible && devicePosition != -1)
+                showRemoveRemoteDeviceConfirmDialog(devicePosition);
             // DIALOGS
             else if(isRemoveRemoteDeviceSuccessfulDialogVisible) showRemoveRemoteDeviceSuccessfulDialog();
             else if(isHttpErrorFaultDialogVisible) showHttpErrorFaultDialog();
@@ -149,7 +146,6 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(CONNECTED_DEVICES_EWD_LIST_OUT_STATE, this.remoteEWDeviceList);
-        outState.putInt(DISCONNECT_DEVICE_CARD_POSITION_OUT_STATE, this.outStatePosition);
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -198,7 +194,7 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
         AbsListView absListView = view.findViewById(R.id.remoteDevicesConnectedAbsView);
         absListView.setAdapter(this.ecoWateringDeviceAdapter);
         absListView.setAdapter(this.ecoWateringDeviceAdapter);
-        absListView.setOnItemClickListener((adapterView, v, position, l) -> showDisconnectDeviceCard(view, position));
+        absListView.setOnItemClickListener((adapterView, v, position, l) -> showRemoveRemoteDeviceConfirmDialog(position));
     }
 
     private void fillEWDList(Common.OnMethodFinishCallback callback) {
@@ -218,28 +214,14 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
         }
     }
 
-    private void showDisconnectDeviceCard(@NonNull View view, int position) {
-        this.outStatePosition = position;
-        view.findViewById(R.id.disconnectDeviceCard).setVisibility(View.VISIBLE);   // MAKE CARD VISIBLE
-        view.findViewById(R.id.disconnectDeviceBackgroundCard).setVisibility(View.VISIBLE);    // MAKE CARD BACKGROUND VISIBLE
-        view.findViewById(R.id.cancelButton).setOnClickListener((v) -> hideDisconnectDeviceCard(view)); // CANCEL BUTTON SETUP
-        // DISCONNECT BUTTON SETUP
-        view.findViewById(R.id.disconnectRemoteDeviceButton).setOnClickListener((v) -> showRemoveRemoteDeviceConfirmDialog(view, position));
-    }
-
-    private void hideDisconnectDeviceCard(@NonNull View view) {
-        this.outStatePosition = -1;
-        view.findViewById(R.id.disconnectDeviceCard).setVisibility(View.GONE);  // MAKE CARD NOT VISIBLE
-        view.findViewById(R.id.disconnectDeviceBackgroundCard).setVisibility(View.GONE);    // MAKE CARD BACKGROUND NOT VISIBLE
-    }
-
     private void noConnectedRemoteDeviceCaseSetup(@NonNull View view) {
         view.findViewById(R.id.noRemoteDevicesConnectedCaseTextView).setVisibility(View.VISIBLE);
         view.findViewById(R.id.remoteDevicesConnectedAbsView).setVisibility(View.GONE);
     }
 
-    private void showRemoveRemoteDeviceConfirmDialog(@NonNull View view, int position) {
+    private void showRemoveRemoteDeviceConfirmDialog(int position) {
         isRemoveRemoteDeviceConfirmDialogVisible = true;
+        devicePosition = position;
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.remove_remote_device_confirm_title))
                 .setMessage(getString(R.string.remove_remote_device_confirm_message))
@@ -252,7 +234,6 @@ public class ManageConnectedRemoteEWDevicesFragment extends Fragment {
                                     this.remoteEWDeviceList.get(position),
                                     (response) ->
                                             requireActivity().runOnUiThread(() -> {
-                                                hideDisconnectDeviceCard(view);
                                                 if(response.equals(Common.REMOVE_REMOTE_DEVICE_RESPONSE)) showRemoveRemoteDeviceSuccessfulDialog();
                                                 else showHttpErrorFaultDialog();
                                             }));

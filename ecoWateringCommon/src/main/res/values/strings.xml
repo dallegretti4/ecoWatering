@@ -20,12 +20,16 @@
     <string name="changes_not_saved_message">If you go back, changes will be lost.</string>
     <string name="changes_not_saved_title">Changes have not yet been saved</string>
     <string name="close_button">Close</string>
+    <string name="close_tutorial_button">Close tutorial</string>
+    <string name="close_tutorial_dialog_msg">You can repeat it from user profile panel.</string>
+    <string name="close_tutorial_dialog_title">Do you want to exit from tutorial?</string>
     <string name="configuration_label">Configuration</string>
     <string name="configuration_not_automated">Automate system</string>
     <string name="configuration_not_automated_message">Try our automatic control</string>
     <string name="configure_label">Configure</string>
     <string name="confirm_button">Confirm</string>
     <string name="connect_to_hub_toolbar_title">Connect to ecoWatering Hub</string>
+    <string name="connected_remote_devices_card_tutorial_msg">From here, you can manage connected remote devices, add new and remove them.</string>
     <string name="connection_chooser_fragment_title_device">To connect to your device, you need to receive the request from your EcoWateringHub.\n\nChoose the way you like to receive the request.</string>
     <string name="connection_chooser_fragment_title_hub">Choose the way you like to authorize a remote ecoWatering Device.</string>
     <string name="control_system_manually_dialog_message">All the functionality will turned in manual mode, Make you sure you have all under your control.</string>
@@ -87,9 +91,12 @@
     <string name="remote_devices_connected_case">Select \"+\" item on the toolbar to add new remote devices..</string>
     <string name="remote_device_connection_toolbar_title">Add new device</string>
     <string name="remove_remote_device_confirm_title">Do you want to remove this device?</string>
-    <string name="remove_remote_device_confirm_message">You can never manage the ecoWatering Hub from this device</string>
+    <string name="remove_remote_device_confirm_message">You can never manage this Hub from this device</string>
     <string name="remove_remote_device_successfully_title">Device removed successfully!</string>
     <string name="remove_remote_device_title_empty_case">No remote device connected</string>
+    <string name="repeat_tutorial_button">Repeat tutorial</string>
+    <string name="repeat_tutorial_dialog_msg">Remember! Tutorial will be available only for not automated hub.</string>
+    <string name="repeat_tutorial_dialog_title">Do you want to repeat the tutorial?</string>
     <string name="retry_button">Retry</string>
     <string name="precipitation_label">Precipitation</string>
     <string name="precipitation_label_chance_light_precipitation">Slight chance of light rain</string>
@@ -131,6 +138,7 @@
     <string name="watering_minutes_executed_label">Executed watering minutes: </string>
     <string name="watering_minutes_saved_label">Saved watering minutes</string>
     <string name="watering_minutes_saved_total_value_label">Total saved watering minutes: </string>
+    <string name="weather_info_card_tutorial_msg">This is the WeatherCard, you can see main information about forecast weather and using sensors</string>
     <string name="why_use_location_address_dialog_post_never_show_message">Go to Setting->privacy->Manage permissions and allow the app to know your location manually.</string>
     <string name="why_use_location_address_dialog_post_never_show_title">You have to allow the app, to know your location</string>
     <string name="why_use_location_dialog_message">We will use your location just to connect your device with an other one.</string>
@@ -169,5 +177,12 @@
         <item>October</item>
         <item>November</item>
         <item>December</item>
+    </string-array>
+
+    <string-array name="tutorial_labels">
+        <item>This is the WeatherCard, you can see main information about forecast weather and using sensors</item>
+        <item>From here, you can manage connected remote devices, add new and remove them.</item>
+        <item>This is the irrigation system panel, you can enable it directly or schedule it from here. Remember you can automate it, we will take care about it for you.</item>
+        <item>This is the configuration panel, you can see the state of your hub, choose and manage sensors</item>
     </string-array>
 </resources>

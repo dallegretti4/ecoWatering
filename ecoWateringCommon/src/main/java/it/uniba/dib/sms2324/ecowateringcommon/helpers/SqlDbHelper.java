@@ -135,7 +135,8 @@ public class SqlDbHelper {
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(stringBuilder.toString());
             Log.i(LOG_DB, "setIsAutomated response: " + response);
-            callback.getResponse(response);
+            if(callback != null)
+                callback.getResponse(response);
         }).start();
     }
 

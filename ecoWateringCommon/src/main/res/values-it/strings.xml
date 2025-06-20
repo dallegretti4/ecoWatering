@@ -20,12 +20,16 @@
     <string name="changes_not_saved_message">Tornando indietro, le modifiche non saranno salvate.</string>
     <string name="changes_not_saved_title">Le modifiche non sono state ancora salvate</string>
     <string name="close_button">Chiudi</string>
+    <string name="close_tutorial_button">Chiudi tutorial</string>
+    <string name="close_tutorial_dialog_msg">Potrai ripeterlo dal pannello Utente.</string>
+    <string name="close_tutorial_dialog_title">Vuoi uscire dal tutorial?</string>
     <string name="configuration_label">Configurazione</string>
     <string name="configuration_not_automated">Automatizza sistema</string>
     <string name="configuration_not_automated_message">Prova il nostro controllo automatizzato</string>
     <string name="configure_label">Configura</string>
     <string name="confirm_button">Conferma</string>
     <string name="connect_to_hub_toolbar_title">Connetti ad un ecoWatering Hub</string>
+    <string name="connected_remote_devices_card_tutorial_msg">Da qui puoi gestire i dispositivi connessi da remoto, aggiungerne nuovi e rimuoverli.</string>
     <string name="connection_chooser_fragment_title_device">Per connettere il tuo dispositivo, devi ricevere una richiesta di connessione dal tuo ecoWatering Hub.\n\nScegli il modo che preferisci per ricevere la richiesta.</string>
     <string name="connection_chooser_fragment_title_hub">Scelgi il modo che preferisci per inviare una richiesta di connessione al tuo dispositivo.</string>
     <string name="control_system_manually_dialog_message">Tutte i comandi passeranno al controllo manuale, accertati di avere tutto sotto controllo.</string>
@@ -87,9 +91,12 @@
     <string name="remote_devices_connected_case">Seleziona la voce \"+\" nella toolbar per connettere un nuovo dispositivo..</string>
     <string name="remote_device_connection_toolbar_title">Aggiungi nuovo dispositivo</string>
     <string name="remove_remote_device_confirm_title">Vuoi rimuovere questo dispositivo?</string>
-    <string name="remove_remote_device_confirm_message">You can never manage the ecoWatering Hub from this device</string>
+    <string name="remove_remote_device_confirm_message">Non potrai più gestire questo Hub da questo dispositivo.</string>
     <string name="remove_remote_device_successfully_title">Dispositivo disconnesso!</string>
     <string name="remove_remote_device_title_empty_case">Nessun dispositivo connesso</string>
+    <string name="repeat_tutorial_button">Ripeti tutorial</string>
+    <string name="repeat_tutorial_dialog_msg">Ricorda! Il tutorial sarà visibile solo per hub non automatizzati.</string>
+    <string name="repeat_tutorial_dialog_title">Vuoi ripetere il tutorial?</string>
     <string name="retry_button">Riprova</string>
     <string name="precipitation_label">Precipitazioni</string>
     <string name="precipitation_label_chance_light_precipitation">Basse probabilità di pioggia</string>
@@ -131,6 +138,7 @@
     <string name="watering_minutes_executed_label">Minuti di irrigazioni effettuati: </string>
     <string name="watering_minutes_saved_label">Minuti di irrigazione risparmiati</string>
     <string name="watering_minutes_saved_total_value_label">Totale minuti di irrigazioni risparmiati: </string>
+    <string name="weather_info_card_tutorial_msg">Questa è la WeatherCard, puoi visualizzare le informazioni principali sulle previsioni meteo e sensori utilizzati.</string>
     <string name="why_use_location_address_dialog_post_never_show_message">Vai in Impostazioni->Privacy->Gestione autorizzazioni e concedi all\'app i permessi di geolocalizzazione.</string>
     <string name="why_use_location_address_dialog_post_never_show_title">Abbiamo bisogno di conoscere la tua posizione</string>
     <string name="why_use_location_dialog_message">Useremo la tua posizione esclusivamente per connettere il tuo dispositivo con un\'altro.</string>
@@ -168,5 +176,12 @@
         <item>Ottobre</item>
         <item>Novembre</item>
         <item>Dicembre</item>
+    </string-array>
+
+    <string-array name="tutorial_labels">
+        <item>Questa è la WeatherCard, puoi visualizzare le informazioni principali sulle previsioni meteo e sensori utilizzati.</item>
+        <item>Da qui puoi gestire i dispositivi connessi da remoto, aggiungerne nuovi e rimuoverli.</item>
+        <item>Questo è il pannello dell\'impianto d\'irrigazione, da qui puoi attivarlo in modo diretto o programmarlo. Ricorda che puoi automatizzare l\'impianto, ce ne prenderemo cura per te.</item>
+        <item>Questo è il pannello di configurazione, puoi monitorare lo stato dell\'hub, scegliere ed utilizzare i sensori</item>
     </string-array>
 </resources>

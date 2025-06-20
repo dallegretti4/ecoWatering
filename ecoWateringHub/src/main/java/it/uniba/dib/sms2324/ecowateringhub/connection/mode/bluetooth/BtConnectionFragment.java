@@ -58,9 +58,17 @@ public class BtConnectionFragment extends Fragment {
     private static ArrayAdapter<String> deviceListAdapter;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothDevice deviceToAdd;
+    private OnConnectionFinishCallback onConnectionFinishCallback;
     private BtDiscoveryThread btDiscoveryThread;
     private BtConnectionRequestThread btConnectionRequestThread;
-    private OnConnectionFinishCallback onConnectionFinishCallback;
+    private Handler btConnectionHandler;
+    private final Runnable btConnectionHandlerRunnable = (() -> {
+        if(btConnectionRequestThread.isAlive()) {
+            btConnectionRequestThread.closeSocket();
+            if(onConnectionFinishCallback != null)
+                requireActivity().runOnUiThread(() -> onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT));
+        }
+    });
     private final ActivityResultLauncher<Intent> enableBluetoothLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), ((resultCode) -> {
                 if(resultCode.getResultCode() == Activity.RESULT_OK) {
@@ -126,14 +134,20 @@ public class BtConnectionFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         Common.unlockLayout(requireActivity());
-        bluetoothAdapter = null;
-        if(btDiscoveryThread != null && btDiscoveryThread.isAlive())
+        if(btConnectionHandler != null)
+            btConnectionHandler.removeCallbacks(btConnectionHandlerRunnable);
+        if(btDiscoveryThread != null && btDiscoveryThread.isAlive()) {
             btDiscoveryThread.cancelDiscovery();
-        if(btConnectionRequestThread != null)
+            btDiscoveryThread.interrupt();
+        }
+        if(btConnectionRequestThread != null) {
             btConnectionRequestThread.closeSocket();
+            btConnectionRequestThread.interrupt();
+        }
+        bluetoothAdapter = null;
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -237,15 +251,17 @@ public class BtConnectionFragment extends Fragment {
                 if(bluetoothAdapter.isDiscovering()) {
                     bluetoothAdapter.cancelDiscovery();
                 }
-                sendBtConnectionRequest(requireContext(), (response) ->
+                sendBtConnectionRequest(requireContext(), (response) -> {
+                    if(btConnectionHandler != null)
+                        btConnectionHandler.removeCallbacks(btConnectionHandlerRunnable);
                     requireActivity().runOnUiThread(() -> {
                         titleTextView.setVisibility(View.VISIBLE);
                         deviceListView.setVisibility(View.VISIBLE);
                         titleConnectingTextView.setVisibility(View.GONE);
                         btConnectionRequestProgressBar.setVisibility(View.GONE);
                         manageResponse(response);
-                    })
-                );
+                    });
+                });
             }
             return true;
         });
@@ -263,12 +279,8 @@ public class BtConnectionFragment extends Fragment {
         if(bluetoothAdapter.isDiscovering())
             bluetoothAdapter.cancelDiscovery();
         // SET TIME LIMIT TO CONNECTION THREAD
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if(btConnectionRequestThread.isAlive()) {
-                btConnectionRequestThread.closeSocket();
-                requireActivity().runOnUiThread(() -> this.onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ERROR_RESULT));
-            }
-        }, OnConnectionFinishCallback.MAX_TIME_CONNECTION);
+        btConnectionHandler = new Handler(Looper.getMainLooper());
+        btConnectionHandler.postDelayed(btConnectionHandlerRunnable, OnConnectionFinishCallback.MAX_TIME_CONNECTION);
     }
 
     private void manageResponse(String response) {

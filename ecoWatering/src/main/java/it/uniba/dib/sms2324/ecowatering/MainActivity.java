@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(it.uniba.dib.sms2324.ecowateringcommon.R.layout.activity_frame_layout);
         fragmentManager = getSupportFragmentManager();
         if(savedInstanceState == null) {
             changeFragment(new LoadingFragment(), false);   // LOADING FRAGMENT

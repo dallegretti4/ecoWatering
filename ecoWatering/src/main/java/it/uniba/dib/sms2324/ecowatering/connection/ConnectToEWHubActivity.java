@@ -26,12 +26,10 @@ import it.uniba.dib.sms2324.ecowatering.MainActivity;
 import it.uniba.dib.sms2324.ecowatering.R;
 import it.uniba.dib.sms2324.ecowatering.connection.mode.bluetooth.BtConnectionFragment;
 import it.uniba.dib.sms2324.ecowatering.connection.mode.wifi.WiFiConnectionFragment;
-import it.uniba.dib.sms2324.ecowatering.management.ManageEWHubActivity;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
-import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment;
 
 public class ConnectToEWHubActivity extends AppCompatActivity implements
@@ -49,7 +47,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connect_to_eco_watering_hub);
+        setContentView(it.uniba.dib.sms2324.ecowateringcommon.R.layout.activity_frame_layout);
         fragmentManager = getSupportFragmentManager();
         if(savedInstanceState == null) {
             Log.i(Common.LOG_NORMAL, "ConnectToEWHubActivity -> onCreate()");
@@ -165,6 +163,10 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
                 startActivity(restartIntent);
                 finish();
             }
+            else {
+                startActivity(new Intent(this, ConnectToEWHubActivity.class));
+                finish();
+            }
         }
         // CALLED IN onModeSelected()
         else if(requestCode == Common.BT_PERMISSION_REQUEST) {
@@ -219,7 +221,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
                     it.uniba.dib.sms2324.ecowateringcommon.R.anim.fragment_transaction_slide_out_right
             );
 
-        fragmentTransaction.replace(R.id.connectToEcoWateringHubFrameLayout, fragment);
+        fragmentTransaction.replace(R.id.mainFrameLayout, fragment);
         if(addToBackStackFlag) {
             fragmentTransaction.addToBackStack(null);
         }

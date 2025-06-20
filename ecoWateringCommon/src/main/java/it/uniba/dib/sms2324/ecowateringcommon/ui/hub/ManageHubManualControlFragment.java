@@ -2,6 +2,7 @@ package it.uniba.dib.sms2324.ecowateringcommon.ui.hub;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.util.Calendar;
@@ -25,6 +27,7 @@ import java.util.Locale;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlan;
 
@@ -37,6 +40,23 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         void scheduleIrrSys(Calendar calendar, int[] irrigationDuration);
     }
     private Button confirmSchedulingButton;
+    private static int counter;
+    private static Calendar calendar;
+    private final DatePicker.OnDateChangedListener onDateChangedListener = new DatePicker.OnDateChangedListener() {
+        @Override
+        public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, monthOfYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        }
+    };
+    private final TimePicker.OnTimeChangedListener onTimeChangedListener = new TimePicker.OnTimeChangedListener() {
+        @Override
+        public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            calendar.set(Calendar.MINUTE, minute);
+        }
+    };
     private final InputFilter[] hoursInputFilters = new InputFilter[]{
             (source, start, end, dest, dStart, dEnd) -> {
                 try {
@@ -90,8 +110,10 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         }
     };
     private final static String[] stringIrrigationDuration = new String[2];
+    private static final View[] views = new View[4];
     private DatePicker schedulingStartingDatePicker;
     private TimePicker schedulingStartingTimePicker;
+    private static boolean isTutorialVisible;
     private static boolean isScheduleCardVisible;
     private static boolean isSwitchIrrigationSystemDialogVisible;
     private static boolean isIrrSysScheduleConfirmDialogVisible;
@@ -111,44 +133,56 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if(context instanceof OnHubManualActionChosenCallback) {
-            this.onHubManualActionChosenCallback = (OnHubManualActionChosenCallback) context;
+            onHubManualActionChosenCallback = (OnHubManualActionChosenCallback) context;
         }
     }
     @Override
     public void onDetach() {
         super.onDetach();
-        this.onHubManualActionChosenCallback = null;
+        onHubManualActionChosenCallback = null;
     }
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getViewReferences(view);
         if(savedInstanceState != null)  {  // CONFIGURATION CHANGED CASE
+            schedulingStartingDatePicker.updateDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+            schedulingStartingTimePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY));
+            schedulingStartingTimePicker.setMinute(calendar.get(Calendar.MINUTE));
             schedulingHoursEditText.setText(stringIrrigationDuration[0]);
             schedulingMinutesEditText.setText(stringIrrigationDuration[1]);
-            if(isSwitchIrrigationSystemDialogVisible) showSwitchIrrigationSystemDialog(view, !hub.getIrrigationSystem().getState());
-            if(isScheduleCardVisible) showScheduleCard(view);
-            if(isSchedulingCardVisible) showSchedulingCard((view));
-            if(isDeleteSchedulingDialogVisible) showDeleteSchedulingDialog(view);
-            if(isIrrSysScheduleConfirmDialogVisible) showIrrSysScheduleConfirmDialog(view);
+            if(isTutorialVisible) tutorialRecursiveStep(view, views, counter);
+            else if(isSwitchIrrigationSystemDialogVisible) showSwitchIrrigationSystemDialog(view, !hub.getIrrigationSystem().getState());
+            else if(isScheduleCardVisible) showScheduleCard(view);
+            else if(isSchedulingCardVisible) showSchedulingCard((view));
+            else if(isDeleteSchedulingDialogVisible) showDeleteSchedulingDialog(view);
+            else if(isIrrSysScheduleConfirmDialogVisible) showIrrSysScheduleConfirmDialog(view);
             else if(isHttpErrorFaultDialogVisible) showHttpErrorFaultDialog();
         }
+        else
+            counter = 0;
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        stringIrrigationDuration[0] = schedulingHoursEditText.getText().toString();
-        stringIrrigationDuration[1] = schedulingMinutesEditText.getText().toString();
+        if(schedulingHoursEditText != null && schedulingMinutesEditText != null) {
+            stringIrrigationDuration[0] = schedulingHoursEditText.getText().toString();
+            stringIrrigationDuration[1] = schedulingMinutesEditText.getText().toString();
+        }
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+        // NEED TO SHOW TUTORIAL CASE
+        if(!SharedPreferencesHelper.readBooleanFromSharedPreferences(requireContext(), SharedPreferencesHelper.TUTORIAL_CHECK_FILENAME, SharedPreferencesHelper.TUTORIAL_CHECK_KEY)) {
+            // Common.lockLayout(requireActivity());
+            showTutorial(requireView());
+        }
+        else
+            Common.unlockLayout(requireActivity());
     }
 
     @Override
@@ -168,7 +202,7 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
             public void run() {
                 if(onHubManualActionChosenCallback != null) onHubManualActionChosenCallback.refreshDataObject(((ecoWateringHub) -> {
                     hub = ecoWateringHub;
-                    if(hub.isAutomated()) onHubManualActionChosenCallback.restartApp();
+                    if(hub.isAutomated()) onHubManualActionChosenCallback.onManageHubRefreshFragment();
                     else if(getView() != null) requireActivity().runOnUiThread(() -> manageHubViewSetup(getView()));
                 }));
                 if(isRefreshManageHubFragmentRunning) refreshManageHubFragmentHandler.postDelayed(this, REFRESH_FRAGMENT_FREQUENCY);
@@ -268,23 +302,13 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(currentDate);
 
-
-        this.schedulingStartingDatePicker = view.findViewById(R.id.schedulingStartingDatePicker);
         schedulingStartingDatePicker.setMinDate(currentDate);
         schedulingStartingDatePicker.setMaxDate(currentDate + (21 * 24 * 60 * 60 * 1000));
 
-        this.schedulingStartingTimePicker = view.findViewById(R.id.schedulingStartingTimePicker);
-        if(!Locale.getDefault().getCountry().equals(Locale.ENGLISH.getCountry()))
-            schedulingStartingTimePicker.setIs24HourView(true);
-        schedulingStartingTimePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY));
-        schedulingStartingTimePicker.setMinute(calendar.get(Calendar.MINUTE)+1);
-
-        schedulingHoursEditText = view.findViewById(R.id.schedulingHoursEditText);
         schedulingHoursEditText.setText(String.valueOf(0));
         schedulingHoursEditText.setFilters(hoursInputFilters);
         schedulingHoursEditText.addTextChangedListener(textWatcher);
 
-        schedulingMinutesEditText = view.findViewById(R.id.schedulingMinutesEditText);
         schedulingMinutesEditText.setText(String.valueOf((int) IrrigationPlan.BASE_DAILY_IRRIGATION_MINUTES));
         schedulingMinutesEditText.setFilters(minutesInputFilters);
         schedulingMinutesEditText.addTextChangedListener(textWatcher);
@@ -305,7 +329,6 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                 this.primary_color_50,
                 (v -> hideSchedulingCard(view)),
                 (v -> {
-                    isSchedulingCardVisible = false;
                     showDeleteSchedulingDialog(view);
                 })
         ));
@@ -341,6 +364,25 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         refreshManageHubFragmentHandler.post(refreshManageHubFragmentRunnable);
     }
 
+    private void getViewReferences(@NonNull View view) {
+        this.schedulingHoursEditText = view.findViewById(R.id.schedulingHoursEditText);
+        this.schedulingMinutesEditText = view.findViewById(R.id.schedulingMinutesEditText);
+
+        this.schedulingStartingDatePicker = view.findViewById(R.id.schedulingStartingDatePicker);
+        this.schedulingStartingDatePicker.setOnDateChangedListener(this.onDateChangedListener);
+
+        this.schedulingStartingTimePicker = view.findViewById(R.id.schedulingStartingTimePicker);
+        if(calendar == null) {
+            calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis() + (60 * 1000));
+            if(!Locale.getDefault().getLanguage().equals(Locale.ENGLISH.getLanguage()))
+                this.schedulingStartingTimePicker.setIs24HourView(true);
+            schedulingStartingTimePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY));
+            schedulingStartingTimePicker.setMinute(calendar.get(Calendar.MINUTE)+1);
+            this.schedulingStartingTimePicker.setOnTimeChangedListener(onTimeChangedListener);
+        }
+    }
+
     private String getSchedulingMessage() {
         String minutesStartingTime = String.valueOf(schedulingStartingTimePicker.getMinute());
         if(schedulingStartingTimePicker.getMinute() < 10)
@@ -371,6 +413,112 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                 .append(startDateCalendar.get(Calendar.HOUR_OF_DAY)).append(":").append(startDateCalendar.get(Calendar.MINUTE));
         message.append("\n\n").append(getString(R.string.irr_sys_already_scheduled_title));
         return message.toString();
+    }
+
+    private void showTutorial(@NonNull View view) {
+        isTutorialVisible = true;
+        Common.lockLayout(requireActivity());
+        views[0] = view.findViewById(R.id.weatherInfoCard);
+        views[1] = view.findViewById(R.id.connectedRemoteDevicesCard);
+        views[2] = view.findViewById(R.id.irrigationSystemCard);
+        views[3] = view.findViewById(R.id.configurationCard);
+        if(counter == 0)
+            tutorialRecursiveStep(view, views, counter);
+    }
+
+    private void tutorialRecursiveStep(@NonNull View view, @NonNull View[] views, int innerCounter) {
+        Log.i(Common.LOG_NORMAL, "----------------> is tutorial visible inner " + innerCounter);
+        // BACKGROUND
+        view.findViewById(R.id.tutorialHelperViewBackground).setVisibility(View.VISIBLE);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if(innerCounter != (views.length-1))
+                view.findViewById(R.id.tutorialRightSideHelperViewBackground).setVisibility(View.VISIBLE);
+            else
+                view.findViewById(R.id.tutorialRightSideHelperViewBackground).setVisibility(View.GONE);
+        }
+
+        ConstraintLayout tutorialViewsContainer = view.findViewById(R.id.tutorialViewsContainer);   // LABEL
+        tutorialViewsContainer.setVisibility(View.VISIBLE);
+        //  CHANGE ELEVATION
+        float startingElevation = views[innerCounter].getElevation();
+        views[innerCounter].setElevation(Common.dpToPx(requireContext(), 24));
+        //  SET POSITION OF LABEL
+        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) tutorialViewsContainer.getLayoutParams();
+        layoutParams.topToTop = ConstraintLayout.LayoutParams.UNSET;
+        // LANDSCAPE CASE
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if(views[innerCounter].getId() == R.id.irrigationSystemCard) {
+                layoutParams.bottomToTop = views[innerCounter].getId();
+                layoutParams.bottomMargin = (int) Common.dpToPx(requireContext(), 128);
+            }
+            else if(views[innerCounter].getId() == R.id.configurationCard) {
+                layoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+                layoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+            }
+            else
+                layoutParams.topToBottom = views[innerCounter].getId();
+        }
+        else {  // PORTRAIT CASE
+            if(views[innerCounter].getId() != R.id.configurationCard)
+                layoutParams.topToBottom = views[innerCounter].getId();
+            else {
+                layoutParams.topToBottom = ConstraintLayout.LayoutParams.UNSET;
+                layoutParams.bottomToTop = views[innerCounter].getId();
+            }
+        }
+        tutorialViewsContainer.setLayoutParams(layoutParams);
+        // SET POSITION OF CLICKABLE TRANSPARENT VIEW
+        View transparentClickableView = view.findViewById(R.id.transparentClickableView);
+        if(views[innerCounter].getId() == R.id.configurationCard && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            transparentClickableView.setVisibility(View.GONE);
+            view.findViewById(R.id.transparentRightClickableView).setVisibility(View.VISIBLE);
+        }
+        else {
+            transparentClickableView.setVisibility(View.VISIBLE);
+            ConstraintLayout.LayoutParams layoutParamsCounterView = (ConstraintLayout.LayoutParams) transparentClickableView.getLayoutParams();
+            layoutParamsCounterView.topToTop = views[innerCounter].getId();
+            layoutParamsCounterView.bottomToBottom = views[innerCounter].getId();
+            layoutParamsCounterView.leftToLeft = views[innerCounter].getId();
+            layoutParamsCounterView.rightToRight = views[innerCounter].getId();
+            transparentClickableView.setLayoutParams(layoutParamsCounterView);
+        }
+
+        ((TextView) view.findViewById(R.id.viewLabelTextView)).setText(getResources().getStringArray(R.array.tutorial_labels)[innerCounter]); // LABEL
+        if(innerCounter != (views.length-1))
+            ((Button) view.findViewById(R.id.closeTutorialButton)).setOnClickListener((v -> requireActivity().runOnUiThread(this::showCloseTutorialDialog)));
+        else
+            view.findViewById(R.id.closeTutorialButton).setVisibility(View.GONE);
+
+        Button nextTutorialButton = view.findViewById(R.id.nextTutorialButton);
+        if(innerCounter == views.length-1)
+            nextTutorialButton.setText(getString(R.string.start_label));
+        nextTutorialButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primary_color_50, requireContext().getTheme()));
+        nextTutorialButton.setOnClickListener((v -> {
+            if(innerCounter != (views.length-1)) {
+                views[innerCounter].setElevation(startingElevation); // ELEVATE
+                counter = innerCounter + 1;
+                this.tutorialRecursiveStep(view, views, counter);
+            }
+            else {
+                isTutorialVisible = false;
+                SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.TUTORIAL_CHECK_FILENAME, SharedPreferencesHelper.TUTORIAL_CHECK_KEY, true);
+                onHubManualActionChosenCallback.onManageHubRefreshFragment();
+            }
+        }));
+    }
+
+    private void showCloseTutorialDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.close_tutorial_dialog_title)
+                .setMessage(R.string.close_tutorial_dialog_msg)
+                .setPositiveButton(
+                        getString(R.string.confirm_button),
+                        (dialogInterface, i) -> {
+                            SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.TUTORIAL_CHECK_FILENAME, SharedPreferencesHelper.TUTORIAL_CHECK_KEY, true);
+                            onHubManualActionChosenCallback.onManageHubRefreshFragment();
+                        }
+                ).setNegativeButton(getString(R.string.cancel_button), (dialogInterface, i) -> dialogInterface.dismiss())
+                .show();
     }
 
     private void showSwitchIrrigationSystemDialog(@NonNull View view, boolean isChecked) {
@@ -412,7 +560,7 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                             int[] irrigationDuration = new int[2];
                             irrigationDuration[0] = Integer.parseInt(schedulingHoursEditText.getText().toString());
                             irrigationDuration[1] = Integer.parseInt(schedulingMinutesEditText.getText().toString());
-                            this.onHubManualActionChosenCallback.scheduleIrrSys(startDateCalendar, irrigationDuration);
+                            onHubManualActionChosenCallback.scheduleIrrSys(startDateCalendar, irrigationDuration);
                             view.findViewById(R.id.loadingCard).setVisibility(View.VISIBLE);
                             hideScheduleCard(view);
                         }
@@ -429,6 +577,7 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                 .setPositiveButton(
                         getString(R.string.confirm_button),
                         ((dialogInterface, i) -> {
+                            isSchedulingCardVisible = false;
                             isDeleteSchedulingDialogVisible = false;
                             new Thread(this::stopAndStartFragmentRefreshing).start();
                             int[] nullInt = {0,0};
@@ -454,7 +603,7 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                         getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.retry_button),
                         ((dialogInterface, i) -> {
                             isHttpErrorFaultDialogVisible = false;
-                            this.onHubManualActionChosenCallback.restartApp();
+                            onHubManualActionChosenCallback.restartApp();
                         })
                 )
                 .setOnKeyListener((dialogInterface, keyCode, keyEvent) -> {

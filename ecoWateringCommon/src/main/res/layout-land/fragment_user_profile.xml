@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/black_white_98"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -35,7 +36,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar">
+            app:layout_constraintTop_toTopOf="parent">
             <!-- USER NAME CARD -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/userNameCard"
@@ -146,16 +147,28 @@
                     app:layout_constraintRight_toRightOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <!-- REPEAT TUTORIAL BUTTON -->
+            <Button
+                android:id="@+id/repeatTutorialButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="36dp"
+                android:text="@string/repeat_tutorial_button"
+                android:textColor="@color/black_white_100"
+                app:layout_constraintTop_toBottomOf="@+id/editUserNameButtonsContainer"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
             <!-- DELETE ACCOUNT BUTTON -->
             <Button
                 android:id="@+id/deleteAccountButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="80dp"
+                android:layout_marginTop="64dp"
                 android:text="@string/delete_account_button"
                 android:textColor="@color/black_white_100"
                 android:backgroundTint="@color/ew_secondary_color_30"
-                app:layout_constraintTop_toBottomOf="@+id/editUserNameButtonsContainer"
+                app:layout_constraintTop_toBottomOf="@+id/repeatTutorialButton"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
         </androidx.constraintlayout.widget.ConstraintLayout>

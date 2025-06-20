@@ -27,6 +27,7 @@ import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.R;
+import it.uniba.dib.sms2324.ecowateringcommon.helpers.SharedPreferencesHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.device.EcoWateringDevice;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 
@@ -76,6 +77,7 @@ public class UserProfileFragment extends Fragment {
     };
     private static boolean isChangesWillBeLostDialogVisible;
     private static boolean isEditUserNameConfirmDialogVisible;
+    private static boolean isRepeatTutorialDialogVisible;
     private static boolean isDeleteAccountConfirmDialogVisible;
     private static boolean isDeviceAccountDeletedDialogVisible;
     private static boolean isErrorDialogVisible;
@@ -131,7 +133,6 @@ public class UserProfileFragment extends Fragment {
             Common.unlockLayout(requireActivity());
             // EDITED USER NAME RECOVERING FROM CONFIGURATION CHANGES
             if(savedInstanceState.getString(EDITED_USER_NAME) != null) {
-                Log.i(Common.LOG_NORMAL, "---------------------- onsave is true");
                 unlockUserNameEdit();
                 this.userNameEditText.setText(savedInstanceState.getString(EDITED_USER_NAME));
             }
@@ -145,10 +146,8 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(editUserNameButtonsContainer.getVisibility() == View.VISIBLE) {
-            Log.i(Common.LOG_NORMAL, "---------------------- onsave visible");
+        if(editUserNameButtonsContainer.getVisibility() == View.VISIBLE)
             outState.putString(EDITED_USER_NAME, userNameEditText.getText().toString());
-        }
     }
 
     private void toolbarSetup(@NonNull View view) {
@@ -178,6 +177,10 @@ public class UserProfileFragment extends Fragment {
         Button editUserNameConfirmButton = view.findViewById(R.id.editUserNameConfirmButton);
         editUserNameConfirmButton.setBackgroundColor(ResourcesCompat.getColor(getResources(), this.primaryColor, requireActivity().getTheme()));
         editUserNameConfirmButton.setOnClickListener((v) -> showEditUserNameConfirmDialog());
+
+        Button repeatTutorialButton = view.findViewById(R.id.repeatTutorialButton);
+        repeatTutorialButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), this.primaryColor, requireContext().getTheme()));
+        repeatTutorialButton.setOnClickListener((v -> requireActivity().runOnUiThread(this::showRepeatTutorialDialog)));
 
         Button deleteAccountButton = view.findViewById(R.id.deleteAccountButton);
         deleteAccountButton.setOnClickListener((v) -> showDeleteAccountConfirmDialog());
@@ -223,7 +226,6 @@ public class UserProfileFragment extends Fragment {
     }
 
     private void unlockUserNameEdit() {
-        Log.i(Common.LOG_NORMAL, "---------------------> visible");
         this.enableEditUserNameButton.setEnabled(false);
         this.enableEditUserNameButton.setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), it.uniba.dib.sms2324.ecowateringcommon.R.color.ew_secondary_color_90, requireContext().getTheme()));
         this.enableEditUserNameButton.setElevation(Common.dpToPx(requireContext(), 1));
@@ -235,9 +237,28 @@ public class UserProfileFragment extends Fragment {
     private void dialogRecovering() {
         if(isChangesWillBeLostDialogVisible) showChangesWillBeLostDialog();
         else if(isEditUserNameConfirmDialogVisible) showEditUserNameConfirmDialog();
+        else if(isRepeatTutorialDialogVisible) showRepeatTutorialDialog();
         else if(isDeleteAccountConfirmDialogVisible) showDeleteAccountConfirmDialog();
         else if(isDeviceAccountDeletedDialogVisible) showDeleteAccountConfirmDialog();
         else if(isErrorDialogVisible) showErrorDialog();
+    }
+
+    private void showRepeatTutorialDialog() {
+        isRepeatTutorialDialogVisible = true;
+        new AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.repeat_tutorial_dialog_title))
+                .setMessage(getString(R.string.repeat_tutorial_dialog_msg))
+                .setPositiveButton(
+                        getString(R.string.confirm_button),
+                        (dialogInterface, i) -> {
+                            isRepeatTutorialDialogVisible = false;
+                            SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.TUTORIAL_CHECK_FILENAME, SharedPreferencesHelper.TUTORIAL_CHECK_KEY, false);
+                            onUserProfileActionCallback.restartApp();
+                        }
+                ).setNegativeButton(getString(R.string.cancel_button), (dialogInterface, i) -> {
+                    isRepeatTutorialDialogVisible = false;
+                    dialogInterface.dismiss();
+                }).show();
     }
 
     private void showChangesWillBeLostDialog() {
