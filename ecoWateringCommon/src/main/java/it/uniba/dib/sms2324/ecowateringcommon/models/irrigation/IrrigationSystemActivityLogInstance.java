@@ -27,23 +27,6 @@ public class IrrigationSystemActivityLogInstance implements Parcelable {
         }
     }
 
-    protected IrrigationSystemActivityLogInstance(Parcel in) {
-        date = in.readString();
-        minutes = in.readInt();
-    }
-
-    public static final Creator<IrrigationSystemActivityLogInstance> CREATOR = new Creator<IrrigationSystemActivityLogInstance>() {
-        @Override
-        public IrrigationSystemActivityLogInstance createFromParcel(Parcel in) {
-            return new IrrigationSystemActivityLogInstance(in);
-        }
-
-        @Override
-        public IrrigationSystemActivityLogInstance[] newArray(int size) {
-            return new IrrigationSystemActivityLogInstance[size];
-        }
-    };
-
     public String getDate() {
         return this.date;
     }
@@ -59,6 +42,26 @@ public class IrrigationSystemActivityLogInstance implements Parcelable {
     public int getSavedMinutesPercent() {
         return ((int) (100 - ((this.minutes * 100) / IrrigationPlan.BASE_DAILY_IRRIGATION_MINUTES)));
     }
+
+
+    protected IrrigationSystemActivityLogInstance(Parcel in) {
+        date = in.readString();
+        minutes = in.readInt();
+    }
+
+    // PARCELABLE IMPLEMENTATION
+
+    public static final Creator<IrrigationSystemActivityLogInstance> CREATOR = new Creator<IrrigationSystemActivityLogInstance>() {
+        @Override
+        public IrrigationSystemActivityLogInstance createFromParcel(Parcel in) {
+            return new IrrigationSystemActivityLogInstance(in);
+        }
+
+        @Override
+        public IrrigationSystemActivityLogInstance[] newArray(int size) {
+            return new IrrigationSystemActivityLogInstance[size];
+        }
+    };
 
     @Override
     public int describeContents() {

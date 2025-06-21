@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import it.uniba.dib.sms2324.ecowateringcommon.Common;
 
 public class SharedPreferencesHelper {
+    private static final String LOG_SHARED_PREFERENCES = "SHARED_PREFERENCES_LOG";
     public static final String FIRST_START_FLAG_FILE_NAME = "IS_FIRST_START_CHECK";
     public static final String FIRST_START_FLAG_VALUE_KEY = "IS_FIRST_START";
     public static final String FIRST_START_VALUE_FLAG = "true";
@@ -36,7 +37,7 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(keyValue, stringValue);
         editor.commit();
-        Log.i(Common.LOG_SHARED_PREFERENCES, "write String on " + fileName + " - VALUE: " + stringValue);
+        Log.i(LOG_SHARED_PREFERENCES, "write String on " + fileName + " - VALUE: " + stringValue);
     }
 
     @SuppressLint("ApplySharedPref")
@@ -45,7 +46,7 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(keyValue, booleanValue);
         editor.commit();
-        Log.i(Common.LOG_SHARED_PREFERENCES, "write Boolean on " + fileName + " - VALUE: " + booleanValue);
+        Log.i(LOG_SHARED_PREFERENCES, "write Boolean on " + fileName + " - VALUE: " + booleanValue);
     }
 
     public static void writeIntOnSharedPreferences(@NonNull Context context, String fileName, String keyValue, int value) {
@@ -53,19 +54,20 @@ public class SharedPreferencesHelper {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(keyValue, value);
         editor.apply();
+        Log.i(LOG_SHARED_PREFERENCES, "write int on " + fileName + " - VALUE: " + value);
     }
 
     public static String readStringFromSharedPreferences(@NonNull Context context, String fileName, String keyValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         String returnString = sharedPreferences.getString(keyValue, Common.NULL_STRING_VALUE);
-        Log.i(Common.LOG_SHARED_PREFERENCES, "read String from " + fileName + " - VALUE: " + returnString);
+        Log.i(LOG_SHARED_PREFERENCES, "read String from " + fileName + " - VALUE: " + returnString);
         return returnString;
     }
 
     public static boolean readBooleanFromSharedPreferences(@NonNull Context context, String fileName, String keyValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         boolean returnValue = sharedPreferences.getBoolean(keyValue, false);
-        Log.i(Common.LOG_SHARED_PREFERENCES, "read String from " + fileName + " - VALUE: " + returnValue);
+        Log.i(LOG_SHARED_PREFERENCES, "read String from " + fileName + " - VALUE: " + returnValue);
         return returnValue;
     }
 

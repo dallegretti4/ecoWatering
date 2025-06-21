@@ -2,7 +2,6 @@ package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 

@@ -25,7 +25,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.SqlDbHelper;
 
 public class SensorsInfo implements Parcelable {
-    public static final String BO_SENSORS_INFO_OBJ_NAME = "sensorsInfo";
     public static final String CONFIGURE_SENSOR_TYPE_AMBIENT_TEMPERATURE = "ambient temperature sensor";
     public static final String CONFIGURE_SENSOR_TYPE_LIGHT = "light sensor";
     public static final String CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY = "relative humidity sensor";

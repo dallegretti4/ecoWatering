@@ -25,7 +25,7 @@ public class AmbientTemperatureSensor extends EcoWateringSensor {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_AMBIENT_TEMPERATURE_SENSOR + "\",\"" +
                 HttpHelper.VALUE_PARAMETER + "\":" + this.currentValue + "}";
         new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+            String response = HttpHelper.sendHttpPostRequest(jsonString);
             Log.i(LOG_SENSOR, "updateSensorAmbTempValueOnServerDb response: " + response + " - value: " + this.currentValue);
         }).start();
     }

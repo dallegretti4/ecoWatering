@@ -204,7 +204,7 @@ public class UserProfileFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
-                if(s.toString().equals("") || s.toString().equals(currentUserName)) {
+                if(s.toString().equals(Common.VOID_STRING_VALUE) || s.toString().equals(currentUserName)) {
                     view.findViewById(R.id.editUserNameConfirmButton).setEnabled(false);
                     view.findViewById(R.id.editUserNameConfirmButton).setBackgroundTintList(ResourcesCompat.getColorStateList(getResources(), primaryColor70, requireActivity().getTheme()));
                 }

@@ -19,7 +19,6 @@ public class HttpHelper {
     private static final String SERVER_PORT = "theall.altervista.org";
     private static final String PATH_ID = "sms2324";
     public static final String HTTP_RESPONSE_ERROR = "error";
-    private static final String REQUEST_MODE_GET = "GET";
     private static final String REQUEST_MODE_POST = "POST";
     private static final String REQUEST_PROPERTY_CONTENT_TYPE_LABEL = "Content-Type";
     private static final String REQUEST_PROPERTY_CONTENT_TYPE_VALUE = "application/json; utf-8";
@@ -34,7 +33,6 @@ public class HttpHelper {
     public static final String MODE_DISCONNECT_FROM_EWH = "DISCONNECT_FROM_EWH";
     public static final String MODE_SET_DEVICE_NAME = "SET_DEVICE_NAME";
     public static final String MODE_DELETE_DEVICE_ACCOUNT = "DELETE_DEVICE_ACCOUNT";
-    public static final String MODE_HUB_EXISTS = "HUB_EXISTS";
     public static final String MODE_ADD_NEW_HUB = "ADD_NEW_HUB";
     public static final String MODE_GET_HUB_OBJ = "GET_HUB_OBJ";
     public static final String MODE_ADD_REMOTE_DEVICE = "ADD_REMOTE_DEVICE";
@@ -87,51 +85,6 @@ public class HttpHelper {
         return false;
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} String url -> to database server;
-     *  {@code @NonNull} String jsonRequest -> to query database server;
-     * To send a specific request to database server.
-     */
-    public static String sendHttpPostRequest(@NonNull String urlString, @NonNull String jsonRequest) {
-        HttpURLConnection connection = null;
-        try {
-            //CONNECTION & REQUEST SETUP
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(REQUEST_MODE_POST);
-            connection.setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE_LABEL, REQUEST_PROPERTY_CONTENT_TYPE_VALUE);
-            connection.setRequestProperty(REQUEST_PROPERTY_ACCEPT_LABEL, REQUEST_PROPERTY_ACCEPT_VALUE);
-            connection.setDoOutput(true);
-            // REQUEST SENDING
-            OutputStream outputStream = connection.getOutputStream();
-            byte[] input = jsonRequest.getBytes(StandardCharsets.UTF_8);
-            outputStream.write(input, 0, input.length);
-            int responseCode = connection.getResponseCode();
-            // GET RESPONSE FROM SERVER
-            InputStream inputStream;
-            if((responseCode >= 200) && (responseCode < 300)) {
-                inputStream = connection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while((line = reader.readLine()) != null) {
-                    response.append(line.trim());
-                }
-                return response.toString();
-            }
-            else {
-                return HTTP_RESPONSE_ERROR;
-            }
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if(connection != null) connection.disconnect();
-        }
-        return HTTP_RESPONSE_ERROR;
-    }
     public static String sendHttpPostRequest(@NonNull String jsonRequest) {
         HttpURLConnection connection = null;
         try {
@@ -162,31 +115,6 @@ public class HttpHelper {
             else {
                 return HTTP_RESPONSE_ERROR;
             }
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if(connection != null) connection.disconnect();
-        }
-        return HTTP_RESPONSE_ERROR;
-    }
-
-    public static String sendHttpGetRequest(@NonNull String urlString) {
-        HttpURLConnection connection = null;
-        try {
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(REQUEST_MODE_GET);
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                response.append(line);
-            }
-            bufferedReader.close();
-            return response.toString();
         }
         catch(Exception e) {
             e.printStackTrace();

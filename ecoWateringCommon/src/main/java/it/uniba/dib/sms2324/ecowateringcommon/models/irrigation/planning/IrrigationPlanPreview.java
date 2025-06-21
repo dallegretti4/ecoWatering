@@ -1,7 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning;
 
 import android.content.ContentValues;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 

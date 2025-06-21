@@ -29,6 +29,5 @@ public class DataObjectRefreshingRunnable implements Runnable {
         SensorsInfo.updateSensorList(this.context, this.hub.getDeviceID(), SensorsInfo.CONFIGURE_SENSOR_TYPE_LIGHT, EcoWateringSensor.getConnectedSensorList(this.context, SensorsInfo.CONFIGURE_SENSOR_TYPE_LIGHT));
         new Thread(new RelativeHumiditySensorRunnable(context, this.hub, duration)).start();
         SensorsInfo.updateSensorList(this.context, this.hub.getDeviceID(), SensorsInfo.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY, EcoWateringSensor.getConnectedSensorList(this.context, SensorsInfo.CONFIGURE_SENSOR_TYPE_RELATIVE_HUMIDITY));
-        // new Thread(new LightSensorEventRunnable()).start(); // TO DEBUG BACKGROUND SERVICE WORK
     }
 }

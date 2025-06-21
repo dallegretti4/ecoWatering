@@ -272,7 +272,6 @@ public class SqlDbHelper {
                 .append(TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_DEVICE_REQUEST_CALLER_COLUMN_NAME)).append("\",\"")
                 .append(TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_DEVICE_REQUEST_REQUEST_COLUMN_NAME)).append("\",\"")
                 .append(TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME).append("\":\"").append(contentValues.get(TABLE_DEVICE_REQUEST_DATE_COLUMN_NAME)).append("\"}");
-        Log.i(LOG_DB, "---------->delete query: " + stringBuilder);
         new Thread(() -> {
             String response = HttpHelper.sendHttpPostRequest(stringBuilder.toString());
             Log.i(LOG_DB, "deleteDeviceRequest response: " + response);

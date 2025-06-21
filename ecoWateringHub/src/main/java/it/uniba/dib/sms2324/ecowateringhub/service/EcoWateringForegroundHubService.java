@@ -7,13 +7,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -28,7 +26,6 @@ import androidx.work.WorkManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -41,7 +38,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
 import it.uniba.dib.sms2324.ecowateringhub.R;
-import it.uniba.dib.sms2324.ecowateringhub.connection.DeviceRequestRefreshingRunnable;
 import it.uniba.dib.sms2324.ecowateringhub.data.DataObjectRefreshingRunnable;
 
 public class EcoWateringForegroundHubService extends Service {
@@ -49,7 +45,7 @@ public class EcoWateringForegroundHubService extends Service {
     private static final String TAG_IRRIGATION_SYSTEM_START = "START_IRRIGATION_SYSTEM";
     private static final String NAME_IRRIGATION_SYSTEM_START = "startIrrigationSystem";
     public static final String TAG_IRRIGATION_SYSTEM_MANUAL_START = "START_MANUAL_IRRIGATION_SYSTEM";
-    public static final String NAME_IRRIGATION_SYSTEM_MANUAL_START = "startManualIrrigationSystem";
+    private static final String NAME_IRRIGATION_SYSTEM_MANUAL_START = "startManualIrrigationSystem";
     protected static final String TAG_IRRIGATION_SYSTEM_MANUAL_STOP = "STOP_MANUAL_IRRIGATION_SYSTEM";
     public static final String NAME_IRRIGATION_SYSTEM_MANUAL_STOP = "stOPManualIrrigationSystem";
     private static final String TAG_IRRIGATION_SYSTEM_STOP = "STOP_IRRIGATION_SYSTEM";
@@ -77,7 +73,6 @@ public class EcoWateringForegroundHubService extends Service {
         acquireWakeLock();
         createNotificationChannel();
         startForeground(NOTIFICATION_ID, getNotification(this, this.hub));
-        Log.i(Common.LOG_SERVICE, "EcoWateringForegroundHubService -> onCreate()");
     }
 
     @Override
@@ -88,7 +83,7 @@ public class EcoWateringForegroundHubService extends Service {
             // DEVICE REQUESTS REFRESHING NEED TO BE STARTED
             this.deviceRequestRefreshingThread = new Thread(() -> {
                 while ((this.hub.getRemoteDeviceList() != null) && (!this.hub.getRemoteDeviceList().isEmpty()) && (this.deviceRequestRefreshingThread != null) && (!this.deviceRequestRefreshingThread.isInterrupted())) {
-                    Log.i(Common.LOG_SERVICE, "-------------------------> deviceRequestRefreshingServiceRunning iteration");
+                    Log.i(Common.LOG_SERVICE, "deviceRequestRefreshingServiceRunning iteration");
                     new Thread(new DeviceRequestRefreshingRunnable(this, this.hub)).start();
                     // WAIT FOR NEXT REFRESHING
                     try { Thread.sleep(DEVICE_REQUESTS_REFRESHING_FREQUENCY); }
@@ -103,7 +98,7 @@ public class EcoWateringForegroundHubService extends Service {
             // DATA OBJECT REFRESHING NEED TO BE STARTED
             this.dataObjectRefreshingThread = new Thread(() -> {
                 while ((this.hub.isDataObjectRefreshing()) && (this.dataObjectRefreshingThread != null) && (!this.dataObjectRefreshingThread.isInterrupted())) {
-                    Log.i(Common.LOG_SERVICE, "-------------------------> dataObjectRefreshingServiceRunning iteration");
+                    Log.i(Common.LOG_SERVICE, "dataObjectRefreshingServiceRunning iteration");
                     new Thread(new DataObjectRefreshingRunnable(this, this.hub, DataObjectRefreshingRunnable.DATA_OBJECT_REFRESHING_RUNNABLE_DURATION)).start();
                     // TO BE SURE ITERATION START AFTER CORRECT TIMING
                     try { Thread.sleep(DATA_OBJECT_REFRESHING_FREQUENCY); }
@@ -118,7 +113,7 @@ public class EcoWateringForegroundHubService extends Service {
             // REFRESH ECO WATERING HUB
             this.hubRefreshingThread = new Thread(() -> {
                 while((this.deviceRequestRefreshingThread.isAlive() || this.dataObjectRefreshingThread.isAlive()) && (this.hubRefreshingThread != null) && (!this.hubRefreshingThread.isInterrupted())) {
-                    Log.i(Common.LOG_SERVICE, "-------------------------> hubRefreshingServiceRunning iteration");
+                    Log.i(Common.LOG_SERVICE, "hubRefreshingServiceRunning iteration");
                     // WAIT TO BE SURE ITERATIONS ARE FINISHED
                     try { Thread.sleep(HUB_REFRESHING_FREQUENCY); }
                     catch (InterruptedException e) {
@@ -162,7 +157,6 @@ public class EcoWateringForegroundHubService extends Service {
             this.hubRefreshingThread.interrupt();
         stopForeground(true);
         stopSelf();
-        Log.i(Common.LOG_SERVICE, "ecoWateringForegroundHubService -> onDestroy");
     }
 
     private void acquireWakeLock() {
@@ -263,7 +257,7 @@ public class EcoWateringForegroundHubService extends Service {
             initialDelay = calendar.getTimeInMillis() - currentTime;
         }
         sendPeriodicWorkRequest(context, IrrigationPlanRefreshWorker.class, initialDelay, TAG_IRRIGATION_PLAN_REFRESH, NAME_IRRIGATION_PLAN_REFRESH);
-        Log.i(Common.LOG_SERVICE, "---------------------> IrrigationPlanRefreshingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+        Log.i(Common.LOG_SERVICE, "IrrigationPlanRefreshingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
     }
 
     protected static void scheduleIrrigationSystemStartingWorker(@NonNull Context context, EcoWateringHub hub, boolean isRetrying) {
@@ -283,7 +277,7 @@ public class EcoWateringForegroundHubService extends Service {
             initialDelay = calendar.getTimeInMillis() - currentTime;
         }
         sendPeriodicWorkRequest(context, IrrigationSystemStartingWorker.class, initialDelay, TAG_IRRIGATION_SYSTEM_START, NAME_IRRIGATION_SYSTEM_START);
-        Log.i(Common.LOG_SERVICE, "---------------------> IrrigationSystemStartingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+        Log.i(Common.LOG_SERVICE, "IrrigationSystemStartingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
     }
 
     protected static void scheduleIrrigationSystemStoppingWorker(@NonNull Context context, EcoWateringHub hub, boolean isRetrying) {
@@ -306,11 +300,10 @@ public class EcoWateringForegroundHubService extends Service {
             initialDelay = calendar.getTimeInMillis() - currentTime;
         }
         sendPeriodicWorkRequest(context, IrrigationSystemStoppingWorker.class, initialDelay, TAG_IRRIGATION_SYSTEM_STOP, NAME_IRRIGATION_SYSTEM_STOP);
-        Log.i(Common.LOG_SERVICE, "---------------------> IrrigationSystemStoppingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
+        Log.i(Common.LOG_SERVICE, "IrrigationSystemStoppingWorker at " + new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(calendar.getTime()));
     }
 
     public static void scheduleManualIrrSysWorker(@NonNull Context context, @NonNull Calendar calendar, int[] irrigationDuration) {
-        Log.i(Common.LOG_SERVICE, "scheduleManualIrrSysWorker");
         long currentTime = System.currentTimeMillis();
         long startDelay = calendar.getTimeInMillis() - currentTime;
         SharedPreferencesHelper.writeIntOnSharedPreferences(context, SharedPreferencesHelper.IRR_SYS_MANUAL_SCHEDULING_FILENAME, String.valueOf(Calendar.HOUR_OF_DAY), irrigationDuration[0]);

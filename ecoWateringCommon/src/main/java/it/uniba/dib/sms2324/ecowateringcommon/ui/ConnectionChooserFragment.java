@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -111,19 +110,16 @@ public class ConnectionChooserFragment extends Fragment {
     public void onResume() {
        super.onResume();
        if(SharedPreferencesHelper.readBooleanFromSharedPreferences(requireContext(), SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY)) {
-           Log.i(Common.LOG_NORMAL, "ConnectionChooserFragment -> onResume()");
            SharedPreferencesHelper.writeBooleanOnSharedPreferences(requireContext(), SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_FILE_NAME, SharedPreferencesHelper.IS_USER_RETURNED_FROM_SETTING_VALUE_KEY, false);
            // ACCESS FINE LOCATION PERMISSION REQUIRED
-           if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+           if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
                showUserMustGivePermissionManuallyDialog();
-           }
            else {
                bluetoothModeButton.setOnClickListener((v) -> onConnectionChooserActionCallback.onModeSelected(OnConnectionFinishCallback.CONNECTION_MODE_BLUETOOTH));
                wifiModeButton.setOnClickListener((v) -> onConnectionChooserActionCallback.onModeSelected(OnConnectionFinishCallback.CONNECTION_MODE_WIFI));
            }
        }
     }
-
 
     private void fragmentSetup(@NonNull View view) {
         toolbarSetup(view);
@@ -193,12 +189,10 @@ public class ConnectionChooserFragment extends Fragment {
 
     private void titleSetup(@NonNull View view) {
         TextView titleTextView = view.findViewById(R.id.connectionChooserTitleTextView);
-        if(calledFrom.equals(Common.CALLED_FROM_HUB)) {
+        if(calledFrom.equals(Common.CALLED_FROM_HUB))
             titleTextView.setText(R.string.connection_chooser_fragment_title_hub);
-        }
-        else {
+        else
             titleTextView.setText(R.string.connection_chooser_fragment_title_device);
-        }
     }
 
     private void showWhyAppUseLocationPermissionDialog() {

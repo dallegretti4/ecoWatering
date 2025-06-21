@@ -165,12 +165,6 @@ public class StartFirstFragment extends Fragment {
         );
     }
 
-    /**
-     *
-     * {@code @param:}
-     *  OnLocationFoundCallback callback -> to manage the location found
-     * To find location of user.
-     */
     private void startFindLocation(OnLocationFoundCallback callback) {
         // CHECK PERMISSION
         if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -197,11 +191,6 @@ public class StartFirstFragment extends Fragment {
         }
     }
 
-    /**
-     * {@code @param:}
-     *  OnGpsEnabledCallback callback;
-     * If GPS is not enabled, requests to enable GPS
-     */
     private void enableGPS(Common.OnIntegerResultGivenCallback callback) {
         com.google.android.gms.location.LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY)
                 .setIntervalMillis(10000)

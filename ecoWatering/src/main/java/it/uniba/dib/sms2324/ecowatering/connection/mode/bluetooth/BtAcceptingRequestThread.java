@@ -20,6 +20,8 @@ public class BtAcceptingRequestThread extends Thread {
     private final Context context;
     private final BluetoothAdapter bluetoothAdapter;
     private final Common.OnStringResponseGivenCallback callback;
+    private BluetoothSocket btSocket;
+    private BluetoothServerSocket btServerSocket;
 
     protected BtAcceptingRequestThread(
             @NonNull Context context,
@@ -34,8 +36,9 @@ public class BtAcceptingRequestThread extends Thread {
     @SuppressLint("MissingPermission")
     @Override
     public void run() {
-        try(BluetoothServerSocket btServerSocket = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(BT_SERVER_SOCKET_REQUEST_NAME, Common.getThisUUID())) {
-            BluetoothSocket btSocket = btServerSocket.accept();
+        try {
+            btServerSocket = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(BT_SERVER_SOCKET_REQUEST_NAME, Common.getThisUUID());
+            btSocket = btServerSocket.accept();
             // DEVICE ID SENDING
             OutputStream outputStream = btSocket.getOutputStream();
             InputStream inputStream = btSocket.getInputStream();
@@ -47,9 +50,24 @@ public class BtAcceptingRequestThread extends Thread {
             String response = new String(buffer, 0, byteRead);
             Log.i(Common.LOG_NORMAL, "btAcceptThread response: " + response);
             callback.getResponse(response);
+            btServerSocket.close();
+            btSocket.close();
         }
         catch(IOException e) {
             e.printStackTrace();
         }
+        finally {
+            closeBtSocket();
+        }
+    }
+
+    protected void closeBtSocket() {
+        try {
+            if(this.btServerSocket != null)
+                btServerSocket.close();
+            if(this.btSocket != null)
+                this.btSocket.close();
+        }
+        catch (IOException ignored) {}
     }
 }

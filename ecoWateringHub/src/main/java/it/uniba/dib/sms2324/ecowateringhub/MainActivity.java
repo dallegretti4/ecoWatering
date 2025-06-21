@@ -11,11 +11,9 @@ import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import java.util.Calendar;
@@ -26,7 +24,6 @@ import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.helpers.HttpHelper;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
 import it.uniba.dib.sms2324.ecowateringcommon.models.SensorsInfo;
-import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystemScheduling;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.planning.IrrigationPlanPreview;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.AutomateSystemFragment;
 import it.uniba.dib.sms2324.ecowateringcommon.ui.LoadingFragment;
@@ -216,9 +213,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void setIrrigationSystemState(boolean value) {
         EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this);
-        IrrigationSystem.setScheduling(this, null, null, (response -> {
-            thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), value);
-        }));
+        IrrigationSystem.setScheduling(this, null, null, (response ->
+            thisEcoWateringHub.getIrrigationSystem().setState(Common.getThisDeviceID(this), Common.getThisDeviceID(this), value)
+        ));
     }
 
     @Override
@@ -319,11 +316,6 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} Fragment fragment -> to replace the fragment;
-     * To replace the fragment.
-     */
     private void changeFragment(@NonNull Fragment fragment, boolean addToBackStack) {
         runOnUiThread(() -> {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -380,11 +372,6 @@ public class MainActivity extends AppCompatActivity implements
         thisEcoWateringHub = ecoWateringHub;
     }
 
-    /**
-     * Notify the user, why app needs to know device's location.
-     * Positive button to go to the FirstStartFragment.
-     * If app cannot requests permissions directly, Positive Button open the app details setting.
-     */
     private void showWhyGrantLocationPermissionDialog() {
         isWhyGrantLocationPermissionDialogVisible = true;
         AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle(getString(R.string.why_grant_location_permission_dialog_title));
@@ -469,10 +456,6 @@ public class MainActivity extends AppCompatActivity implements
                 .show();
     }
 
-    /**
-     * Notify the user there isn't internet connection.
-     * Positive button restarts the app.
-     */
     private void showInternetFaultDialog() {
         isInternetFaultDialog = true;
         new AlertDialog.Builder(this)

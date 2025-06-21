@@ -10,10 +10,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -108,7 +104,7 @@ public class DeviceRequest {
         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timeArray[0]));
         calendar.set(Calendar.MINUTE, Integer.parseInt(timeArray[1]));
         boolean returnValue = (((System.currentTimeMillis() - calendar.getTimeInMillis()) < (15 * 1000)));
-        Log.i(Common.LOG_SERVICE, "-----> inputDate: " + returnValue);
+        Log.i(Common.LOG_SERVICE, "isValidDeviceRequest: " + returnValue);
         return returnValue;
     }
 }

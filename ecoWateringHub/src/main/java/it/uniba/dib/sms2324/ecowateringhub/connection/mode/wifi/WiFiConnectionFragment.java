@@ -200,8 +200,13 @@ public class WiFiConnectionFragment extends Fragment {
         requireActivity().unregisterReceiver(peersReceiver);
         if(wifiConnectionHandler != null)
             wifiConnectionHandler.removeCallbacks(wifiConnectionHandlerRunnable);
-        if(wiFiConnectionRequestThread != null && wiFiConnectionRequestThread.isAlive())
-            wiFiConnectionRequestThread.interrupt();
+
+        if(wiFiConnectionRequestThread != null) {
+            wiFiConnectionRequestThread.closeWifiSocket();
+            if(wiFiConnectionRequestThread.isAlive())
+                wiFiConnectionRequestThread.interrupt(); 
+        }
+
         wifiP2pManager.stopPeerDiscovery(channel, null);
         wifiP2pManager.removeGroup(channel, null);
         wifiP2pManager.cancelConnect(channel, null);
@@ -267,11 +272,6 @@ public class WiFiConnectionFragment extends Fragment {
         });
     }
 
-    /**
-     * {@code @param:}
-     *  OnGpsEnabledCallback callback;
-     * If GPS is not enabled, requests to enable GPS
-     */
     private void enableGPS(Common.OnIntegerResultGivenCallback callback) {
         com.google.android.gms.location.LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY)
                 .setIntervalMillis(10000)
@@ -300,10 +300,7 @@ public class WiFiConnectionFragment extends Fragment {
                 });
     }
 
-    /**
-     * To show the pop up menu
-     * which avoid user to send a WiFi connection.
-     */
+
     @SuppressLint("MissingPermission")
     private void showConnectPopUpMenu(@NonNull View view, int position) {
         PopupMenu menu = new PopupMenu(requireContext(), view);
@@ -342,11 +339,6 @@ public class WiFiConnectionFragment extends Fragment {
         menu.show();
     }
 
-    /**
-     * To ask to user, to enable WiFi.
-     * Positive button to go to setting.
-     * Negative button to restart the fragment.
-     */
     private void showEnableWiFiDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.user_must_enable_wifi_title))
@@ -376,10 +368,6 @@ public class WiFiConnectionFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * Explains to user, why app uses user location.
-     * Positive button to restart the fragment.
-     */
     private void showWhyUseLocationDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.why_use_location_dialog_title))
@@ -392,10 +380,6 @@ public class WiFiConnectionFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * Notify the user that something went wrong.
-     * Positive button dismiss dialog.
-     */
     private void showErrorDialog() {
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))

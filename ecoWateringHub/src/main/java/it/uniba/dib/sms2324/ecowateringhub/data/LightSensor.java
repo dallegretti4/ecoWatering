@@ -25,7 +25,7 @@ public class LightSensor extends EcoWateringSensor {
                 HttpHelper.MODE_PARAMETER + "\":\"" + HttpHelper.MODE_UPDATE_LIGHT_SENSOR + "\",\"" +
                 HttpHelper.VALUE_PARAMETER + "\":" + this.currentValue + "}";
         new Thread(() -> {
-            String response = HttpHelper.sendHttpPostRequest(Common.getThisUrl(), jsonString);
+            String response = HttpHelper.sendHttpPostRequest(jsonString);
             Log.i(LOG_SENSOR, "updateLightSensorValueOnServerDb response: " + response + " - value: " + this.currentValue);
         }).start();
     }

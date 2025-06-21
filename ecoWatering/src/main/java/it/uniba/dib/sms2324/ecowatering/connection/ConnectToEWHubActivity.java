@@ -36,7 +36,7 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         it.uniba.dib.sms2324.ecowateringcommon.ui.ConnectionChooserFragment.OnConnectionChooserActionCallback,
         OnConnectionFinishCallback {
     private static final String MUST_SHOW_MESSAGE_INTENT_KEY = "MUST_SHOW_MESSAGE";
-    private static FragmentManager fragmentManager;
+    private FragmentManager fragmentManager;
     private static boolean isFirstActivity = false;
     private static boolean isWhyUseLocationFirstDialogVisible;
     private static boolean isWhyUseLocationDialogVisible;
@@ -193,12 +193,6 @@ public class ConnectToEWHubActivity extends AppCompatActivity implements
         }
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} Fragment fragment;
-     *  boolean addToBackStackFlag -> true, to add the transaction to the backstack.
-     *  To change the fragment.
-     */
     private void changeFragment(@NonNull Fragment fragment, boolean addToBackStackFlag) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         boolean needToBeAnimated = false;

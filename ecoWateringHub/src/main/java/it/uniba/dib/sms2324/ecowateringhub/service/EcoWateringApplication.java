@@ -1,7 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringhub.service;
 
 import android.app.Application;
-import android.os.Build;
 
 import androidx.work.Configuration;
 import androidx.work.WorkManager;
@@ -11,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class EcoWateringApplication extends Application {
+    private static final String PROCESS_NAME_ENDING = ":persistent_service";
     @Override
     public void onCreate() {
         super.onCreate();
@@ -34,12 +34,12 @@ public class EcoWateringApplication extends Application {
                 BufferedReader reader = new BufferedReader(new FileReader("/proc/" + pid + "/cmdline"));
                 processName = reader.readLine().trim();
                 reader.close();
-                return processName.endsWith(":persistent_service");
+                return processName.endsWith(PROCESS_NAME_ENDING);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
             }
         }
-        return processName != null && processName.endsWith(":persistent_service");
+        return processName != null && processName.endsWith(PROCESS_NAME_ENDING);
     }
 }

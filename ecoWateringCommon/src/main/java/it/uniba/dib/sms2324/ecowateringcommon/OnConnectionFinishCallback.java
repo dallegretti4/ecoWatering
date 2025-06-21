@@ -1,7 +1,7 @@
 package it.uniba.dib.sms2324.ecowateringcommon;
 
 public interface OnConnectionFinishCallback {
-    public static final String START_TO_CONNECTION_CHOOSER = "START_TO_CONNECTION_CHOOSER";
+    String START_TO_CONNECTION_CHOOSER = "START_TO_CONNECTION_CHOOSER";
     int MAX_TIME_CONNECTION = 30 * 1000;
     String BT_ALREADY_CONNECTED_DEVICE_RESPONSE = "remoteDeviceAlreadyExists";
     String BT_ERROR_RESPONSE = "error";

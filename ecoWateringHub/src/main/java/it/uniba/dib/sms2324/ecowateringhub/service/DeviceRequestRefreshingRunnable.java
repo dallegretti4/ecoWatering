@@ -1,9 +1,6 @@
-package it.uniba.dib.sms2324.ecowateringhub.connection;
+package it.uniba.dib.sms2324.ecowateringhub.service;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -18,14 +15,12 @@ import it.uniba.dib.sms2324.ecowateringcommon.Common;
 import it.uniba.dib.sms2324.ecowateringcommon.models.DeviceRequest;
 import it.uniba.dib.sms2324.ecowateringcommon.models.hub.EcoWateringHub;
 import it.uniba.dib.sms2324.ecowateringcommon.models.irrigation.IrrigationSystem;
-import it.uniba.dib.sms2324.ecowateringhub.MainActivity;
-import it.uniba.dib.sms2324.ecowateringhub.service.EcoWateringForegroundHubService;
 
 public class DeviceRequestRefreshingRunnable implements Runnable {
     private final Context context;
     private final EcoWateringHub hub;
 
-    public DeviceRequestRefreshingRunnable(@NonNull Context context, @NonNull EcoWateringHub hub) {
+    protected DeviceRequestRefreshingRunnable(@NonNull Context context, @NonNull EcoWateringHub hub) {
         this.context = context;
         this.hub = hub;
     }
@@ -49,7 +44,6 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
         deviceRequest.delete(); // FOR FIRST, TO BE SURE, NEXT DeviceRequestsRefreshingRunnable CAN'T FIND THIS REQUEST
         // CHECK IS DEVICE REQUEST VALID
         if(deviceRequest.isValidDeviceRequest()) {
-            Log.i(Common.LOG_SERVICE, "---> solve request:" + deviceRequest.getRequest());
             String requestParameter = deviceRequest.getRequest().split(DeviceRequest.REQUEST_PARAMETER_DIVISOR)[0];
             switch (requestParameter) {
                 // SWITCH ON/OFF IRRIGATION SYSTEM CASE
@@ -101,13 +95,11 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
 
                 //  SCHEDULE IRR SYS MANUALLY CASE
                 case DeviceRequest.REQUEST_SCHEDULE_IRR_SYS:
-                    Log.i(Common.LOG_SERVICE, "--->DeviceRequest.REQUEST_SCHEDULE_IRR_SYS: " + deviceRequest.getRequest());
                     String deviceRequestParameter = deviceRequest.getRequest().split(DeviceRequest.REQUEST_PARAMETER_DIVISOR)[1].replace("\\\"", "\"");
                     int[] startingDate = new int[3];
                     int[] startingTime = new int[2];
                     int[] irrigationDuration = new int[2];
                     try {
-                        Log.i(Common.LOG_SERVICE, "--->DeviceRequest.REQUEST_SCHEDULE_IRR_SYS TRY");
                         JSONObject jsonObject = new JSONObject(deviceRequestParameter);
                         JSONArray startingDateJsonArray = jsonObject.getJSONArray(DeviceRequest.STARTING_DATE_PARAMETER);
                         startingDate[0] = startingDateJsonArray.getInt(0);
@@ -129,9 +121,9 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                             calendar.set(Calendar.DAY_OF_MONTH, startingDate[2]);
                             calendar.set(Calendar.HOUR_OF_DAY, startingTime[0]);
                             calendar.set(Calendar.MINUTE, startingTime[1]);
-                            IrrigationSystem.setScheduling(this.context,  calendar, irrigationDuration, (response -> {
-                                EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this.context, calendar, irrigationDuration);
-                            }));
+                            IrrigationSystem.setScheduling(this.context,  calendar, irrigationDuration, (response ->
+                                EcoWateringForegroundHubService.scheduleManualIrrSysWorker(this.context, calendar, irrigationDuration)
+                            ));
                         }
                         else {  //  DISABLE IRR SYS MANUAL SCHEDULING
                             EcoWateringForegroundHubService.cancelIrrSysManualSchedulingWorker(this.context);
@@ -141,7 +133,6 @@ public class DeviceRequestRefreshingRunnable implements Runnable {
                         this.hub.getIrrigationSystem().setState(deviceRequest.getCaller(), Common.getThisDeviceID(this.context), false);
                     }
                     catch (JSONException e) {
-                        Log.i(Common.LOG_SERVICE, "------> DeviceRequest.REQUEST_SCHEDULE_IRR_SYS CATCH");
                         e.printStackTrace();
                     }
                     break;

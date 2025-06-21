@@ -256,10 +256,6 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                 .show();
     }
 
-    /**
-     * Notify the user, device is already connected.
-     * Positive button dismiss dialog.
-     */
     private void showDeviceAlreadyConnectedDialog() {
         isDeviceAlreadyConnectedDialogVisible = true;
         new AlertDialog.Builder(this)
@@ -277,10 +273,6 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                 .show();
     }
 
-    /**
-     * Notify the user, device is successfully connected.
-     * Positive button restarts the MainFragment.
-     */
     private void showDeviceConnectedSuccessfully() {
         isDeviceConnectedSuccessfullyVisible = true;
         new AlertDialog.Builder(this)
@@ -299,10 +291,6 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                 .create().show();
     }
 
-    /**
-     * Notify the user that something went wrong.
-     * Positive button dismiss dialog.
-     */
     private void showErrorDialog() {
         isErrorDialogVisible = true;
         new AlertDialog.Builder(this)
@@ -325,10 +313,6 @@ public class ManageEcoWateringDevicesConnectionActivity extends AppCompatActivit
                 .show();
     }
 
-    /**
-     * Notify the user there isn't internet connection.
-     * Positive button restarts the app.
-     */
     private void showInternetFaultDialog() {
         isInternetFaultDialog = true;
         new AlertDialog.Builder(this)

@@ -240,7 +240,7 @@ public class MainFragment extends Fragment {
      * Notify the user something went wrong with the database server.
      * Positive button restarts the app.
      */
-    protected void showHttpErrorFaultDialog() {
+    private void showHttpErrorFaultDialog() {
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.http_error_dialog_title))
                 .setPositiveButton(

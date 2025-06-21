@@ -155,13 +155,13 @@ public class ManageEWHubActivity extends AppCompatActivity implements
     public void scheduleIrrSys(Calendar calendar, int[] irrigationDuration) {
         StringBuilder requestStringBuilder = new StringBuilder(DeviceRequest.REQUEST_SCHEDULE_IRR_SYS);
         requestStringBuilder.append(DeviceRequest.REQUEST_PARAMETER_DIVISOR).append("{\\\"").append(DeviceRequest.STARTING_DATE_PARAMETER).append("\\\":[");
-        if(calendar != null)
+        if(calendar != null)    // ENABLE SCHEDULING CASE
             requestStringBuilder.append(calendar.get(Calendar.YEAR)).append(",").append(calendar.get(Calendar.MONTH)).append(",").append(calendar.get(Calendar.DAY_OF_MONTH)).append("],\\\"")
                     .append(DeviceRequest.STARTING_TIME_PARAMETER).append("\\\":[")
                     .append(calendar.get(Calendar.HOUR_OF_DAY)).append(",").append(calendar.get(Calendar.MINUTE)).append("],\\\"")
                     .append(DeviceRequest.IRRIGATION_DURATION_PARAMETER).append("\\\":[")
                     .append(irrigationDuration[0]).append(",").append(irrigationDuration[1]).append("]}");
-        else
+        else    // DISABLE SCHEDULING CASE
             requestStringBuilder.append(0).append(",").append(0).append(",").append(0).append("],\\\"")
                     .append(DeviceRequest.STARTING_TIME_PARAMETER).append("\\\":[")
                     .append(0).append(",").append(0).append("],\\\"")

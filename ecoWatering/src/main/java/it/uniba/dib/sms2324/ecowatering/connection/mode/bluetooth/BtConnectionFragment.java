@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,6 +30,7 @@ import it.uniba.dib.sms2324.ecowateringcommon.OnConnectionFinishCallback;
 public class BtConnectionFragment extends Fragment {
     private static final int BT_DISCOVERABLE_DURATION = 180;
     private BluetoothAdapter bluetoothAdapter;
+    private BtAcceptingRequestThread btAcceptingRequestThread;
     private OnConnectionFinishCallback onConnectionFinishCallback;
     private final MenuProvider menuProvider = new MenuProvider() {
         @Override
@@ -104,9 +104,11 @@ public class BtConnectionFragment extends Fragment {
    @Override
    public void onStop() {
         super.onStop();
-       this.makeBtDiscoverableLauncher.unregister();
-       this.bluetoothAdapter = null;
-       Common.unlockLayout(requireActivity());
+        if(btAcceptingRequestThread != null && btAcceptingRequestThread.isAlive())
+            btAcceptingRequestThread.closeBtSocket();
+        this.makeBtDiscoverableLauncher.unregister();
+        this.bluetoothAdapter = null;
+        Common.unlockLayout(requireActivity());
    }
 
    private void toolbarSetup(@NonNull View view) {
@@ -131,14 +133,17 @@ public class BtConnectionFragment extends Fragment {
    }
 
    private void startAcceptingBtRequest() {
-        new BtAcceptingRequestThread(requireContext(), this.bluetoothAdapter, ((response) -> {
-           if(response.equals(OnConnectionFinishCallback.BT_ERROR_RESPONSE))
-               requireActivity().runOnUiThread(this::showErrorDialog);
-           else if(response.equals(OnConnectionFinishCallback.BT_ALREADY_CONNECTED_DEVICE_RESPONSE))
-               onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT);
-           else
-               onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_CONNECTED_DEVICE_RESULT);
-        })).start();
+       btAcceptingRequestThread = new BtAcceptingRequestThread(requireContext(), this.bluetoothAdapter, ((response) -> {
+           if(onConnectionFinishCallback != null) {
+               if(response.equals(OnConnectionFinishCallback.BT_ERROR_RESPONSE))
+                   requireActivity().runOnUiThread(this::showErrorDialog);
+               else if(response.equals(OnConnectionFinishCallback.BT_ALREADY_CONNECTED_DEVICE_RESPONSE))
+                   onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_ALREADY_CONNECTED_DEVICE_RESULT);
+               else
+                   onConnectionFinishCallback.onConnectionFinish(OnConnectionFinishCallback.CONNECTION_CONNECTED_DEVICE_RESULT);
+           }
+        }));
+       btAcceptingRequestThread.start();
    }
 
    private void showBtNotSupportedDialog() {

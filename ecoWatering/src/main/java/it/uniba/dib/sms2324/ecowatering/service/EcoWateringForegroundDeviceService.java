@@ -16,11 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import it.uniba.dib.sms2324.ecowatering.R;
@@ -120,7 +117,7 @@ public class EcoWateringForegroundDeviceService extends Service {
             }
         }
         if(stringBuilder.toString().equals(Common.VOID_STRING_VALUE))
-            stringBuilder.append(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.starting_label));
+            stringBuilder.append(getString(R.string.nothing_to_notify));
 
         if(!HttpHelper.isDeviceConnectedToInternet(this))
             stringBuilder = new StringBuilder().append(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.warning_label)).append(" ").append(getString(it.uniba.dib.sms2324.ecowateringcommon.R.string.internet_connection_fault_title));

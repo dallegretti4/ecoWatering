@@ -29,7 +29,7 @@ public class IrrigationSystemManualSetWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Log.i(Common.LOG_SERVICE, "-------> doWork IrrigationSystemManualSetWorker");
+        Log.i(Common.LOG_SERVICE, "IrrigationSystemManualSetWorker->doWork()");
         Set<String> tags = getTags();
         if(HttpHelper.isDeviceConnectedToInternet(this.context)) {
             //  NORMAL EXECUTION

@@ -82,9 +82,8 @@ public class IrrigationPlan implements Parcelable {
         else returnString = new StringBuilder(context.getString(R.string.next_starting_label));
 
         String stringMinutes = Integer.toString(intMinutes);
-        if(intMinutes < 10) {
+        if(intMinutes < 10)
             stringMinutes = "0" + intMinutes;
-        }
         return returnString.append(" ").append(hours).append(":").append(stringMinutes).toString();
     }
 
@@ -138,7 +137,7 @@ public class IrrigationPlan implements Parcelable {
                 irrigationMinutesPlanString.append(this.irrigationMinutesPlan[i]).append("]");
             }
         }
-
+        // CREATE CONTENT VALUES
         ContentValues contentValues = new ContentValues();
         contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, hubID);
         contentValues.put(HttpHelper.REMOTE_DEVICE_PARAMETER, Common.getThisDeviceID(context));

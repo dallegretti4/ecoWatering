@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -328,9 +327,7 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
                 view,
                 this.primary_color_50,
                 (v -> hideSchedulingCard(view)),
-                (v -> {
-                    showDeleteSchedulingDialog(view);
-                })
+                (v -> showDeleteSchedulingDialog(view))
         ));
     }
 
@@ -350,8 +347,6 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
         start.set(Calendar.HOUR_OF_DAY, schedulingStartingTimePicker.getHour());
         start.set(Calendar.MINUTE, schedulingStartingTimePicker.getMinute());
 
-        Log.i(Common.LOG_NORMAL, "---------> isValidIntervalDate start: " + start.getTime());
-        Log.i(Common.LOG_NORMAL, "---------> isValidIntervalDate calen: " + calendar.getTime());
         return start.getTimeInMillis() > calendar.getTimeInMillis();
     }
 
@@ -427,7 +422,6 @@ public class ManageHubManualControlFragment extends ManageHubFragment {
     }
 
     private void tutorialRecursiveStep(@NonNull View view, @NonNull View[] views, int innerCounter) {
-        Log.i(Common.LOG_NORMAL, "----------------> is tutorial visible inner " + innerCounter);
         // BACKGROUND
         view.findViewById(R.id.tutorialHelperViewBackground).setVisibility(View.VISIBLE);
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

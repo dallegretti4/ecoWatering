@@ -3,7 +3,6 @@ package it.uniba.dib.sms2324.ecowateringcommon.ui.hub;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -101,9 +100,7 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
         return new Runnable() {
             @Override
             public void run() {
-                Log.i(Common.LOG_NORMAL, ".....................> RUNNABLE");
                 if(onManageHubAutomaticControlActionCallback != null) onManageHubAutomaticControlActionCallback.refreshDataObject((ecoWateringHub) -> {
-                    Log.i(Common.LOG_NORMAL, ".....................> RUNNABLE");
                     hub = ecoWateringHub;
                     if (!hub.isAutomated()) onManageHubAutomaticControlActionCallback.restartApp();
                     else if (getView() != null) requireActivity().runOnUiThread(() -> manageHubViewSetup(getView()));
@@ -199,8 +196,6 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
     private void showAutomatedIrrigationSystemInfoCard(@NonNull View view) {
         isIrrigationInfoCardVisible = true;
         view.findViewById(R.id.openIrrigationSystemInfoButtonImageView).setRotation(90);
-        // MAKE INFORMATION VISIBLE
-            // automatedIrrigationSystemInfoCard.setVisibility(View.VISIBLE);
 
         // ACTIVATION DAYS AGO SETUP
         if((hub.getIrrigationSystem().getActivityLog() != null) && (!hub.getIrrigationSystem().getActivityLog().isEmpty()) && (hub.getIrrigationSystem().getActivityLog().get(0).getAutomatedSystemDays() > 0)) {
@@ -218,7 +213,6 @@ public class ManageHubAutomaticControlFragment extends ManageHubFragment {
     private void hideAutomatedIrrigationSystemInfoCard(@NonNull View view) {
         isIrrigationInfoCardVisible = false;
         view.findViewById(R.id.openIrrigationSystemInfoButtonImageView).setRotation(270);
-        // automatedIrrigationSystemInfoCard.setVisibility(View.GONE);
         Common.collapseViewGradually(automatedIrrigationSystemInfoCard, 500);
     }
 

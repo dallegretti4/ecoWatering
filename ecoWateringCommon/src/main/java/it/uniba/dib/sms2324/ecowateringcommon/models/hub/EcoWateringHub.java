@@ -35,6 +35,7 @@ public class EcoWateringHub implements Parcelable {
     public static final String SET_IS_AUTOMATED_SUCCESS_RESPONSE = "ecoWateringHubIsAutomateSet";
     public static final String SET_IS_DATA_OBJECT_REFRESHING_SUCCESS_RESPONSE = "isDataObjectRefreshingSet";
     private static final String BO_IRRIGATION_SYSTEM_COLUMN_NAME = "irrigationSystem";
+    private static final String BO_SENSORS_INFO_OBJ_NAME = "sensorsInfo";
     public static final String HUB_NAME_CHANGED_RESPONSE = "hubNameSuccessfulChanged";
     public static final String DEVICE_HUB_ACCOUNT_RESPONSE = "hubAccountSuccessfulDeleted";
     private String deviceID;
@@ -84,8 +85,8 @@ public class EcoWateringHub implements Parcelable {
             if(!jsonOBJ.getString(WeatherInfo.BO_WEATHER_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE))
                 this.weatherInfo = new WeatherInfo(jsonOBJ.getString(WeatherInfo.BO_WEATHER_INFO_OBJ_NAME));
             // SENSORS INFO RECOVERING
-            if(!jsonOBJ.getString(SensorsInfo.BO_SENSORS_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE))
-                this.sensorInfo = new SensorsInfo(jsonOBJ.getString(SensorsInfo.BO_SENSORS_INFO_OBJ_NAME));
+            if(!jsonOBJ.getString(BO_SENSORS_INFO_OBJ_NAME).equals(Common.NULL_STRING_VALUE))
+                this.sensorInfo = new SensorsInfo(jsonOBJ.getString(BO_SENSORS_INFO_OBJ_NAME));
             // IRRIGATION PLAN RECOVERING
             if(!jsonOBJ.getString(IrrigationPlan.BO_IRRIGATION_PLAN_COLUMN_NAME).equals(Common.NULL_STRING_VALUE))
                 this.irrigationPlan = new IrrigationPlan(jsonOBJ.getString(IrrigationPlan.BO_IRRIGATION_PLAN_COLUMN_NAME));
@@ -183,17 +184,10 @@ public class EcoWateringHub implements Parcelable {
         contentValues.put(SqlDbHelper.TABLE_HUB_DEVICE_ID_COLUMN_NAME, Common.getThisDeviceID(context));
         SqlDbHelper.deleteAccount(contentValues, (callback));
     }
-
-    /**
-     * Return the name associated to the instance of the EcoWateringHub.
-     */
     public String getName() {
         return this.name;
     }
 
-    /**
-     * Return device's ID associated to the instance of the EcoWateringHub.
-     */
     public String getDeviceID() {
         return this.deviceID;
     }
@@ -206,9 +200,6 @@ public class EcoWateringHub implements Parcelable {
         return this.longitude;
     }
 
-    /**
-     * Return am address string associated to the instance of the EcoWateringHub.
-     */
     public String getPosition() {
         return this.address + ", " + this.city + " - " + this.country;
     }
@@ -217,9 +208,6 @@ public class EcoWateringHub implements Parcelable {
         return this.weatherInfo;
     }
 
-    /**
-     * Return the remote device list associated to the instance of the EcoWateringHub.
-     */
     public List<String> getRemoteDeviceList() {
         if(this.remoteDeviceList != null) {
             return this.remoteDeviceList;
@@ -230,9 +218,11 @@ public class EcoWateringHub implements Parcelable {
     public boolean isAutomated() {
         return this.isAutomated;
     }
+
     public boolean isDataObjectRefreshing() {
         return this.isDataObjectRefreshing;
     }
+
     public int getBatteryPercent() {
         return this.batteryPercent;
     }
@@ -268,25 +258,15 @@ public class EcoWateringHub implements Parcelable {
     @Override
     public String toString() { return this.name + " - " + this.deviceID; }
 
-    /**
-     * Callable from EcoWateringHub module only.
-     * @return double: ambient temperature value.
-     */
     public double getAmbientTemperature() {
         if((this.sensorInfo != null) && (this.sensorInfo.getAmbientTemperatureChosenSensor() != null) &&
                 (this.sensorInfo.getAmbientTemperatureLastUpdate() != null) &&
-                (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getAmbientTemperatureLastUpdate()))) {
+                (this.sensorInfo.isLastUpdateValid(this.sensorInfo.getAmbientTemperatureLastUpdate())))
             return this.sensorInfo.getAmbientTemperatureSensorValue();
-        }
-        else {
+        else
             return this.weatherInfo.getAmbientTemperature();
-        }
     }
 
-    /**
-     * Callable from EcoWateringHub module only.
-     * @return double: UV index.
-     */
     public double getIndexUV() {
         int hourFromTimestamp = Integer.parseInt(this.weatherInfo.getTime().split("T")[1].split(":")[0]);
         boolean isInRangeTime = (hourFromTimestamp >= 7 && hourFromTimestamp < 20);
@@ -303,10 +283,6 @@ public class EcoWateringHub implements Parcelable {
         }
     }
 
-    /**
-     * Callable from EcoWateringHub module only.
-     * @return double: relative humidity value.
-     */
     public double getRelativeHumidity() {
         if((this.sensorInfo != null) && (this.sensorInfo.getRelativeHumidityChosenSensor() != null) &&
                 (this.sensorInfo.getRelativeHumidityLastUpdate() != null) &&

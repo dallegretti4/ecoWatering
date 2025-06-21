@@ -88,7 +88,7 @@ public class IrrigationSystemScheduling implements Parcelable {
 
     //  PARCELABLE IMPLEMENTATION
 
-    protected IrrigationSystemScheduling(Parcel in) {
+    public IrrigationSystemScheduling(Parcel in) {
         startingDate = in.createIntArray();
         startingTime = in.createIntArray();
         irrigationDuration = in.createIntArray();

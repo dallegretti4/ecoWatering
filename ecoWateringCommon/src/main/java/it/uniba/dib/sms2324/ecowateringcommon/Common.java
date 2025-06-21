@@ -41,8 +41,6 @@ public class Common {
     public static final String REMOVE_REMOTE_DEVICE_RESPONSE = "remoteDeviceRemoved";
     public static final String LOG_NORMAL = "NORMAL_LOG";
     public static final String LOG_SERVICE = "SERVICE_LOG";
-    public static final String LOG_SHARED_PREFERENCES = "SHARED_PREFERENCES_LOG";
-    private static final String THIS_URL = "https://theall.altervista.org/sms2324";
     private static final UUID THIS_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public static final String VOID_STRING_VALUE = "";
     public static final int WIFI_PERMISSION_REQUEST = 2005;
@@ -70,14 +68,8 @@ public class Common {
 
     // METHODS
 
-    public static String getThisUrl() { return THIS_URL; }
     public static UUID getThisUUID() { return THIS_UUID; }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} Context context;
-     * Return the unique device Id.
-     */
     @SuppressLint("HardwareIds")
     public static String getThisDeviceID(@NonNull Context context) {
         return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -113,20 +105,10 @@ public class Common {
         }
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} Activity activity;
-     * To lock the layout.
-     */
     public static void lockLayout(@NonNull Activity activity) {
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
     }
 
-    /**
-     * {@code @param:}
-     *  {@code @NonNull} Activity activity;
-     * To unlock the layout.
-     */
     public static void unlockLayout(Activity activity) {
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
     }

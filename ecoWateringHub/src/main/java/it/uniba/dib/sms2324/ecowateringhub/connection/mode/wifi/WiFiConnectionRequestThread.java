@@ -1,8 +1,6 @@
 package it.uniba.dib.sms2324.ecowateringhub.connection.mode.wifi;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,6 +20,7 @@ public class WiFiConnectionRequestThread extends Thread {
     private final Context context;
     private final String peerAddress;
     private final Common.OnStringResponseGivenCallback callback;
+    private Socket socket;
 
     protected WiFiConnectionRequestThread(@NonNull Context context, @NonNull String peerAddress, Common.OnStringResponseGivenCallback callback) {
         this.context = context;
@@ -31,7 +30,8 @@ public class WiFiConnectionRequestThread extends Thread {
 
     @Override
     public void run() {
-        try (Socket socket = new Socket(this.peerAddress, WIFI_DIRECT_PORT)) {
+        try {
+            socket = new Socket(this.peerAddress, WIFI_DIRECT_PORT);
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // SEND REQUEST NAME
@@ -46,8 +46,19 @@ public class WiFiConnectionRequestThread extends Thread {
             callback.getResponse(response);
         }
         catch(IOException e) {
-            callback.getResponse(OnConnectionFinishCallback.WIFI_ERROR_RESPONSE);
+            if(callback != null)
+                callback.getResponse(OnConnectionFinishCallback.WIFI_ERROR_RESPONSE);
             e.printStackTrace();
         }
+        finally {
+            closeWifiSocket();
+        }
+    }
+
+    protected void closeWifiSocket() {
+        try {
+            if(socket != null)
+                socket.close();
+        } catch (IOException ignored) {}
     }
 }
