@@ -10,6 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="120dp"
+        android:maxWidth="720dp"
         android:background="@drawable/rounded_square_ripple"
         android:elevation="8dp"
         android:scaleX="0.85"

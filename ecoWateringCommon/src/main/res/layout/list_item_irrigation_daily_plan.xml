@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:maxWidth="720dp"
     android:scaleX="1.125"
     android:scaleY="1.125">
     <androidx.constraintlayout.widget.ConstraintLayout

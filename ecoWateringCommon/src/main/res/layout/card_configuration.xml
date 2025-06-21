@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/rounded_square_shape"
+    android:maxWidth="720dp"
     android:scaleX="0.85"
     android:scaleY="0.85"
     android:elevation="1dp"
